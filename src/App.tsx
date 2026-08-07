@@ -26,16 +26,26 @@ function App() {
     if (session) inicializarSync()
   }, [session, inicializarSync])
 
+  // Registra o service worker (e escuta o prompt de instalação) mesmo sem sessão — a
+  // instalabilidade do PWA não pode depender de já estar logado.
   if (loading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-bg">
-        <p className="text-sm text-text-dim">Carregando…</p>
-      </div>
+      <>
+        <PwaUpdatePrompt />
+        <div className="min-h-screen w-full flex items-center justify-center bg-bg">
+          <p className="text-sm text-text-dim">Carregando…</p>
+        </div>
+      </>
     )
   }
 
   if (!session) {
-    return <LoginPage />
+    return (
+      <>
+        <PwaUpdatePrompt />
+        <LoginPage />
+      </>
+    )
   }
 
   return (
