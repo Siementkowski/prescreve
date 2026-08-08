@@ -129,7 +129,7 @@ export function MedicamentosPage() {
         <div className="flex flex-col gap-3 min-h-0">
           <p className="text-xs text-text-dim leading-relaxed -mt-1">
             Catálogo — cadastre cada remédio uma vez aqui, com os dados dele (gestação, pediatria).
-            O uso na receita (dose, via, posologia) fica em <span className="text-text-dim/90">Tratamentos → item</span>.
+            O uso na receita (dose, via, posologia) fica em <span className="text-text-dim/90">Prescrições → item</span>.
           </p>
           <div className="flex gap-2">
             <div className="flex-1">

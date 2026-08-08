@@ -39,7 +39,7 @@ export function PainelPatologias({ visivelMobile }: { visivelMobile: boolean }) 
         {areaSelecionadaId == null ? (
           <p className="text-sm text-text-dim px-2 py-4">Selecione uma área.</p>
         ) : visiveis.length === 0 ? (
-          <p className="text-sm text-text-dim px-2 py-4">Nenhuma patologia com tratamento neste modo.</p>
+          <p className="text-sm text-text-dim px-2 py-4">Nenhuma patologia com prescrição neste modo.</p>
         ) : (
           visiveis.map((p) => (
             <button

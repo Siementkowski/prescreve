@@ -11,7 +11,7 @@ function patologiaTemTratamentoNoModo(
   tratamentos: Tratamento[],
   modo: ModoTratamento
 ): boolean {
-  return tratamentos.some((t) => t.patologia_id === patologiaId && t.modo === modo)
+  return tratamentos.some((t) => t.patologia_id === patologiaId && (t.modo === modo || t.modo === 'ambos'))
 }
 
 export function patologiasVisiveis(
@@ -27,7 +27,7 @@ export function patologiasVisiveis(
 }
 
 export function tratamentosVisiveis(tratamentos: Tratamento[], patologiaId: number, modo: ModoTratamento): Tratamento[] {
-  return tratamentos.filter((t) => t.patologia_id === patologiaId && t.modo === modo)
+  return tratamentos.filter((t) => t.patologia_id === patologiaId && (t.modo === modo || t.modo === 'ambos'))
 }
 
 const ORDEM_LINHA: Record<Linha, number> = { '1a_linha': 0, alternativa: 1, opcao: 2, off_label: 3 }

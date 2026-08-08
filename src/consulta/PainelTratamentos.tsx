@@ -43,7 +43,7 @@ export function PainelTratamentos({ visivelMobile }: { visivelMobile: boolean })
           <ArrowLeft className="w-4 h-4" />
         </button>
         <h2 className="text-xs font-semibold text-text-dim uppercase tracking-wide">
-          Tratamentos{patologia ? ` — ${patologia.nome}` : ''}
+          Prescrições{patologia ? ` — ${patologia.nome}` : ''}
         </h2>
       </div>
 
@@ -71,13 +71,13 @@ export function PainelTratamentos({ visivelMobile }: { visivelMobile: boolean })
             {ocultosCount > 0 && (
               <div className="flex items-center gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-md px-3 py-2">
                 <EyeOff className="w-3.5 h-3.5 shrink-0" />
-                {ocultosCount} tratamento{ocultosCount > 1 ? 's' : ''} oculto{ocultosCount > 1 ? 's' : ''} por
+                {ocultosCount} prescriç{ocultosCount > 1 ? 'ões' : 'ão'} oculta{ocultosCount > 1 ? 's' : ''} por
                 contraindicação na gestação
               </div>
             )}
 
             {grupos.length === 0 ? (
-              <p className="text-sm text-text-dim px-1">Nenhum tratamento cadastrado neste modo.</p>
+              <p className="text-sm text-text-dim px-1">Nenhuma prescrição cadastrada neste modo.</p>
             ) : (
               grupos.map((grupo) => (
                 <div key={grupo.linha} className="flex flex-col gap-2.5">

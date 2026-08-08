@@ -23,7 +23,7 @@ export function ItemLinha({
     { rotulo: 'Posologia', valor: item.posologia },
     { rotulo: 'Duração', valor: item.duracao },
   ]
-  if (modoTratamento === 'hospitalar' && item.diluicao) {
+  if ((modoTratamento === 'hospitalar' || modoTratamento === 'ambos') && item.diluicao) {
     detalhes.push({ rotulo: 'Diluição', valor: item.diluicao })
   }
   const detalhesPreenchidos = detalhes.filter((d) => d.valor?.trim())

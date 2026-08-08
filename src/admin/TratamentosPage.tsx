@@ -17,7 +17,7 @@ import { SearchInput } from './components/SearchInput'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { SortableList } from './components/SortableList'
 import { TratamentoItemRow } from './components/TratamentoItemRow'
-import { TextField, TextAreaField, SelectField, CheckboxField } from './components/Field'
+import { TextField, SelectField, CheckboxField } from './components/Field'
 
 function vazio(patologiaId: number, ordem: number): TratamentoInput {
   return {
@@ -279,7 +279,7 @@ export function TratamentosPage() {
 
           <div className="flex gap-2">
             <div className="flex-1">
-              <SearchInput value={busca} onChange={setBusca} placeholder="Buscar tratamento…" />
+              <SearchInput value={busca} onChange={setBusca} placeholder="Buscar prescrição…" />
             </div>
             <button
               onClick={novo}
@@ -294,7 +294,7 @@ export function TratamentosPage() {
             {carregando ? (
               <p className="text-sm text-text-dim px-1">Carregando…</p>
             ) : filtrados.length === 0 ? (
-              <p className="text-sm text-text-dim px-1">Nenhum tratamento cadastrado.</p>
+              <p className="text-sm text-text-dim px-1">Nenhuma prescrição cadastrada.</p>
             ) : (
               <SortableList
                 items={filtrados}
@@ -331,7 +331,7 @@ export function TratamentosPage() {
             <span className="text-text font-medium">
               {tratamentoSelecionado
                 ? tratamentoSelecionado.titulo || `${LABEL_MODO_TRATAMENTO[tratamentoSelecionado.modo]} · ${LABEL_LINHA[tratamentoSelecionado.linha]}`
-                : 'Novo tratamento'}
+                : 'Nova prescrição'}
             </span>
           </div>
 
@@ -341,10 +341,10 @@ export function TratamentosPage() {
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent-dim text-accent text-[11px] font-bold shrink-0">
                   1
                 </span>
-                <h2 className="text-sm font-semibold text-text">Cabeçalho do tratamento</h2>
+                <h2 className="text-sm font-semibold text-text">Cabeçalho da prescrição</h2>
               </div>
               <p className="text-xs text-text-dim mb-4 ml-7.5">
-                O tratamento é o contêiner — modo, linha e título. Os medicamentos com dose e posologia
+                A prescrição é o contêiner — modo, linha e título. Os medicamentos com dose e posologia
                 entram na seção 2, depois de salvar aqui.
               </p>
 
@@ -381,13 +381,6 @@ export function TratamentosPage() {
                   placeholder="Ex: Esquema padrão"
                 />
 
-                <TextAreaField
-                  label="Observações"
-                  value={form.observacoes ?? ''}
-                  onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
-                  rows={2}
-                />
-
                 <div className="grid grid-cols-2 gap-3">
                   <TextField
                     label="Referência (opcional)"
@@ -421,7 +414,7 @@ export function TratamentosPage() {
                       className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
-                      Excluir tratamento
+                      Excluir prescrição
                     </button>
                   ) : (
                     <span />
@@ -431,7 +424,7 @@ export function TratamentosPage() {
                     disabled={salvando}
                     className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
                   >
-                    {salvando ? 'Salvando…' : selecionadoId ? 'Salvar cabeçalho' : 'Criar tratamento e liberar itens →'}
+                    {salvando ? 'Salvando…' : selecionadoId ? 'Salvar cabeçalho' : 'Criar prescrição e liberar itens →'}
                   </button>
                 </div>
               </div>
@@ -510,8 +503,8 @@ export function TratamentosPage() {
 
       <ConfirmDialog
         aberto={!!paraExcluir}
-        titulo="Excluir tratamento"
-        mensagem={`Excluir "${paraExcluir?.titulo || 'este tratamento'}"? Isso apaga também todos os itens dele.`}
+        titulo="Excluir prescrição"
+        mensagem={`Excluir "${paraExcluir?.titulo || 'esta prescrição'}"? Isso apaga também todos os itens dela.`}
         onConfirmar={() => paraExcluir && excluirTratamento(paraExcluir)}
         onCancelar={() => setParaExcluir(null)}
       />

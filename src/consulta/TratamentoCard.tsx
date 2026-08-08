@@ -66,8 +66,6 @@ export function TratamentoCard({
         )}
       </div>
 
-      {tratamento.observacoes && <p className="text-sm text-text-dim">{tratamento.observacoes}</p>}
-
       <div className="flex flex-col gap-2.5">
         {itensDoCard.map((item) => (
           <ItemLinha

@@ -1,43 +1,43 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { MapPinned, FolderHeart, Pill, ListChecks, ClipboardCheck, ArrowRight, Plus } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { MapPinned, FolderHeart, Pill, ListChecks, ArrowRight, Plus, Search } from 'lucide-react'
 import { areasApi, patologiasApi, medicamentosApi } from './api'
-import { useRevisaoStore } from './revisaoStore'
-import { useConfiguracoesStore } from '../core/configuracoes'
+import type { Patologia, Medicamento } from './types'
 import { useAuth } from '../core/auth/AuthProvider'
-import { precisaRevisar, tempoDesdeRevisao } from '../core/revisao'
-import { LABEL_LINHA, LABEL_MODO_TRATAMENTO } from './types'
 
 /** A tela inicial do admin — em vez de abas no topo, um painel com cards. Cada card é uma
- *  porta de entrada pra uma parte da base; a fila de revisão já aparece aqui, sem precisar
- *  procurar. É o "hub" que substitui a barra de abas antiga. */
+ *  porta de entrada pra uma parte da base. Revisão fica de fora daqui de propósito: é
+ *  manutenção interna, não o que alguém vem procurar ao abrir o painel — continua a um
+ *  clique de distância pela faixa de atalhos no topo das telas de dentro. */
 export function AdminHub() {
   const { perfil } = useAuth()
-  const [contagens, setContagens] = useState({ areas: 0, patologias: 0, medicamentos: 0 })
-
-  const tratamentos = useRevisaoStore((s) => s.tratamentos)
-  const carregar = useRevisaoStore((s) => s.carregar)
-  const marcarRevisado = useRevisaoStore((s) => s.marcarRevisado)
-  const mesesAteRevisar = useConfiguracoesStore((s) => s.mesesAteRevisar)
-  const [marcando, setMarcando] = useState<number | null>(null)
+  const navigate = useNavigate()
+  const [contagemAreas, setContagemAreas] = useState(0)
+  const [patologias, setPatologias] = useState<Patologia[]>([])
+  const [medicamentos, setMedicamentos] = useState<Medicamento[]>([])
+  const [busca, setBusca] = useState('')
 
   useEffect(() => {
-    carregar()
-    Promise.all([areasApi.list(), patologiasApi.list(), medicamentosApi.list()]).then(
-      ([areas, patologias, medicamentos]) =>
-        setContagens({ areas: areas.length, patologias: patologias.length, medicamentos: medicamentos.length })
-    )
-  }, [carregar])
-
-  const pendentes = useMemo(
-    () =>
-      tratamentos
-        .filter((t) => precisaRevisar({ precisaRevisao: t.precisa_revisao, revisadoEm: t.revisado_em }, mesesAteRevisar))
-        .sort((a, b) => (a.revisado_em ?? '').localeCompare(b.revisado_em ?? '')),
-    [tratamentos, mesesAteRevisar]
-  )
+    areasApi.list().then((areas) => setContagemAreas(areas.length))
+    patologiasApi.list().then(setPatologias)
+    medicamentosApi.list().then(setMedicamentos)
+  }, [])
 
   const primeiroNome = (perfil?.nome || 'você').split(' ')[0]
+
+  const resultadosPatologias = useMemo(() => {
+    const t = busca.trim().toLowerCase()
+    if (!t) return []
+    return patologias.filter((p) => p.nome.toLowerCase().includes(t)).slice(0, 5)
+  }, [patologias, busca])
+
+  const resultadosMedicamentos = useMemo(() => {
+    const t = busca.trim().toLowerCase()
+    if (!t) return []
+    return medicamentos.filter((m) => m.nome.toLowerCase().includes(t)).slice(0, 5)
+  }, [medicamentos, busca])
+
+  const buscando = busca.trim().length > 0
 
   return (
     <div className="max-w-5xl mx-auto px-2 pb-16">
@@ -55,9 +55,54 @@ export function AdminHub() {
           vamos cuidar da sua base?
         </h1>
         <p className="text-text-dim mt-3 max-w-md mx-auto">
-          Cadastre áreas, patologias e medicamentos, monte os tratamentos e mantenha tudo revisado — tudo por
-          aqui, num só lugar.
+          Cadastre áreas, patologias e medicamentos, monte as prescrições — tudo por aqui, num só lugar.
         </p>
+      </div>
+
+      {/* busca rápida */}
+      <div className="max-w-lg mx-auto mt-8 relative">
+        <div className="flex items-center gap-2.5 bg-surface border border-border rounded-full px-5 py-3 shadow-sm">
+          <Search className="w-4 h-4 text-text-dim shrink-0" />
+          <input
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar patologia ou medicamento na base…"
+            className="flex-1 bg-transparent outline-none text-sm text-text placeholder:text-text-dim"
+          />
+        </div>
+
+        {buscando && (
+          <div className="absolute z-10 top-full mt-2 w-full bg-surface border border-border rounded-2xl shadow-lg overflow-hidden">
+            {resultadosPatologias.length === 0 && resultadosMedicamentos.length === 0 ? (
+              <p className="text-sm text-text-dim px-5 py-4 text-center">Nada encontrado.</p>
+            ) : (
+              <>
+                {resultadosPatologias.map((p) => (
+                  <button
+                    key={`p-${p.id}`}
+                    onClick={() => navigate('/admin/patologias')}
+                    className="w-full flex items-center gap-2.5 text-left px-5 py-2.5 hover:bg-surface-2 transition-colors"
+                  >
+                    <FolderHeart className="w-4 h-4 text-cat-patologias shrink-0" />
+                    <span className="text-sm">{p.nome}</span>
+                    <span className="text-xs text-text-dim ml-auto">Patologia</span>
+                  </button>
+                ))}
+                {resultadosMedicamentos.map((m) => (
+                  <button
+                    key={`m-${m.id}`}
+                    onClick={() => navigate('/admin/medicamentos')}
+                    className="w-full flex items-center gap-2.5 text-left px-5 py-2.5 hover:bg-surface-2 transition-colors"
+                  >
+                    <Pill className="w-4 h-4 text-cat-medicamentos shrink-0" />
+                    <span className="text-sm">{m.nome}</span>
+                    <span className="text-xs text-text-dim ml-auto">Medicamento</span>
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* hub de cards */}
@@ -69,7 +114,7 @@ export function AdminHub() {
           corFundo="var(--color-cat-areas-bg)"
           titulo="Áreas"
           descricao="As grandes especialidades. O primeiro nível da sua base."
-          contador={`${contagens.areas} cadastrada${contagens.areas === 1 ? '' : 's'}`}
+          contador={`${contagemAreas} cadastrada${contagemAreas === 1 ? '' : 's'}`}
         />
         <HubCard
           to="/admin/patologias"
@@ -78,7 +123,7 @@ export function AdminHub() {
           corFundo="var(--color-cat-patologias-bg)"
           titulo="Patologias"
           descricao="Sinônimos e orientações que alimentam a busca da consulta."
-          contador={`${contagens.patologias} cadastrada${contagens.patologias === 1 ? '' : 's'}`}
+          contador={`${patologias.length} cadastrada${patologias.length === 1 ? '' : 's'}`}
         />
         <HubCard
           to="/admin/medicamentos"
@@ -87,12 +132,12 @@ export function AdminHub() {
           corFundo="var(--color-cat-medicamentos-bg)"
           titulo="Medicamentos"
           descricao="O catálogo — gestação, lactação e dose pediátrica num cadastro só."
-          contador={`${contagens.medicamentos} cadastrado${contagens.medicamentos === 1 ? '' : 's'}`}
+          contador={`${medicamentos.length} cadastrado${medicamentos.length === 1 ? '' : 's'}`}
         />
 
         <Link
           to="/admin/tratamentos"
-          className="sm:col-span-2 lg:col-span-2 bg-surface border border-border rounded-3xl p-6 flex items-center gap-5 hover:-translate-y-0.5 transition-transform"
+          className="sm:col-span-2 lg:col-span-3 bg-surface border border-border rounded-3xl p-6 flex items-center gap-5 hover:-translate-y-0.5 transition-transform"
         >
           <span
             className="w-16 h-16 rounded-[20px] flex items-center justify-center shrink-0"
@@ -101,84 +146,24 @@ export function AdminHub() {
             <ListChecks className="w-8 h-8" />
           </span>
           <span className="flex-1 min-w-0">
-            <span className="font-display text-lg font-semibold block">Tratamentos</span>
+            <span className="font-display text-lg font-semibold block">Prescrições</span>
             <span className="text-sm text-text-dim block mt-0.5">
               Onde a receita ganha forma — cabeçalho + itens com dose, via e posologia.
             </span>
           </span>
           <ArrowRight className="w-5 h-5 text-text-dim shrink-0" />
         </Link>
-
-        <Link
-          to="/admin/revisao"
-          className="bg-surface border border-border rounded-3xl p-6 flex flex-col justify-between gap-4 hover:-translate-y-0.5 transition-transform"
-        >
-          <span
-            className="w-12 h-12 rounded-2xl flex items-center justify-center"
-            style={{ background: 'var(--color-cat-revisao-bg)', color: 'var(--color-cat-revisao)' }}
-          >
-            <ClipboardCheck className="w-6 h-6" />
-          </span>
-          <span>
-            <span className="font-display text-lg font-semibold block">Revisão</span>
-            <span className="text-xs font-semibold text-text-dim">
-              {pendentes.length > 0 ? `${pendentes.length} pedindo atenção` : 'tudo em dia'}
-            </span>
-          </span>
-        </Link>
       </div>
-
-      {/* fila de revisão */}
-      {pendentes.length > 0 && (
-        <div className="mt-14">
-          <div className="flex items-baseline justify-between mb-3">
-            <h2 className="font-display text-xl font-semibold">Fila de revisão</h2>
-            <span className="text-xs text-text-dim font-semibold">do mais antigo pro mais recente</span>
-          </div>
-          <div className="flex flex-col gap-2.5">
-            {pendentes.slice(0, 4).map((t) => (
-              <div
-                key={t.id}
-                className="bg-surface border border-border rounded-2xl px-5 py-3.5 flex items-center gap-4"
-              >
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-danger-dim text-danger shrink-0">
-                  {tempoDesdeRevisao(t.revisado_em)}
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className="font-display text-[15px] font-semibold block truncate">
-                    {t.titulo || `${LABEL_MODO_TRATAMENTO[t.modo]} · ${LABEL_LINHA[t.linha]}`}
-                  </span>
-                </span>
-                <button
-                  onClick={() => {
-                    setMarcando(t.id)
-                    marcarRevisado(t.id).finally(() => setMarcando(null))
-                  }}
-                  disabled={marcando === t.id}
-                  className="text-xs font-bold text-cat-tratamentos bg-cat-tratamentos-bg px-3.5 py-2 rounded-full disabled:opacity-50 shrink-0"
-                >
-                  {marcando === t.id ? 'Marcando…' : 'Marcar como revisado'}
-                </button>
-              </div>
-            ))}
-            {pendentes.length > 4 && (
-              <Link to="/admin/revisao" className="text-xs font-semibold text-accent text-center py-1.5">
-                Ver mais {pendentes.length - 4} pendências →
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* cta */}
       <Link
         to="/admin/tratamentos"
-        className="mt-14 flex items-center justify-between gap-6 rounded-3xl px-9 py-8 text-white overflow-hidden relative"
+        className="mt-10 flex items-center justify-between gap-6 rounded-3xl px-9 py-8 text-white overflow-hidden relative"
         style={{ background: '#201F2E' }}
       >
         <span>
           <span className="font-display text-2xl font-semibold block max-w-xs">
-            Cadastre um tratamento novo agora
+            Cadastre uma prescrição nova agora
           </span>
           <span className="text-sm block mt-2 max-w-xs" style={{ color: '#B9B6CC' }}>
             Cabeçalho e itens no mesmo lugar — leva menos de dois minutos pra deixar pronto pra consulta.
@@ -189,7 +174,7 @@ export function AdminHub() {
           style={{ background: 'var(--color-cat-areas-bg)', color: 'var(--color-cat-areas)' }}
         >
           <Plus className="w-4 h-4" />
-          Novo tratamento
+          Nova prescrição
         </span>
       </Link>
     </div>

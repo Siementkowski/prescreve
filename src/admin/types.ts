@@ -1,7 +1,7 @@
 // Tipos espelhando o schema do Supabase (fase P1).
 
 export type ModoArea = 'ambulatorial' | 'hospitalar' | 'ambos'
-export type ModoTratamento = 'ambulatorial' | 'hospitalar'
+export type ModoTratamento = 'ambulatorial' | 'hospitalar' | 'ambos'
 export type Linha = '1a_linha' | 'alternativa' | 'opcao' | 'off_label'
 export type StatusRisco = 'seguro' | 'cautela' | 'contraindicado' | 'sem_dados'
 
@@ -82,6 +82,7 @@ export const LABEL_MODO_AREA: Record<ModoArea, string> = {
 export const LABEL_MODO_TRATAMENTO: Record<ModoTratamento, string> = {
   ambulatorial: 'Ambulatorial',
   hospitalar: 'Hospitalar',
+  ambos: 'Ambos',
 }
 
 export const LABEL_LINHA: Record<Linha, string> = {

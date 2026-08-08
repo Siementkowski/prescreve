@@ -63,7 +63,7 @@ export function RevisaoPage() {
         <div>
           <h2 className="font-display text-lg font-semibold text-text">Pendências de revisão</h2>
           <p className="text-xs text-text-dim mt-0.5">
-            {pendentes.length} tratamento{pendentes.length !== 1 ? 's' : ''} pendente
+            {pendentes.length} prescriç{pendentes.length !== 1 ? 'ões' : 'ão'} pendente
             {pendentes.length !== 1 ? 's' : ''}, do mais antigo pro mais recente.
           </p>
         </div>

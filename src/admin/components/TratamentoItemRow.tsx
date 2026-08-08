@@ -156,7 +156,7 @@ export function TratamentoItemRow({
         </button>
       </div>
 
-      <div className={`grid gap-3 ${modoTratamento === 'hospitalar' ? 'grid-cols-5' : 'grid-cols-4'}`}>
+      <div className={`grid gap-3 ${modoTratamento !== 'ambulatorial' ? 'grid-cols-5' : 'grid-cols-4'}`}>
         <TextField
           label="Dose"
           value={local.dose ?? ''}
@@ -181,7 +181,7 @@ export function TratamentoItemRow({
           onChange={(e) => setLocal({ ...local, duracao: e.target.value })}
           placeholder="5 dias"
         />
-        {modoTratamento === 'hospitalar' && (
+        {modoTratamento !== 'ambulatorial' && (
           <TextField
             label="Diluição"
             value={local.diluicao ?? ''}

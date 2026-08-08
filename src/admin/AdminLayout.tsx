@@ -10,7 +10,7 @@ const SECOES = [
   { to: '/admin/areas', label: 'Áreas', icone: MapPinned },
   { to: '/admin/patologias', label: 'Patologias', icone: FolderHeart },
   { to: '/admin/medicamentos', label: 'Medicamentos', icone: Pill },
-  { to: '/admin/tratamentos', label: 'Tratamentos', icone: ListChecks },
+  { to: '/admin/tratamentos', label: 'Prescrições', icone: ListChecks },
   { to: '/admin/revisao', label: 'Revisão', icone: ClipboardCheck },
 ]
 
