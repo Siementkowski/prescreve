@@ -22,7 +22,7 @@ export function AtualizacaoDisponivelBanner() {
         <button
           onClick={() => sincronizar({ forcar: true })}
           disabled={sincronizando}
-          className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-xs font-medium rounded-md px-3 py-1.5 transition-colors"
+          className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-xs font-semibold rounded-lg px-3 py-1.5 transition-colors"
         >
           {sincronizando ? 'Atualizando…' : 'Atualizar'}
         </button>

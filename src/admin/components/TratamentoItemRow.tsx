@@ -240,7 +240,7 @@ export function TratamentoItemRow({
             type="button"
             onClick={salvar}
             disabled={salvando}
-            className="text-xs bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text rounded-md px-3 py-1.5 transition-colors"
+            className="text-xs bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text rounded-lg px-3 py-1.5 transition-colors"
           >
             {salvando ? 'Salvando…' : 'Salvar item'}
           </button>

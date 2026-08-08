@@ -61,7 +61,7 @@ export function RevisaoPage() {
     <div className="flex flex-col gap-4 h-full min-h-0">
       <div className="flex items-center justify-between gap-3 flex-wrap shrink-0">
         <div>
-          <h2 className="text-sm font-semibold text-text">Pendências de revisão</h2>
+          <h2 className="font-display text-lg font-semibold text-text">Pendências de revisão</h2>
           <p className="text-xs text-text-dim mt-0.5">
             {pendentes.length} tratamento{pendentes.length !== 1 ? 's' : ''} pendente
             {pendentes.length !== 1 ? 's' : ''}, do mais antigo pro mais recente.
@@ -75,14 +75,14 @@ export function RevisaoPage() {
             min={1}
             value={mesesAteRevisar}
             onChange={(e) => setMesesAteRevisar(Number(e.target.value) || 1)}
-            className="w-14 bg-surface-2 border border-border rounded-md px-2 py-1 text-sm text-text outline-none focus:border-accent"
+            className="tabular w-14 bg-surface-2 border border-border rounded-lg px-2 py-1 text-sm text-text outline-none focus:border-accent"
           />
           meses
         </label>
       </div>
 
       {erro && (
-        <p className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-md px-3 py-2 shrink-0">
+        <p className="text-sm text-danger bg-danger-dim border border-danger/30 rounded-lg px-3 py-2 shrink-0">
           {erro}
         </p>
       )}
@@ -98,24 +98,24 @@ export function RevisaoPage() {
             return (
               <div
                 key={t.id}
-                className="flex items-center justify-between gap-3 border border-border rounded-lg bg-surface px-4 py-3"
+                className="flex items-center justify-between gap-3 border border-border rounded-xl bg-surface px-4 py-3"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-medium text-text">
+                    <span className="font-display text-[15px] font-medium text-text">
                       {area} · {patologia}
                     </span>
                     <span className="text-xs text-text-dim">
                       {t.titulo || `${LABEL_MODO_TRATAMENTO[t.modo]} · ${LABEL_LINHA[t.linha]}`}
                     </span>
                     {t.precisa_revisao && (
-                      <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-full border text-danger border-danger/40 bg-danger/10">
+                      <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-full border text-danger border-danger/40 bg-danger-dim">
                         marcado manualmente
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-1 text-xs text-text-dim">
-                    <span>{tempoDesdeRevisao(t.revisado_em)}</span>
+                    <span className="tabular">{tempoDesdeRevisao(t.revisado_em)}</span>
                     {t.referencia && (
                       <>
                         <span>·</span>

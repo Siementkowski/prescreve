@@ -154,14 +154,14 @@ export function MedicamentosPage() {
                 <button
                   key={m.id}
                   onClick={() => selecionar(m)}
-                  className={`w-full text-left px-3 py-2 rounded-md border transition-colors ${
+                  className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
                     selecionadoId === m.id
-                      ? 'bg-surface-2 border-accent'
+                      ? 'bg-accent-dim border-accent'
                       : 'bg-surface border-border hover:border-text-dim'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm text-text truncate">{m.nome}</span>
+                    <span className="font-display text-[15px] text-text truncate">{m.nome}</span>
                     <StatusRiscoBadge status={m.gestacao_status} />
                   </div>
                   {m.nome_comercial && (
@@ -175,7 +175,7 @@ export function MedicamentosPage() {
 
         <div className="min-h-0 overflow-y-auto">
           <div className="bg-surface border border-border rounded-lg p-6 max-w-2xl">
-            <h2 className="text-sm font-semibold text-text mb-4">
+            <h2 className="font-display text-lg font-semibold text-text mb-4">
               {selecionadoId ? 'Editar medicamento' : 'Novo medicamento'}
             </h2>
 
@@ -307,7 +307,7 @@ export function MedicamentosPage() {
               </div>
 
               {erro && (
-                <p className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-md px-3 py-2">
+                <p className="text-sm text-danger bg-danger-dim border border-danger/30 rounded-lg px-3 py-2">
                   {erro}
                 </p>
               )}
@@ -327,7 +327,7 @@ export function MedicamentosPage() {
                 <button
                   onClick={salvar}
                   disabled={salvando}
-                  className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-medium rounded-md px-4 py-2 transition-colors"
+                  className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
                 >
                   {salvando ? 'Salvando…' : 'Salvar'}
                 </button>

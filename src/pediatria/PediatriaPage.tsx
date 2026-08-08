@@ -40,9 +40,9 @@ export function PediatriaPage() {
   return (
     <div className="h-full flex flex-col min-h-0">
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Baby className="w-4 h-4 text-text-dim shrink-0" />
-          <label className="text-sm text-text-dim shrink-0">Peso</label>
+        <div className="flex items-center gap-2.5">
+          <Baby className="w-4 h-4 text-accent shrink-0" />
+          <label className="text-sm text-text-dim shrink-0 font-medium">Peso</label>
           <div className="relative">
             <input
               type="number"
@@ -51,9 +51,9 @@ export function PediatriaPage() {
               value={pesoKg ?? ''}
               onChange={(e) => setPesoKg(e.target.value === '' ? null : Number(e.target.value))}
               placeholder="0,0"
-              className="w-24 bg-surface-2 border border-border rounded-md pl-3 pr-8 py-1.5 text-sm text-text outline-none focus:border-accent"
+              className="tabular w-28 bg-surface-2 border-2 border-accent/40 focus:border-accent rounded-lg pl-3 pr-9 py-1.5 text-base font-semibold text-text outline-none transition-colors"
             />
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-text-dim pointer-events-none">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-dim pointer-events-none">
               kg
             </span>
           </div>

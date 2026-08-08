@@ -24,12 +24,12 @@ export function CalculadoraMedicamento({ medicamento, pesoKg }: { medicamento: M
   return (
     <div
       className={`border rounded-xl p-4 flex flex-col gap-3 ${
-        calc.atingiuTeto ? 'border-danger/50 bg-danger/5' : 'border-border bg-surface'
+        calc.atingiuTeto ? 'border-danger/50 bg-danger-dim' : 'border-border bg-surface'
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-text">{medicamento.nome}</p>
+          <p className="font-display text-base font-semibold text-text">{medicamento.nome}</p>
           {medicamento.apresentacoes && (
             <p className="text-xs text-text-dim mt-0.5">{medicamento.apresentacoes}</p>
           )}
@@ -43,7 +43,7 @@ export function CalculadoraMedicamento({ medicamento, pesoKg }: { medicamento: M
           <select
             value={tomadas}
             onChange={(e) => setTomadasPorMedicamento(medicamento.id, Number(e.target.value))}
-            className="appearance-none bg-surface-2 border border-border rounded-md pl-2.5 pr-7 py-1.5 text-sm text-text outline-none focus:border-accent"
+            className="appearance-none bg-surface-2 border border-border rounded-lg pl-2.5 pr-7 py-1.5 text-sm text-text outline-none focus:border-accent"
           >
             {OPCOES_TOMADAS.map((n) => (
               <option key={n} value={n}>
@@ -56,7 +56,7 @@ export function CalculadoraMedicamento({ medicamento, pesoKg }: { medicamento: M
       </div>
 
       {calc.atingiuTeto && (
-        <div className="flex items-start gap-2 text-sm text-white bg-danger border border-danger rounded-md px-3 py-2.5 font-medium">
+        <div className="flex items-start gap-2 text-sm text-white bg-danger border border-danger rounded-lg px-3 py-2.5 font-medium">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             Dose calculada ({formatarNumero(calc.doseDiariaCalculadaMg)} mg/dia) ultrapassa o teto de{' '}
@@ -75,7 +75,7 @@ export function CalculadoraMedicamento({ medicamento, pesoKg }: { medicamento: M
 
       <details className="text-xs text-text-dim">
         <summary className="cursor-pointer hover:text-text transition-colors">Ver fórmula</summary>
-        <pre className="whitespace-pre-wrap font-sans mt-1.5 leading-relaxed">{textoFormula(calc)}</pre>
+        <pre className="tabular whitespace-pre-wrap mt-1.5 leading-relaxed">{textoFormula(calc)}</pre>
       </details>
 
       {medicamento.ped_volume_ref != null && (
@@ -91,9 +91,9 @@ export function CalculadoraMedicamento({ medicamento, pesoKg }: { medicamento: M
 
 function Resultado({ rotulo, valor, destaque }: { rotulo: string; valor: string; destaque?: boolean }) {
   return (
-    <div className={`rounded-md px-3 py-2 ${destaque ? 'bg-accent/10 border border-accent/30' : 'bg-surface-2'}`}>
+    <div className={`rounded-lg px-3 py-2 ${destaque ? 'bg-accent-dim border border-accent/30' : 'bg-surface-2'}`}>
       <p className="text-[11px] text-text-dim uppercase tracking-wide">{rotulo}</p>
-      <p className={`text-sm font-semibold ${destaque ? 'text-accent' : 'text-text'}`}>{valor}</p>
+      <p className={`tabular text-[15px] font-semibold ${destaque ? 'text-accent' : 'text-text'}`}>{valor}</p>
     </div>
   )
 }

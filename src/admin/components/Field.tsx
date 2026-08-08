@@ -1,7 +1,7 @@
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 
 const inputClass =
-  'bg-surface-2 border border-border rounded-md px-3 py-2 text-sm text-text outline-none focus:border-accent transition-colors w-full disabled:opacity-50'
+  'bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-text outline-none focus:border-accent focus:ring-1 focus:ring-accent/40 transition-colors w-full disabled:opacity-50'
 
 function FieldShell({
   label,
@@ -16,7 +16,7 @@ function FieldShell({
 }) {
   return (
     <label className={`flex flex-col gap-1.5 ${className ?? ''}`}>
-      <span className="text-xs font-medium text-text-dim">{label}</span>
+      <span className="text-[11px] font-medium text-text-dim uppercase tracking-wide">{label}</span>
       {children}
       {hint && <span className="text-xs text-text-dim/80">{hint}</span>}
     </label>

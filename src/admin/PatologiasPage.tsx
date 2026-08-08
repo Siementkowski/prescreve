@@ -150,13 +150,13 @@ export function PatologiasPage() {
               renderItem={(p) => (
                 <button
                   onClick={() => selecionar(p)}
-                  className={`w-full text-left px-3 py-2 rounded-md border transition-colors ${
+                  className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
                     selecionadaId === p.id
-                      ? 'bg-surface-2 border-accent'
+                      ? 'bg-accent-dim border-accent'
                       : 'bg-surface border-border hover:border-text-dim'
                   }`}
                 >
-                  <span className="block text-sm text-text truncate">{p.nome}</span>
+                  <span className="block font-display text-[15px] text-text truncate">{p.nome}</span>
                   {p.sinonimos && (
                     <span className="block text-xs text-text-dim truncate">{p.sinonimos}</span>
                   )}
@@ -168,7 +168,7 @@ export function PatologiasPage() {
         formulario={
           form && (
             <div className="bg-surface border border-border rounded-lg p-6 max-w-2xl">
-              <h2 className="text-sm font-semibold text-text mb-4">
+              <h2 className="font-display text-lg font-semibold text-text mb-4">
                 {selecionadaId ? 'Editar patologia' : 'Nova patologia'}
               </h2>
 
@@ -204,7 +204,7 @@ export function PatologiasPage() {
                 />
 
                 {erro && (
-                  <p className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-md px-3 py-2">
+                  <p className="text-sm text-danger bg-danger-dim border border-danger/30 rounded-lg px-3 py-2">
                     {erro}
                   </p>
                 )}
@@ -224,7 +224,7 @@ export function PatologiasPage() {
                   <button
                     onClick={salvar}
                     disabled={salvando}
-                    className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-medium rounded-md px-4 py-2 transition-colors"
+                    className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
                   >
                     {salvando ? 'Salvando…' : 'Salvar'}
                   </button>

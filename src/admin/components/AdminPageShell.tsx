@@ -33,7 +33,7 @@ export function AdminPageShell({
           </div>
           <button
             onClick={onNovo}
-            className="shrink-0 flex items-center gap-1.5 bg-accent hover:bg-accent/90 text-accent-text text-sm font-medium rounded-md px-3 py-2 transition-colors"
+            className="shrink-0 flex items-center gap-1.5 bg-accent hover:bg-accent/90 text-accent-text text-sm font-semibold rounded-lg px-3 py-2 transition-colors"
           >
             <Plus className="w-4 h-4" />
             {labelNovo}
