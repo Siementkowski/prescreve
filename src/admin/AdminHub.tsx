@@ -40,6 +40,7 @@ export function AdminHub() {
   const buscando = busca.trim().length > 0
 
   return (
+    <div className="h-full overflow-y-auto p-6">
     <div className="max-w-5xl mx-auto px-2 pb-16">
       {/* saudação */}
       <div className="text-center pt-6 pb-2 relative">
@@ -177,6 +178,7 @@ export function AdminHub() {
           Nova prescrição
         </span>
       </Link>
+    </div>
     </div>
   )
 }
