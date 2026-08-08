@@ -16,7 +16,6 @@ import { PatologiasPage } from './admin/PatologiasPage'
 import { MedicamentosPage } from './admin/MedicamentosPage'
 import { TratamentosPage } from './admin/TratamentosPage'
 import { RevisaoPage } from './admin/RevisaoPage'
-import { AdminHub } from './admin/AdminHub'
 import { AvisoUsoProfissional } from './core/components/AvisoUsoProfissional'
 
 const navPillClass = ({ isActive }: { isActive: boolean }) =>
@@ -55,9 +54,9 @@ function App() {
     )
   }
 
-  // O Painel é a home (/) — inclui todas as sub-telas de /admin. A pílula fica marcada
+  // O Painel é a home (/) — inclui todas as sub-telas de cadastro. A pílula fica marcada
   // como ativa em qualquer uma delas, não só na raiz exata.
-  const painelAtivo = location.pathname === '/' || location.pathname.startsWith('/admin')
+  const painelAtivo = !location.pathname.startsWith('/consulta') && !location.pathname.startsWith('/pediatria')
 
   return (
     <div className="h-screen w-full bg-bg text-text flex flex-col">
@@ -111,10 +110,9 @@ function App() {
 
       <main className="flex-1 min-h-0">
         <Routes>
-          <Route path="/" element={<AdminHub />} />
           <Route path="/consulta" element={<ConsultaPage />} />
           <Route path="/pediatria" element={<PediatriaPage />} />
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/" element={<AdminLayout />}>
             <Route index element={<Navigate to="areas" replace />} />
             <Route path="areas" element={<AreasPage />} />
             <Route path="patologias" element={<PatologiasPage />} />

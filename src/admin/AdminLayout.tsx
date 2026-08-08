@@ -7,11 +7,11 @@ import { useConfiguracoesStore } from '../core/configuracoes'
 import { precisaRevisar } from '../core/revisao'
 
 const SECOES = [
-  { to: '/admin/areas', label: 'Áreas', icone: MapPinned },
-  { to: '/admin/patologias', label: 'Patologias', icone: FolderHeart },
-  { to: '/admin/medicamentos', label: 'Medicamentos', icone: Pill },
-  { to: '/admin/tratamentos', label: 'Prescrições', icone: ListChecks },
-  { to: '/admin/revisao', label: 'Revisão', icone: ClipboardCheck },
+  { to: '/areas', label: 'Áreas', icone: MapPinned },
+  { to: '/patologias', label: 'Patologias', icone: FolderHeart },
+  { to: '/medicamentos', label: 'Medicamentos', icone: Pill },
+  { to: '/tratamentos', label: 'Prescrições', icone: ListChecks },
+  { to: '/revisao', label: 'Revisão', icone: ClipboardCheck },
 ]
 
 export function AdminLayout() {
