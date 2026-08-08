@@ -1,17 +1,100 @@
 @import "tailwindcss";
 
+/* Fraunces — títulos. Serifa de alto contraste, peso editorial, distinta do genérico
+   grotesco de painel-admin. IBM Plex Sans/Mono — corpo e dados: a mono nas doses/números
+   dá aquele ar de rótulo de instrumento clínico, não é decoração à toa. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/fraunces-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/fraunces-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/fraunces-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/plexsans-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/plexsans-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/plexsans-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/plexmono-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/plexmono-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/plexmono-600.woff2') format('woff2');
+}
+
 @theme {
-  --color-bg: #0b0f14;
-  --color-surface: #12181f;
-  --color-surface-2: #1a222b;
-  --color-border: #232d38;
-  --color-text: #e6edf3;
-  --color-text-dim: #8b98a5;
-  --color-accent: #3ba7ff;
-  --color-accent-dim: #1c4e73;
-  --color-danger: #ef5350;
-  --color-warn: #e0a63a;
-  --color-ok: #4caf7d;
+  /* Base — preto quase morno, não o azul-preto genérico de SaaS. */
+  --color-bg: #0a0d0f;
+  --color-surface: #12161a;
+  --color-surface-2: #191f24;
+  --color-surface-3: #212830;
+  --color-border: #262f37;
+  --color-border-strong: #37424c;
+  --color-text: #eaeef0;
+  --color-text-dim: #8d9aa3;
+  --color-text-faint: #5c6a73;
+
+  /* Destaque primário — ciano de traço de monitor, não o azul batido de botão de SaaS.
+     Semânticas (ok/warn/danger) continuam intocadas: são informação de segurança clínica. */
+  --color-accent: #2dd4e8;
+  --color-accent-dim: #0f4750;
+  --color-accent-text: #06181b;
+
+  --color-danger: #f36a63;
+  --color-danger-dim: #3a1614;
+  --color-warn: #f0b429;
+  --color-warn-dim: #3a2c0a;
+  --color-ok: #4fd8a0;
+  --color-ok-dim: #0e3327;
+
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
 }
 
 html,
@@ -23,4 +106,32 @@ body,
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
+  font-family: var(--font-sans);
+  font-feature-settings: 'ss01' 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ruído sutil no fundo — textura de instrumento, não chapado. Some visualmente em telas
+   pequenas/impressão, é só um verniz de superfície no bg. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+/* Números clínicos (dose, posologia, timestamps) sempre em mono — legibilidade tabular. */
+.tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }

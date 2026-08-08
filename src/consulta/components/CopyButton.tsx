@@ -30,7 +30,7 @@ export function CopyButton({
     variant === 'solid'
       ? copiado
         ? 'bg-ok text-white'
-        : 'bg-accent hover:bg-accent/90 text-white'
+        : 'bg-accent hover:bg-accent/90 text-accent-text'
       : copiado
         ? 'bg-ok/15 text-ok border border-ok/40'
         : 'bg-surface-2 hover:bg-border text-text-dim hover:text-text border border-border'

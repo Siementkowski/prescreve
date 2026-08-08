@@ -51,15 +51,15 @@ function App() {
   return (
     <div className="h-screen w-full bg-bg text-text flex flex-col">
       <header className="h-14 shrink-0 border-b border-border flex items-center justify-between px-4 sm:px-6 gap-3">
-        <div className="flex items-center gap-4 min-w-0">
-          <span className="font-semibold tracking-tight shrink-0">Prescreve</span>
+        <div className="flex items-center gap-5 min-w-0">
+          <span className="font-display text-lg font-semibold tracking-tight shrink-0">Prescreve</span>
           <nav className="flex items-center gap-1">
             <NavLink
               to="/"
               end
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm transition-colors ${
-                  isActive ? 'bg-surface-2 text-text' : 'text-text-dim hover:text-text'
+                `flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  isActive ? 'bg-accent-dim text-accent' : 'text-text-dim hover:text-text'
                 }`
               }
             >
@@ -69,8 +69,8 @@ function App() {
             <NavLink
               to="/pediatria"
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm transition-colors ${
-                  isActive ? 'bg-surface-2 text-text' : 'text-text-dim hover:text-text'
+                `flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  isActive ? 'bg-accent-dim text-accent' : 'text-text-dim hover:text-text'
                 }`
               }
             >
@@ -80,8 +80,8 @@ function App() {
             <NavLink
               to="/admin"
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm transition-colors ${
-                  isActive ? 'bg-surface-2 text-text' : 'text-text-dim hover:text-text'
+                `flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  isActive ? 'bg-accent-dim text-accent' : 'text-text-dim hover:text-text'
                 }`
               }
             >

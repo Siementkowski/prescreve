@@ -32,7 +32,7 @@ export function ItemLinha({
     <div className="border border-border rounded-lg p-4 bg-surface-2 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-text">{nomeExibido}</p>
+          <p className="font-display text-base font-semibold text-text">{nomeExibido}</p>
           {medicamento?.apresentacoes && (
             <p className="text-xs text-text-dim mt-0.5">{medicamento.apresentacoes}</p>
           )}
@@ -43,12 +43,13 @@ export function ItemLinha({
       {/* Alerta de gestação — automático, sempre visível, independente de qualquer toggle */}
       <AlertaGestacao status={medicamento?.gestacao_status ?? null} obs={medicamento?.gestacao_obs ?? null} />
 
-      {/* Receita montada — o que vai ser colado na prescrição, sempre em destaque */}
+      {/* Receita montada — o que vai ser colado na prescrição, sempre em destaque. Mono:
+          lê como um rótulo de bula, não como prosa qualquer. */}
       <div className="rounded-md bg-bg border border-border px-3 py-2.5">
         {custom && (
           <span className="block text-[11px] font-medium text-warn mb-1">Texto customizado</span>
         )}
-        <p className="text-sm text-text font-medium leading-relaxed">{texto || '—'}</p>
+        <p className="tabular text-sm text-text font-medium leading-relaxed">{texto || '—'}</p>
       </div>
 
       {detalhesPreenchidos.length > 0 && (
@@ -56,7 +57,7 @@ export function ItemLinha({
           {detalhesPreenchidos.map((d) => (
             <div key={d.rotulo}>
               <dt className="text-[11px] text-text-dim uppercase tracking-wide">{d.rotulo}</dt>
-              <dd className="text-sm text-text">{d.valor}</dd>
+              <dd className="tabular text-sm text-text">{d.valor}</dd>
             </div>
           ))}
         </dl>

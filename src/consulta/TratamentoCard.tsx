@@ -58,7 +58,7 @@ export function TratamentoCard({
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${CHIP_LINHA[tratamento.linha]}`}>
             {LABEL_LINHA[tratamento.linha]}
           </span>
-          {tratamento.titulo && <h3 className="text-sm font-semibold text-text">{tratamento.titulo}</h3>}
+          {tratamento.titulo && <h3 className="font-display text-base font-semibold text-text">{tratamento.titulo}</h3>}
           {revisar && <SeloRevisao revisadoEm={tratamento.revisado_em} />}
         </div>
         {itensDoCard.length > 1 && (

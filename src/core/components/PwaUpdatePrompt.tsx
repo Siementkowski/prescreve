@@ -26,7 +26,7 @@ export function PwaUpdatePrompt() {
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={() => updateServiceWorker(true)}
-          className="bg-accent hover:bg-accent/90 text-white text-xs font-medium rounded-md px-3 py-1.5 transition-colors"
+          className="bg-accent hover:bg-accent/90 text-accent-text text-xs font-medium rounded-md px-3 py-1.5 transition-colors"
         >
           Atualizar
         </button>

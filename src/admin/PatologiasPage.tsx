@@ -224,7 +224,7 @@ export function PatologiasPage() {
                   <button
                     onClick={salvar}
                     disabled={salvando}
-                    className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-white text-sm font-medium rounded-md px-4 py-2 transition-colors"
+                    className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-medium rounded-md px-4 py-2 transition-colors"
                   >
                     {salvando ? 'Salvando…' : 'Salvar'}
                   </button>

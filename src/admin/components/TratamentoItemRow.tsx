@@ -33,6 +33,7 @@ export function TratamentoItemRow({
   arrastando,
   onSalvar,
   onExcluir,
+  onCriarMedicamento,
 }: {
   item: TratamentoItem
   medicamentos: Medicamento[]
@@ -40,6 +41,7 @@ export function TratamentoItemRow({
   arrastando: boolean
   onSalvar: (id: number, dados: Partial<TratamentoItem>) => Promise<void>
   onExcluir: (id: number) => void
+  onCriarMedicamento?: (nome: string) => Promise<Medicamento>
 }) {
   const [local, setLocal] = useState<TratamentoItem>(item)
   const [salvando, setSalvando] = useState(false)
@@ -110,7 +112,7 @@ export function TratamentoItemRow({
               setUsaCadastro(true)
               setLocal({ ...local, nome_livre: null })
             }}
-            className={`px-2 py-1 transition-colors ${usaCadastro ? 'bg-accent text-white' : 'text-text-dim hover:text-text'}`}
+            className={`px-2 py-1 transition-colors ${usaCadastro ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
           >
             Cadastro
           </button>
@@ -120,7 +122,7 @@ export function TratamentoItemRow({
               setUsaCadastro(false)
               setLocal({ ...local, medicamento_id: null })
             }}
-            className={`px-2 py-1 transition-colors ${!usaCadastro ? 'bg-accent text-white' : 'text-text-dim hover:text-text'}`}
+            className={`px-2 py-1 transition-colors ${!usaCadastro ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
           >
             Nome livre
           </button>
@@ -132,6 +134,7 @@ export function TratamentoItemRow({
               medicamentos={medicamentos}
               valorId={local.medicamento_id}
               onSelecionar={(id) => setLocal({ ...local, medicamento_id: id })}
+              onCriar={onCriarMedicamento}
             />
           ) : (
             <input
@@ -237,7 +240,7 @@ export function TratamentoItemRow({
             type="button"
             onClick={salvar}
             disabled={salvando}
-            className="text-xs bg-accent hover:bg-accent/90 disabled:opacity-50 text-white rounded-md px-3 py-1.5 transition-colors"
+            className="text-xs bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text rounded-md px-3 py-1.5 transition-colors"
           >
             {salvando ? 'Salvando…' : 'Salvar item'}
           </button>

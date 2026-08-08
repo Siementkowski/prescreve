@@ -27,17 +27,17 @@ export function PainelAreas({ visivelMobile }: { visivelMobile: boolean }) {
               onClick={() => selecionarArea(area.id)}
               className={`w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-lg border transition-colors ${
                 areaSelecionadaId === area.id
-                  ? 'bg-surface-2 border-accent'
+                  ? 'bg-accent-dim border-accent'
                   : 'bg-transparent border-transparent hover:bg-surface-2'
               }`}
             >
               <span
                 className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: (area.cor ?? '#3ba7ff') + '22', color: area.cor ?? '#3ba7ff' }}
+                style={{ backgroundColor: (area.cor ?? '#2dd4e8') + '22', color: area.cor ?? '#2dd4e8' }}
               >
                 <IconePorNome nome={area.icone} className="w-4 h-4" />
               </span>
-              <span className="text-sm text-text font-medium">{area.nome}</span>
+              <span className="font-display text-[15px] text-text font-medium">{area.nome}</span>
             </button>
           ))
         )}

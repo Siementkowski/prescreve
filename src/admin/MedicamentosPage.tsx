@@ -127,13 +127,17 @@ export function MedicamentosPage() {
     <>
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 h-full min-h-0">
         <div className="flex flex-col gap-3 min-h-0">
+          <p className="text-xs text-text-dim leading-relaxed -mt-1">
+            Catálogo — cadastre cada remédio uma vez aqui, com os dados dele (gestação, pediatria).
+            O uso na receita (dose, via, posologia) fica em <span className="text-text-dim/90">Tratamentos → item</span>.
+          </p>
           <div className="flex gap-2">
             <div className="flex-1">
               <SearchInput value={busca} onChange={setBusca} placeholder="Buscar medicamento…" />
             </div>
             <button
               onClick={novo}
-              className="shrink-0 flex items-center gap-1.5 bg-accent hover:bg-accent/90 text-white text-sm font-medium rounded-md px-3 py-2 transition-colors"
+              className="shrink-0 flex items-center gap-1.5 bg-accent hover:bg-accent/90 text-accent-text text-sm font-semibold rounded-lg px-3 py-2 transition-colors"
             >
               <Plus className="w-4 h-4" />
               Novo
@@ -323,7 +327,7 @@ export function MedicamentosPage() {
                 <button
                   onClick={salvar}
                   disabled={salvando}
-                  className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-white text-sm font-medium rounded-md px-4 py-2 transition-colors"
+                  className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-medium rounded-md px-4 py-2 transition-colors"
                 >
                   {salvando ? 'Salvando…' : 'Salvar'}
                 </button>

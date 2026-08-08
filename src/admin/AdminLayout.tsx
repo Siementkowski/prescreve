@@ -41,7 +41,7 @@ export function AdminLayout() {
             className={({ isActive }) =>
               `flex items-center gap-1.5 px-3 py-3 text-sm border-b-2 transition-colors ${
                 isActive
-                  ? 'border-accent text-text'
+                  ? 'border-accent text-accent'
                   : 'border-transparent text-text-dim hover:text-text'
               }`
             }
@@ -54,7 +54,7 @@ export function AdminLayout() {
           to="/admin/revisao"
           className={({ isActive }) =>
             `flex items-center gap-1.5 px-3 py-3 text-sm border-b-2 transition-colors ${
-              isActive ? 'border-accent text-text' : 'border-transparent text-text-dim hover:text-text'
+              isActive ? 'border-accent text-accent' : 'border-transparent text-text-dim hover:text-text'
             }`
           }
         >

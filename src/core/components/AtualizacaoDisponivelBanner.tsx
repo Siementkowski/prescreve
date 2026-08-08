@@ -1,4 +1,4 @@
-import { Sparkles, X } from 'lucide-react'
+import { DatabaseZap, X } from 'lucide-react'
 import { useState } from 'react'
 import { useSyncStore } from '../sync'
 
@@ -15,14 +15,14 @@ export function AtualizacaoDisponivelBanner() {
   return (
     <div className="flex items-center justify-between gap-3 bg-accent/10 border-b border-accent/30 px-4 py-2 text-sm shrink-0">
       <span className="flex items-center gap-2 text-text">
-        <Sparkles className="w-4 h-4 text-accent shrink-0" />
+        <DatabaseZap className="w-4 h-4 text-accent shrink-0" />
         A base foi atualizada. Os dados na tela podem estar desatualizados.
       </span>
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={() => sincronizar({ forcar: true })}
           disabled={sincronizando}
-          className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-white text-xs font-medium rounded-md px-3 py-1.5 transition-colors"
+          className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-xs font-medium rounded-md px-3 py-1.5 transition-colors"
         >
           {sincronizando ? 'Atualizando…' : 'Atualizar'}
         </button>

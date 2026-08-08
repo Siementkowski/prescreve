@@ -16,7 +16,7 @@ export function ModoToggle() {
           type="button"
           onClick={() => setModo(opcao)}
           className={`px-3.5 py-1.5 text-sm font-medium rounded-md transition-colors ${
-            modo === opcao ? 'bg-accent text-white' : 'text-text-dim hover:text-text'
+            modo === opcao ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'
           }`}
         >
           {LABEL_MODO_TRATAMENTO[opcao]}

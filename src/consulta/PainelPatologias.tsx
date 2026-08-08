@@ -47,11 +47,11 @@ export function PainelPatologias({ visivelMobile }: { visivelMobile: boolean }) 
               onClick={() => selecionarPatologia(p.id)}
               className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors ${
                 patologiaSelecionadaId === p.id
-                  ? 'bg-surface-2 border-accent'
+                  ? 'bg-accent-dim border-accent'
                   : 'bg-transparent border-transparent hover:bg-surface-2'
               }`}
             >
-              <span className="block text-sm text-text font-medium">{p.nome}</span>
+              <span className="block font-display text-[15px] text-text font-medium">{p.nome}</span>
               {p.sinonimos && <span className="block text-xs text-text-dim truncate mt-0.5">{p.sinonimos}</span>}
             </button>
           ))

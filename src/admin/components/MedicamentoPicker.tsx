@@ -1,18 +1,22 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Plus } from 'lucide-react'
 import type { Medicamento } from '../types'
 
 export function MedicamentoPicker({
   medicamentos,
   valorId,
   onSelecionar,
+  onCriar,
 }: {
   medicamentos: Medicamento[]
   valorId: number | null
   onSelecionar: (id: number) => void
+  /** Cadastro rápido — quando a busca não acha nada, oferece criar ali mesmo, sem trocar de tela. */
+  onCriar?: (nome: string) => Promise<Medicamento>
 }) {
   const [aberto, setAberto] = useState(false)
   const [filtro, setFiltro] = useState('')
+  const [criando, setCriando] = useState(false)
 
   const selecionado = medicamentos.find((m) => m.id === valorId) ?? null
 
@@ -24,21 +28,34 @@ export function MedicamentoPicker({
       .slice(0, 30)
   }, [medicamentos, filtro])
 
+  async function criarAgora() {
+    if (!onCriar || !filtro.trim()) return
+    setCriando(true)
+    try {
+      const novo = await onCriar(filtro.trim())
+      onSelecionar(novo.id)
+      setAberto(false)
+      setFiltro('')
+    } finally {
+      setCriando(false)
+    }
+  }
+
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => setAberto((v) => !v)}
-        className="w-full flex items-center justify-between bg-surface-2 border border-border rounded-md px-3 py-2 text-sm text-text outline-none focus:border-accent transition-colors"
+        className="w-full flex items-center justify-between bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-text outline-none focus:border-accent transition-colors"
       >
         <span className={selecionado ? 'text-text' : 'text-text-dim'}>
-          {selecionado ? selecionado.nome : 'Selecionar do cadastro…'}
+          {selecionado ? selecionado.nome : 'Selecionar do catálogo…'}
         </span>
         <ChevronDown className="w-4 h-4 text-text-dim shrink-0" />
       </button>
 
       {aberto && (
-        <div className="absolute z-20 mt-1 w-full bg-surface border border-border rounded-md shadow-xl overflow-hidden">
+        <div className="absolute z-20 mt-1 w-full bg-surface border border-border rounded-lg shadow-2xl shadow-black/40 overflow-hidden">
           <input
             autoFocus
             value={filtro}
@@ -48,7 +65,20 @@ export function MedicamentoPicker({
           />
           <div className="max-h-52 overflow-y-auto">
             {filtrados.length === 0 ? (
-              <p className="text-xs text-text-dim px-3 py-2">Nenhum medicamento encontrado.</p>
+              <div className="px-3 py-2.5 flex flex-col gap-2">
+                <p className="text-xs text-text-dim">Nenhum medicamento encontrado no catálogo.</p>
+                {onCriar && filtro.trim() && (
+                  <button
+                    type="button"
+                    onClick={criarAgora}
+                    disabled={criando}
+                    className="flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 disabled:opacity-50 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    {criando ? 'Cadastrando…' : `Cadastrar "${filtro.trim()}" como novo medicamento`}
+                  </button>
+                )}
+              </div>
             ) : (
               filtrados.map((m) => (
                 <button

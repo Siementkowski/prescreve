@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { ChevronRight, Lock, Plus, Trash2 } from 'lucide-react'
 import { areasApi, patologiasApi, tratamentosApi, tratamentoItensApi, medicamentosApi } from './api'
-import type { Area, Patologia, Tratamento, TratamentoInput, TratamentoItem, Medicamento, ModoTratamento, Linha } from './types'
+import type {
+  Area,
+  Patologia,
+  Tratamento,
+  TratamentoInput,
+  TratamentoItem,
+  Medicamento,
+  MedicamentoInput,
+  ModoTratamento,
+  Linha,
+} from './types'
 import { LABEL_MODO_TRATAMENTO, LABEL_LINHA } from './types'
 import { SearchInput } from './components/SearchInput'
 import { ConfirmDialog } from './components/ConfirmDialog'
@@ -20,6 +30,23 @@ function vazio(patologiaId: number, ordem: number): TratamentoInput {
     revisado_em: null,
     precisa_revisao: false,
     ordem,
+  }
+}
+
+function medicamentoVazio(nome: string): MedicamentoInput {
+  return {
+    nome,
+    nome_comercial: null,
+    apresentacoes: null,
+    gestacao_status: null,
+    gestacao_obs: null,
+    lactacao_status: null,
+    contraindicacoes: null,
+    ped_mg_kg_dia: null,
+    ped_dose_max_dia: null,
+    ped_concentracao: null,
+    ped_volume_ref: null,
+    ped_obs: null,
   }
 }
 
@@ -87,6 +114,10 @@ export function TratamentosPage() {
       ),
     [tratamentos, busca]
   )
+
+  const nomeArea = areas.find((a) => a.id === areaSelecionada)?.nome ?? ''
+  const nomePatologia = patologias.find((p) => p.id === patologiaSelecionada)?.nome ?? ''
+  const tratamentoSelecionado = tratamentos.find((t) => t.id === selecionadoId) ?? null
 
   function novo() {
     if (patologiaSelecionada == null) return
@@ -199,6 +230,13 @@ export function TratamentosPage() {
     }
   }
 
+  /** Cadastro rápido de medicamento direto do item — evita trocar de aba no meio da receita. */
+  async function criarMedicamentoRapido(nome: string): Promise<Medicamento> {
+    const criado = await medicamentosApi.insert(medicamentoVazio(nome))
+    setMedicamentos((prev) => [...prev, criado].sort((a, b) => a.nome.localeCompare(b.nome)))
+    return criado
+  }
+
   if (areas.length === 0) {
     return <p className="text-sm text-text-dim">Cadastre uma área e uma patologia primeiro.</p>
   }
@@ -245,7 +283,7 @@ export function TratamentosPage() {
             </div>
             <button
               onClick={novo}
-              className="shrink-0 flex items-center gap-1.5 bg-accent hover:bg-accent/90 text-white text-sm font-medium rounded-md px-3 py-2 transition-colors"
+              className="shrink-0 flex items-center gap-1.5 bg-accent hover:bg-accent/90 text-accent-text text-sm font-semibold rounded-lg px-3 py-2 transition-colors"
             >
               <Plus className="w-4 h-4" />
               Novo
@@ -264,10 +302,10 @@ export function TratamentosPage() {
                 renderItem={(t) => (
                   <button
                     onClick={() => selecionar(t)}
-                    className={`w-full text-left px-3 py-2 rounded-md border transition-colors ${
+                    className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
                       selecionadoId === t.id
-                        ? 'bg-surface-2 border-accent'
-                        : 'bg-surface border-border hover:border-text-dim'
+                        ? 'bg-accent-dim border-accent'
+                        : 'bg-surface border-border hover:border-text-faint'
                     }`}
                   >
                     <span className="block text-sm text-text truncate">
@@ -283,12 +321,32 @@ export function TratamentosPage() {
           </div>
         </div>
 
-        <div className="min-h-0 overflow-y-auto flex flex-col gap-6 pb-6">
+        <div className="min-h-0 overflow-y-auto flex flex-col gap-5 pb-6">
+          {/* Trilha de contexto — nunca perder onde você está na hierarquia */}
+          <div className="flex items-center gap-1.5 text-xs text-text-dim">
+            <span>{nomeArea}</span>
+            <ChevronRight className="w-3 h-3" />
+            <span>{nomePatologia}</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-text font-medium">
+              {tratamentoSelecionado
+                ? tratamentoSelecionado.titulo || `${LABEL_MODO_TRATAMENTO[tratamentoSelecionado.modo]} · ${LABEL_LINHA[tratamentoSelecionado.linha]}`
+                : 'Novo tratamento'}
+            </span>
+          </div>
+
           {form && (
-            <div className="bg-surface border border-border rounded-lg p-6">
-              <h2 className="text-sm font-semibold text-text mb-4">
-                {selecionadoId ? 'Editar tratamento' : 'Novo tratamento'}
-              </h2>
+            <div className="bg-surface border border-border rounded-xl p-6">
+              <div className="flex items-center gap-2.5 mb-1">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent-dim text-accent text-[11px] font-bold shrink-0">
+                  1
+                </span>
+                <h2 className="text-sm font-semibold text-text">Cabeçalho do tratamento</h2>
+              </div>
+              <p className="text-xs text-text-dim mb-4 ml-7.5">
+                O tratamento é o contêiner — modo, linha e título. Os medicamentos com dose e posologia
+                entram na seção 2, depois de salvar aqui.
+              </p>
 
               <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-2 gap-3">
@@ -351,7 +409,7 @@ export function TratamentosPage() {
                 />
 
                 {erro && (
-                  <p className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-md px-3 py-2">
+                  <p className="text-sm text-danger bg-danger-dim border border-danger/30 rounded-lg px-3 py-2">
                     {erro}
                   </p>
                 )}
@@ -371,22 +429,36 @@ export function TratamentosPage() {
                   <button
                     onClick={salvarCabecalho}
                     disabled={salvando}
-                    className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-white text-sm font-medium rounded-md px-4 py-2 transition-colors"
+                    className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
                   >
-                    {salvando ? 'Salvando…' : selecionadoId ? 'Salvar cabeçalho' : 'Criar tratamento'}
+                    {salvando ? 'Salvando…' : selecionadoId ? 'Salvar cabeçalho' : 'Criar tratamento e liberar itens →'}
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {selecionadoId && form && (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-text">
-                  Itens da prescrição
-                  <span className="text-text-dim font-normal"> — arraste para reordenar</span>
-                </h3>
+          {/* Seção 2 sempre visível — trancada até o cabeçalho existir, em vez de simplesmente
+              não aparecer. É essa transição invisível que confundia antes. */}
+          <div
+            className={`bg-surface border rounded-xl p-6 ${
+              selecionadoId ? 'border-border' : 'border-border border-dashed'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2.5">
+                <span
+                  className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold shrink-0 ${
+                    selecionadoId ? 'bg-accent-dim text-accent' : 'bg-surface-3 text-text-faint'
+                  }`}
+                >
+                  2
+                </span>
+                <h2 className={`text-sm font-semibold ${selecionadoId ? 'text-text' : 'text-text-faint'}`}>
+                  Itens — medicamento, dose, via, posologia
+                </h2>
+              </div>
+              {selecionadoId && (
                 <button
                   onClick={adicionarItem}
                   className="flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 transition-colors"
@@ -394,34 +466,45 @@ export function TratamentosPage() {
                   <Plus className="w-4 h-4" />
                   Adicionar item
                 </button>
-              </div>
-
-              {carregandoItens ? (
-                <p className="text-sm text-text-dim">Carregando itens…</p>
-              ) : itens.length === 0 ? (
-                <p className="text-sm text-text-dim">
-                  Nenhum item ainda. Uma prescrição ambulatorial simples tem 1 item; um combo hospitalar
-                  costuma ter vários — é o mesmo editor.
-                </p>
-              ) : (
-                <SortableList
-                  items={itens}
-                  onReorder={reordenarItens}
-                  className="flex flex-col gap-3"
-                  renderItem={(item, arrastando) => (
-                    <TratamentoItemRow
-                      item={item}
-                      medicamentos={medicamentos}
-                      modoTratamento={form.modo}
-                      arrastando={arrastando}
-                      onSalvar={salvarItem}
-                      onExcluir={excluirItem}
-                    />
-                  )}
-                />
               )}
             </div>
-          )}
+
+            {!selecionadoId ? (
+              <p className="flex items-center gap-1.5 text-xs text-text-faint mt-3 ml-7.5">
+                <Lock className="w-3.5 h-3.5 shrink-0" />
+                Salve o cabeçalho na seção 1 pra liberar a adição de itens aqui.
+              </p>
+            ) : (
+              <>
+                <p className="text-xs text-text-dim mb-4 ml-7.5">
+                  Cada item é um medicamento da receita. Uma prescrição ambulatorial simples tem 1 item; um
+                  combo hospitalar costuma ter vários — arraste pra reordenar.
+                </p>
+                {carregandoItens ? (
+                  <p className="text-sm text-text-dim">Carregando itens…</p>
+                ) : itens.length === 0 ? (
+                  <p className="text-sm text-text-dim">Nenhum item ainda — clique em "Adicionar item".</p>
+                ) : (
+                  <SortableList
+                    items={itens}
+                    onReorder={reordenarItens}
+                    className="flex flex-col gap-3"
+                    renderItem={(item, arrastando) => (
+                      <TratamentoItemRow
+                        item={item}
+                        medicamentos={medicamentos}
+                        modoTratamento={form?.modo ?? 'ambulatorial'}
+                        arrastando={arrastando}
+                        onSalvar={salvarItem}
+                        onExcluir={excluirItem}
+                        onCriarMedicamento={criarMedicamentoRapido}
+                      />
+                    )}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
 
