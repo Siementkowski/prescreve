@@ -1,22 +1,14 @@
-import { useConsultaStore } from './store'
 import { useSyncStore } from '../core/sync'
 import { ModoToggle } from './components/ModoToggle'
 import { GestanteToggle } from './components/GestanteToggle'
 import { BuscaGlobal } from './BuscaGlobal'
-import { PainelAreas } from './PainelAreas'
-import { PainelPatologias } from './PainelPatologias'
+import { SeletorBreadcrumb } from './SeletorBreadcrumb'
 import { PainelTratamentos } from './PainelTratamentos'
 
 export function ConsultaPage() {
   const carregandoInicial = useSyncStore((s) => s.carregandoInicial)
   const erro = useSyncStore((s) => s.erro)
   const areas = useSyncStore((s) => s.areas)
-  const areaSelecionadaId = useConsultaStore((s) => s.areaSelecionadaId)
-  const patologiaSelecionadaId = useConsultaStore((s) => s.patologiaSelecionadaId)
-
-  // No mobile só um painel fica visível por vez — deriva a "profundidade" da navegação.
-  const painelMobile =
-    patologiaSelecionadaId != null ? 'tratamentos' : areaSelecionadaId != null ? 'patologias' : 'areas'
 
   if (carregandoInicial) {
     return (
@@ -44,11 +36,11 @@ export function ConsultaPage() {
         <BuscaGlobal />
       </div>
 
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[280px_320px_1fr]">
-        <PainelAreas visivelMobile={painelMobile === 'areas'} />
-        <PainelPatologias visivelMobile={painelMobile === 'patologias'} />
-        <PainelTratamentos visivelMobile={painelMobile === 'tratamentos'} />
+      <div className="px-4 py-3 border-b border-border shrink-0">
+        <SeletorBreadcrumb />
       </div>
+
+      <PainelTratamentos />
     </div>
   )
 }

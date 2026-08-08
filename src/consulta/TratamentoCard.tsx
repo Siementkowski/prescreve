@@ -73,6 +73,7 @@ export function TratamentoCard({
             item={item}
             medicamento={medicamentoPorId(medicamentos, item.medicamento_id)}
             modoTratamento={tratamento.modo}
+            semMoldura={itensDoCard.length === 1}
           />
         ))}
       </div>

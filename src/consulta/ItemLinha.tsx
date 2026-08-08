@@ -8,10 +8,14 @@ export function ItemLinha({
   item,
   medicamento,
   modoTratamento,
+  semMoldura = false,
 }: {
   item: TratamentoItem
   medicamento: Medicamento | null
   modoTratamento: ModoTratamento
+  /** Quando o tratamento tem um único item, o card externo (TratamentoCard) já dá a
+   *  moldura — renderiza só o conteúdo, sem duplicar borda/fundo. */
+  semMoldura?: boolean
 }) {
   const nomeExibido = medicamento?.nome ?? item.nome_livre ?? '—'
   const texto = textoReceitaDoItem(item, medicamento?.nome ?? null)
@@ -29,7 +33,7 @@ export function ItemLinha({
   const detalhesPreenchidos = detalhes.filter((d) => d.valor?.trim())
 
   return (
-    <div className="border border-border rounded-lg p-4 bg-surface-2 flex flex-col gap-3">
+    <div className={semMoldura ? 'flex flex-col gap-3' : 'border border-border rounded-lg p-4 bg-surface-2 flex flex-col gap-3'}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-display text-base font-semibold text-text">{nomeExibido}</p>
