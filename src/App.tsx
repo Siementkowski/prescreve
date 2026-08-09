@@ -76,10 +76,6 @@ function App() {
                 <Home className="w-4 h-4" />
                 <span className="hidden sm:inline">Página Inicial</span>
               </NavLink>
-              <NavLink to="/painel" className={() => navPillClass({ isActive: painelAtivo })}>
-                <Settings className="w-4 h-4" />
-                <span className="hidden sm:inline">Painel</span>
-              </NavLink>
               <NavLink to="/consulta" className={navPillClass}>
                 <Stethoscope className="w-4 h-4" />
                 <span className="hidden sm:inline">Consulta</span>
@@ -88,6 +84,12 @@ function App() {
                 <Baby className="w-4 h-4" />
                 <span className="hidden sm:inline">Pediatria</span>
               </NavLink>
+              {isEditor && (
+                <NavLink to="/painel" className={() => navPillClass({ isActive: painelAtivo })}>
+                  <Settings className="w-4 h-4" />
+                  <span className="hidden sm:inline">Painel</span>
+                </NavLink>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-2.5 text-sm text-text-dim min-w-0">

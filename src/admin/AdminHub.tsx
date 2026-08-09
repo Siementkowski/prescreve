@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapPinned, FolderHeart, Pill, ListChecks, ArrowRight, Plus, Search } from 'lucide-react'
+import { MapPinned, FolderHeart, Pill, ListChecks, ArrowRight, Baby, Search } from 'lucide-react'
 import { areasApi, patologiasApi, medicamentosApi } from './api'
 import type { Patologia, Medicamento } from './types'
 import { useAuth } from '../core/auth/AuthProvider'
@@ -158,24 +158,24 @@ export function AdminHub() {
 
       {/* cta */}
       <Link
-        to="/painel/tratamentos"
+        to="/pediatria"
         className="mt-10 flex items-center justify-between gap-6 rounded-3xl px-9 py-8 text-white overflow-hidden relative"
         style={{ background: '#201F2E' }}
       >
         <span>
           <span className="font-display text-2xl font-semibold block max-w-xs">
-            Cadastre uma prescrição nova agora
+            Calculadora de dose pediátrica
           </span>
           <span className="text-sm block mt-2 max-w-xs" style={{ color: '#B9B6CC' }}>
-            Cabeçalho e itens no mesmo lugar — leva menos de dois minutos pra deixar pronto pra consulta.
+            Fórmula transparente, com aviso de dose-teto — pronta pra usar na consulta.
           </span>
         </span>
         <span
           className="flex items-center gap-2 font-display font-semibold text-sm px-5 py-3 rounded-full shrink-0"
           style={{ background: 'var(--color-cat-areas-bg)', color: 'var(--color-cat-areas)' }}
         >
-          <Plus className="w-4 h-4" />
-          Nova prescrição
+          <Baby className="w-4 h-4" />
+          Abrir calculadora
         </span>
       </Link>
     </div>
