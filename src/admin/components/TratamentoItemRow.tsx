@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { Trash2, Pencil } from 'lucide-react'
 import type { Medicamento, Apresentacao, ModoTratamento, TratamentoItem } from '../types'
 import { gerarTextoReceita, gerarTextoPadrao, estaUsandoCustom } from '../../core/receita'
-import { formatarApresentacao } from '../../core/apresentacao'
 import { MedicamentoPicker } from './MedicamentoPicker'
-import { TextField, TextAreaField, SelectField } from './Field'
+import { ApresentacaoPicker, type NovaApresentacaoDados } from './ApresentacaoPicker'
+import { TextField, TextAreaField } from './Field'
 
 function resolveNome(item: Pick<TratamentoItem, 'medicamento_id' | 'nome_livre'>, medicamentos: Medicamento[]): string {
   if (item.medicamento_id) {
@@ -39,6 +39,7 @@ export function TratamentoItemRow({
   onSalvar,
   onExcluir,
   onCriarMedicamento,
+  onCriarApresentacao,
 }: {
   item: TratamentoItem
   medicamentos: Medicamento[]
@@ -48,6 +49,7 @@ export function TratamentoItemRow({
   onSalvar: (id: number, dados: Partial<TratamentoItem>) => Promise<void>
   onExcluir: (id: number) => void
   onCriarMedicamento?: (nome: string) => Promise<Medicamento>
+  onCriarApresentacao?: (medicamentoId: number, dados: NovaApresentacaoDados) => Promise<Apresentacao>
 }) {
   const [local, setLocal] = useState<TratamentoItem>(item)
   const [salvando, setSalvando] = useState(false)
@@ -179,23 +181,20 @@ export function TratamentoItemRow({
       {/* Apresentação do catálogo — carrega as apresentações do medicamento escolhido;
           quantidade é texto porque aceita faixa ("1 a 2"). */}
       {usaCadastro && local.medicamento_id && (
-        <div className="grid grid-cols-[1fr_auto] gap-3">
-          <SelectField
-            label="Apresentação"
-            value={local.apresentacao_id ?? ''}
-            onChange={(e) =>
-              setLocal({ ...local, apresentacao_id: e.target.value ? Number(e.target.value) : null })
-            }
-          >
-            <option value="">
-              {apresentacoesDoMedicamento.length === 0 ? 'Nenhuma cadastrada — use "Dose" abaixo' : '— nenhuma —'}
-            </option>
-            {apresentacoesDoMedicamento.map((a) => (
-              <option key={a.id} value={a.id}>
-                {formatarApresentacao(a)}
-              </option>
-            ))}
-          </SelectField>
+        <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-medium text-text-dim uppercase tracking-wide">Apresentação</span>
+            <ApresentacaoPicker
+              apresentacoes={apresentacoesDoMedicamento}
+              valorId={local.apresentacao_id}
+              onSelecionar={(id) => setLocal({ ...local, apresentacao_id: id })}
+              onCriar={
+                onCriarApresentacao && local.medicamento_id
+                  ? (dados) => onCriarApresentacao(local.medicamento_id!, dados)
+                  : undefined
+              }
+            />
+          </label>
           <TextField
             label="Quantidade"
             hint="Aceita faixa"
@@ -269,11 +268,11 @@ export function TratamentoItemRow({
             </span>
           )}
         </div>
-        <p className={`text-sm ${usandoCustom ? 'text-warn' : 'text-text'}`}>
+        <p className={`text-sm whitespace-pre-line ${usandoCustom ? 'text-warn' : 'text-text'}`}>
           {textoFinal || <span className="text-text-dim">Preencha os campos para gerar o texto…</span>}
         </p>
         {usandoCustom && textoPadrao && (
-          <p className="text-xs text-text-dim line-through decoration-text-dim/60">{textoPadrao}</p>
+          <p className="text-xs text-text-dim whitespace-pre-line line-through decoration-text-dim/60">{textoPadrao}</p>
         )}
       </div>
 

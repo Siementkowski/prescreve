@@ -58,7 +58,7 @@ export function ItemLinha({
         {custom && (
           <span className="block text-[11px] font-medium text-warn mb-1">Texto customizado</span>
         )}
-        <p className="tabular text-sm text-text font-medium leading-relaxed">{texto || '—'}</p>
+        <p className="tabular text-sm text-text font-medium leading-relaxed whitespace-pre-line">{texto || '—'}</p>
       </div>
 
       {/* Condição (SOS) — muda QUANDO tomar, não é só mais um detalhe: destaque próprio,

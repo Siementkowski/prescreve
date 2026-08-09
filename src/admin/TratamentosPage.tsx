@@ -243,6 +243,27 @@ export function TratamentosPage() {
     return criado
   }
 
+  /** Cadastro rápido de apresentação direto do item — mesma tabela do cadastro do
+   *  medicamento, só um atalho a mais pra não sair do editor da prescrição. */
+  async function criarApresentacaoRapida(
+    medicamentoId: number,
+    dados: { forma: string; concentracao: number | null; unidade: string; por_volume: number | null; por_volume_unidade: string }
+  ): Promise<Apresentacao> {
+    const ordem = apresentacoes.filter((a) => a.medicamento_id === medicamentoId).length
+    const criada = await apresentacoesApi.insert({
+      medicamento_id: medicamentoId,
+      forma: dados.forma.trim(),
+      concentracao: dados.concentracao,
+      unidade: dados.unidade.trim() || null,
+      por_volume: dados.por_volume,
+      por_volume_unidade: dados.por_volume_unidade.trim() || null,
+      descricao: null,
+      ordem,
+    })
+    setApresentacoes((prev) => [...prev, criada])
+    return criada
+  }
+
   if (areas.length === 0) {
     return <p className="text-sm text-text-dim">Cadastre uma área e uma patologia primeiro.</p>
   }
@@ -498,6 +519,7 @@ export function TratamentosPage() {
                         onSalvar={salvarItem}
                         onExcluir={excluirItem}
                         onCriarMedicamento={criarMedicamentoRapido}
+                        onCriarApresentacao={criarApresentacaoRapida}
                       />
                     )}
                   />

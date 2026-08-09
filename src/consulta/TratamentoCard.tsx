@@ -38,6 +38,8 @@ export function TratamentoCard({
     mesesAteRevisar
   )
 
+  // Linha em branco entre itens — cada um já vem em duas linhas (medicamento + como
+  // tomar), sem o espaçamento eles colariam um no outro e ficaria ilegível no combo.
   const textoCombo = itensDoCard
     .map((item) =>
       textoReceitaDoItem(
@@ -46,7 +48,7 @@ export function TratamentoCard({
         apresentacaoPorId(apresentacoes, item.apresentacao_id)
       )
     )
-    .join('\n')
+    .join('\n\n')
 
   return (
     <div

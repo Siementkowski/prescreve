@@ -3,6 +3,10 @@
 // dose + via + posologia + duração + condição, pra nunca desatualizar quando algo muda
 // (o problema que a planilha antiga tinha).
 //
+// Formato de duas linhas, como uma receita de verdade:
+//   Dipirona 500 mg
+//   Tomar 1 a 2 comprimidos 6/6h, se dor ou febre
+//
 // Montagem por segmentos: cada pedaço da frase só entra na lista se tiver conteúdo, e o
 // texto final é a junção dos segmentos presentes — nunca uma concatenação de strings com
 // conectores fixos. É assim que um campo ausente nunca deixa preposição ou vírgula solta,
@@ -10,6 +14,7 @@
 // bug: ele também só aparece quando tem conteúdo.
 
 import { formatarConcentracao, formaComQuantidade, type DadosApresentacao } from './apresentacao'
+import { textoDaVia } from './via'
 
 export interface DadosItemReceita {
   nomeMedicamento: string | null | undefined // resolvido: nome do cadastro OU nome_livre
@@ -25,45 +30,9 @@ export interface DadosItemReceita {
 
 interface Segmento {
   texto: string
-  /** true = este segmento é introduzido por ", " em vez de espaço — usado pra separar a
-   *  identificação do medicamento (nome + concentração) de como tomar, e pra sempre
-   *  destacar a condição no fim. */
+  /** true = este segmento é introduzido por ", " em vez de espaço — hoje só a condição
+   *  usa isso, pra sempre se destacar no fim da linha. */
   virgulaAntes: boolean
-}
-
-function montarSegmentos(dados: DadosItemReceita): Segmento[] {
-  const segmentos: Segmento[] = []
-
-  const nome = dados.nomeMedicamento?.trim()
-  if (nome) segmentos.push({ texto: nome, virgulaAntes: false })
-
-  const concentracao = dados.apresentacao ? formatarConcentracao(dados.apresentacao) : null
-  if (concentracao) segmentos.push({ texto: concentracao, virgulaAntes: false })
-
-  const quantidade = dados.quantidade?.trim()
-  const forma = dados.apresentacao?.forma?.trim()
-  if (quantidade && forma) {
-    segmentos.push({ texto: `${quantidade} ${formaComQuantidade(forma, quantidade)}`, virgulaAntes: true })
-  }
-
-  // Dose "solta" (sem apresentação estruturada) continua funcionando como antes — entra
-  // junto do bloco de como tomar, sem vírgula, pra não duplicar a lógica da apresentação.
-  const dose = dados.dose?.trim()
-  if (dose) segmentos.push({ texto: dose, virgulaAntes: false })
-
-  const via = dados.via?.trim()
-  if (via) segmentos.push({ texto: via, virgulaAntes: false })
-
-  const posologia = dados.posologia?.trim()
-  if (posologia) segmentos.push({ texto: posologia, virgulaAntes: false })
-
-  const duracao = dados.duracao?.trim()
-  if (duracao) segmentos.push({ texto: `por ${duracao}`, virgulaAntes: false })
-
-  const condicao = dados.condicao?.trim()
-  if (condicao) segmentos.push({ texto: condicao, virgulaAntes: true })
-
-  return segmentos
 }
 
 /** Junta os segmentos presentes — nunca produz espaço duplo, vírgula dupla ou pontuação
@@ -75,9 +44,55 @@ function juntarSegmentos(segmentos: Segmento[]): string {
   }, '')
 }
 
-/** Monta o texto padrão: "Amoxicilina 500 mg, 1 comprimido VO 8/8h por 10 dias" */
+/** Linha 1 — identificação: "Dipirona 500 mg". A concentração vem da apresentação
+ *  escolhida; na ausência dela, a dose livre (campo legado) faz esse papel. */
+function montarLinha1(dados: DadosItemReceita): string {
+  const segmentos: Segmento[] = []
+
+  const nome = dados.nomeMedicamento?.trim()
+  if (nome) segmentos.push({ texto: nome, virgulaAntes: false })
+
+  const concentracao = dados.apresentacao ? formatarConcentracao(dados.apresentacao) : null
+  const forca = concentracao ?? dados.dose?.trim() ?? null
+  if (forca) segmentos.push({ texto: forca, virgulaAntes: false })
+
+  return juntarSegmentos(segmentos)
+}
+
+/** Linha 2 — como tomar: "Tomar 1 a 2 comprimidos 6/6h, se dor ou febre". A sigla da via
+ *  vira o verbo correspondente (verboDaVia/textoDaVia, em core/via.ts); via não mapeada
+ *  mantém a sigla como está. */
+function montarLinha2(dados: DadosItemReceita): string {
+  const segmentos: Segmento[] = []
+
+  const via = textoDaVia(dados.via)
+  if (via) segmentos.push({ texto: via, virgulaAntes: false })
+
+  const quantidade = dados.quantidade?.trim()
+  const forma = dados.apresentacao?.forma?.trim()
+  if (quantidade && forma) {
+    segmentos.push({ texto: `${quantidade} ${formaComQuantidade(forma, quantidade)}`, virgulaAntes: false })
+  }
+
+  const posologia = dados.posologia?.trim()
+  if (posologia) segmentos.push({ texto: posologia, virgulaAntes: false })
+
+  const duracao = dados.duracao?.trim()
+  if (duracao) segmentos.push({ texto: `por ${duracao}`, virgulaAntes: false })
+
+  const condicao = dados.condicao?.trim()
+  if (condicao) segmentos.push({ texto: condicao, virgulaAntes: true })
+
+  return juntarSegmentos(segmentos)
+}
+
+/** Monta o texto padrão em duas linhas — só entra a quebra se as duas linhas tiverem
+ *  conteúdo, senão sobra uma linha vazia à toa. */
 export function gerarTextoPadrao(dados: DadosItemReceita): string {
-  return juntarSegmentos(montarSegmentos(dados))
+  const linha1 = montarLinha1(dados)
+  const linha2 = montarLinha2(dados)
+  if (linha1 && linha2) return `${linha1}\n${linha2}`
+  return linha1 || linha2
 }
 
 /** Texto final: usa receita_custom quando preenchido, senão o texto derivado dos campos. */
@@ -108,7 +123,7 @@ export interface ItemReceitaBruto {
 
 /** Recebe o item cru + o nome do medicamento e a apresentação já resolvidos por quem chama
  *  (só quem tem acesso às listas de medicamentos/apresentações sabe fazer esse lookup) e
- *  devolve o texto final. */
+ *  devolve o texto final (duas linhas, com \n de verdade). */
 export function textoReceitaDoItem(
   item: ItemReceitaBruto,
   nomeMedicamentoCadastro: string | null,
