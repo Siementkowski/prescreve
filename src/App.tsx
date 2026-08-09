@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Stethoscope, Settings, Baby } from 'lucide-react'
+import { Stethoscope, Settings, Baby, Home } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
 import { LoginPage } from './core/auth/LoginPage'
 import { useSyncStore } from './core/sync'
@@ -16,6 +16,7 @@ import { PatologiasPage } from './admin/PatologiasPage'
 import { MedicamentosPage } from './admin/MedicamentosPage'
 import { TratamentosPage } from './admin/TratamentosPage'
 import { RevisaoPage } from './admin/RevisaoPage'
+import { AdminHub } from './admin/AdminHub'
 import { AvisoUsoProfissional } from './core/components/AvisoUsoProfissional'
 
 const navPillClass = ({ isActive }: { isActive: boolean }) =>
@@ -54,9 +55,9 @@ function App() {
     )
   }
 
-  // O Painel é a home (/) — inclui todas as sub-telas de cadastro. A pílula fica marcada
+  // Painel inclui todas as sub-telas de cadastro (/painel/*) — a pílula fica marcada
   // como ativa em qualquer uma delas, não só na raiz exata.
-  const painelAtivo = !location.pathname.startsWith('/consulta') && !location.pathname.startsWith('/pediatria')
+  const painelAtivo = location.pathname.startsWith('/painel')
 
   return (
     <div className="h-screen w-full bg-bg text-text flex flex-col">
@@ -71,7 +72,11 @@ function App() {
               Prescreve
             </NavLink>
             <nav className="flex items-center gap-1">
-              <NavLink to="/" className={() => navPillClass({ isActive: painelAtivo })}>
+              <NavLink to="/" end className={navPillClass}>
+                <Home className="w-4 h-4" />
+                <span className="hidden sm:inline">Página Inicial</span>
+              </NavLink>
+              <NavLink to="/painel" className={() => navPillClass({ isActive: painelAtivo })}>
                 <Settings className="w-4 h-4" />
                 <span className="hidden sm:inline">Painel</span>
               </NavLink>
@@ -110,9 +115,10 @@ function App() {
 
       <main className="flex-1 min-h-0">
         <Routes>
+          <Route path="/" element={<AdminHub />} />
           <Route path="/consulta" element={<ConsultaPage />} />
           <Route path="/pediatria" element={<PediatriaPage />} />
-          <Route path="/" element={<AdminLayout />}>
+          <Route path="/painel" element={<AdminLayout />}>
             <Route index element={<Navigate to="areas" replace />} />
             <Route path="areas" element={<AreasPage />} />
             <Route path="patologias" element={<PatologiasPage />} />

@@ -7,11 +7,11 @@ import { useConfiguracoesStore } from '../core/configuracoes'
 import { precisaRevisar } from '../core/revisao'
 
 const SECOES = [
-  { to: '/areas', label: 'Áreas', icone: MapPinned },
-  { to: '/patologias', label: 'Patologias', icone: FolderHeart },
-  { to: '/medicamentos', label: 'Medicamentos', icone: Pill },
-  { to: '/tratamentos', label: 'Prescrições', icone: ListChecks },
-  { to: '/revisao', label: 'Revisão', icone: ClipboardCheck },
+  { to: '/painel/areas', label: 'Áreas', icone: MapPinned },
+  { to: '/painel/patologias', label: 'Patologias', icone: FolderHeart },
+  { to: '/painel/medicamentos', label: 'Medicamentos', icone: Pill },
+  { to: '/painel/tratamentos', label: 'Prescrições', icone: ListChecks },
+  { to: '/painel/revisao', label: 'Revisão', icone: ClipboardCheck },
 ]
 
 export function AdminLayout() {
@@ -35,15 +35,15 @@ export function AdminLayout() {
     <div className="flex flex-col h-full min-h-0">
       <OfflineBanner />
 
-      {/* Faixa fina de atalho — volta pro painel (home) ou pula lateralmente entre seções,
-          sem precisar passar pelo hub toda vez. */}
+      {/* Faixa fina de atalho — volta pra página inicial ou pula lateralmente entre
+          seções, sem precisar passar pelo hub toda vez. */}
       <div className="flex items-center gap-3 px-6 py-3 border-b border-border shrink-0 overflow-x-auto">
         <Link
           to="/"
           className="flex items-center gap-1.5 text-sm font-semibold text-text-dim hover:text-text transition-colors shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
-          Painel
+          Página inicial
         </Link>
         <span className="w-px h-4 bg-border shrink-0" />
         <div className="flex items-center gap-1 shrink-0">
