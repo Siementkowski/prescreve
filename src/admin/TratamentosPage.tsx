@@ -367,15 +367,15 @@ export function TratamentosPage() {
               // Lista em ordem alfabética — sem arrastar-pra-reordenar aqui (a ordem que
               // rege a Consulta continua existindo, só não é mais o critério desta lista).
               filtrados.map((t) => (
-                <div
-                  key={t.id}
-                  className={`w-full flex items-center gap-1 rounded-lg border transition-colors ${
-                    selecionadoId === t.id
-                      ? 'bg-accent-dim border-accent'
-                      : 'bg-surface border-border hover:border-text-faint'
-                  }`}
-                >
-                  <button onClick={() => selecionar(t)} className="flex-1 min-w-0 text-left px-3 py-2">
+                <div key={t.id} className="w-full flex items-center gap-1.5">
+                  <button
+                    onClick={() => selecionar(t)}
+                    className={`flex-1 min-w-0 text-left px-3 py-2 rounded-lg border transition-colors ${
+                      selecionadoId === t.id
+                        ? 'bg-accent-dim border-accent'
+                        : 'bg-surface border-border hover:border-text-faint'
+                    }`}
+                  >
                     <span className="block text-sm text-text font-medium truncate">
                       {t.titulo || resumoTratamento(t) || `${LABEL_MODO_TRATAMENTO[t.modo]} · ${LABEL_LINHA[t.linha]}`}
                     </span>
@@ -386,11 +386,8 @@ export function TratamentosPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setParaExcluir(t)
-                    }}
-                    className="shrink-0 text-danger hover:text-danger/80 transition-colors p-2 mr-1"
+                    onClick={() => setParaExcluir(t)}
+                    className="shrink-0 text-danger hover:text-danger/80 transition-colors p-2"
                     title="Excluir prescrição"
                   >
                     <Trash2 className="w-4 h-4" />
