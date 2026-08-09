@@ -128,5 +128,17 @@ export const tratamentoItensApi = {
     if (error) throw error
     return (data ?? []) as TratamentoItem[]
   },
+  /** Todos os itens de vários tratamentos de uma vez — usado pra montar um resumo (nome
+   *  do 1º medicamento) na lista, sem precisar de 1 query por card. */
+  async listByTratamentos(tratamentoIds: number[]): Promise<TratamentoItem[]> {
+    if (tratamentoIds.length === 0) return []
+    const { data, error } = await supabase
+      .from('tratamento_itens')
+      .select('*')
+      .in('tratamento_id', tratamentoIds)
+      .order('ordem', { ascending: true })
+    if (error) throw error
+    return (data ?? []) as TratamentoItem[]
+  },
   reorder: (itens: { id: number; ordem: number }[]) => reorder('tratamento_itens', itens),
 }

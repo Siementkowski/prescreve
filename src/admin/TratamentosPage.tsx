@@ -71,6 +71,10 @@ export function TratamentosPage() {
 
   const [itens, setItens] = useState<TratamentoItem[]>([])
   const [carregandoItens, setCarregandoItens] = useState(false)
+  // Itens de TODOS os tratamentos da patologia atual — só pra montar um resumo (nome do
+  // medicamento) na lista da esquerda, que sem isso mostrava "Ambulatorial · 1ª linha"
+  // repetido em cada card, sem dar pra distinguir um do outro.
+  const [resumoItens, setResumoItens] = useState<Record<number, TratamentoItem[]>>({})
 
   useEffect(() => {
     areasApi.list().then((lista) => {
@@ -97,25 +101,46 @@ export function TratamentosPage() {
     setCarregando(true)
     tratamentosApi
       .listByPatologia(patologiaSelecionada)
-      .then((lista) => {
+      .then(async (lista) => {
         setTratamentos(lista)
         setSelecionadoId(null)
         setForm(vazio(patologiaSelecionada, lista.length))
         setItens([])
         setErro(null)
+
+        const todosItens = await tratamentoItensApi.listByTratamentos(lista.map((t) => t.id))
+        const agrupados: Record<number, TratamentoItem[]> = {}
+        for (const item of todosItens) {
+          ;(agrupados[item.tratamento_id] ??= []).push(item)
+        }
+        setResumoItens(agrupados)
       })
       .catch((e) => setErro(e.message))
       .finally(() => setCarregando(false))
   }, [patologiaSelecionada])
 
+  /** "Amoxicilina" (1 item) ou "Amoxicilina +2" (combo) — o que de fato diferencia um
+   *  card do outro na lista, já que vários tratamentos podem ter o mesmo modo e linha. */
+  function resumoTratamento(t: Tratamento): string {
+    const itensDoTratamento = (resumoItens[t.id] ?? [])
+      .slice()
+      .sort((a, b) => a.ordem - b.ordem)
+    if (itensDoTratamento.length === 0) return ''
+    const nomes = itensDoTratamento.map((i) =>
+      i.medicamento_id ? medicamentos.find((m) => m.id === i.medicamento_id)?.nome ?? '—' : i.nome_livre || '—'
+    )
+    return nomes.length === 1 ? nomes[0] : `${nomes[0]} +${nomes.length - 1}`
+  }
+
   const filtrados = useMemo(
     () =>
       tratamentos.filter((t) =>
-        `${t.titulo ?? ''} ${LABEL_MODO_TRATAMENTO[t.modo]} ${LABEL_LINHA[t.linha]}`
+        `${t.titulo ?? ''} ${resumoTratamento(t)} ${LABEL_MODO_TRATAMENTO[t.modo]} ${LABEL_LINHA[t.linha]}`
           .toLowerCase()
           .includes(busca.toLowerCase())
       ),
-    [tratamentos, busca]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tratamentos, busca, resumoItens, medicamentos]
   )
 
   const nomeArea = areas.find((a) => a.id === areaSelecionada)?.nome ?? ''
@@ -188,6 +213,12 @@ export function TratamentosPage() {
     }
   }
 
+  /** Mantém o resumo da lista (nome do medicamento no card) em dia depois de qualquer
+   *  alteração nos itens — sem isso o card só atualizava ao trocar de patologia e voltar. */
+  function sincronizarResumo(tratamentoId: number, novaLista: TratamentoItem[]) {
+    setResumoItens((prev) => ({ ...prev, [tratamentoId]: novaLista }))
+  }
+
   async function adicionarItem() {
     if (!selecionadoId) return
     try {
@@ -207,7 +238,9 @@ export function TratamentosPage() {
         observacoes: '',
         ordem: itens.length,
       })
-      setItens((prev) => [...prev, criado])
+      const novaLista = [...itens, criado]
+      setItens(novaLista)
+      sincronizarResumo(selecionadoId, novaLista)
     } catch (e) {
       setErro((e as Error).message)
     }
@@ -215,13 +248,17 @@ export function TratamentosPage() {
 
   async function salvarItem(id: number, dados: Partial<TratamentoItem>) {
     const atualizado = await tratamentoItensApi.update(id, dados)
-    setItens((prev) => prev.map((i) => (i.id === id ? atualizado : i)))
+    const novaLista = itens.map((i) => (i.id === id ? atualizado : i))
+    setItens(novaLista)
+    if (selecionadoId) sincronizarResumo(selecionadoId, novaLista)
   }
 
   async function excluirItem(id: number) {
     try {
       await tratamentoItensApi.remove(id)
-      setItens((prev) => prev.filter((i) => i.id !== id))
+      const novaLista = itens.filter((i) => i.id !== id)
+      setItens(novaLista)
+      if (selecionadoId) sincronizarResumo(selecionadoId, novaLista)
     } catch (e) {
       setErro((e as Error).message)
     }
@@ -229,6 +266,7 @@ export function TratamentosPage() {
 
   async function reordenarItens(novaOrdem: TratamentoItem[]) {
     setItens(novaOrdem)
+    if (selecionadoId) sincronizarResumo(selecionadoId, novaOrdem)
     try {
       await tratamentoItensApi.reorder(novaOrdem.map((i, idx) => ({ id: i.id, ordem: idx })))
     } catch (e) {
@@ -335,11 +373,12 @@ export function TratamentosPage() {
                         : 'bg-surface border-border hover:border-text-faint'
                     }`}
                   >
-                    <span className="block text-sm text-text truncate">
-                      {t.titulo || `${LABEL_MODO_TRATAMENTO[t.modo]} · ${LABEL_LINHA[t.linha]}`}
+                    <span className="block text-sm text-text font-medium truncate">
+                      {t.titulo || resumoTratamento(t) || `${LABEL_MODO_TRATAMENTO[t.modo]} · ${LABEL_LINHA[t.linha]}`}
                     </span>
-                    <span className="block text-xs text-text-dim">
+                    <span className="block text-xs text-text-dim truncate">
                       {LABEL_MODO_TRATAMENTO[t.modo]} · {LABEL_LINHA[t.linha]}
+                      {t.titulo && resumoTratamento(t) && ` · ${resumoTratamento(t)}`}
                     </span>
                   </button>
                 )}
