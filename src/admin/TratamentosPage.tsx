@@ -78,8 +78,11 @@ export function TratamentosPage() {
 
   useEffect(() => {
     areasApi.list().then((lista) => {
-      setAreas(lista)
-      if (lista.length > 0) setAreaSelecionada(lista[0].id)
+      // Ordem alfabética — bem mais fácil de achar a área numa lista grande do que a
+      // ordem de arrasto (que é pra outra coisa: a ordem de navegação da Consulta).
+      const ordenada = [...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      setAreas(ordenada)
+      if (ordenada.length > 0) setAreaSelecionada(ordenada[0].id)
     })
     medicamentosApi.list().then(setMedicamentos)
     apresentacoesApi.list().then(setApresentacoes)
@@ -88,8 +91,9 @@ export function TratamentosPage() {
   useEffect(() => {
     if (areaSelecionada == null) return
     patologiasApi.listByArea(areaSelecionada).then((lista) => {
-      setPatologias(lista)
-      setPatologiaSelecionada(lista.length > 0 ? lista[0].id : null)
+      const ordenada = [...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      setPatologias(ordenada)
+      setPatologiaSelecionada(ordenada.length > 0 ? ordenada[0].id : null)
     })
   }, [areaSelecionada])
 
@@ -132,13 +136,21 @@ export function TratamentosPage() {
     return nomes.length === 1 ? nomes[0] : `${nomes[0]} +${nomes.length - 1}`
   }
 
+  function tituloExibido(t: Tratamento): string {
+    return t.titulo || resumoTratamento(t) || `${LABEL_MODO_TRATAMENTO[t.modo]} · ${LABEL_LINHA[t.linha]}`
+  }
+
   const filtrados = useMemo(
     () =>
-      tratamentos.filter((t) =>
-        `${t.titulo ?? ''} ${resumoTratamento(t)} ${LABEL_MODO_TRATAMENTO[t.modo]} ${LABEL_LINHA[t.linha]}`
-          .toLowerCase()
-          .includes(busca.toLowerCase())
-      ),
+      tratamentos
+        .filter((t) =>
+          `${t.titulo ?? ''} ${resumoTratamento(t)} ${LABEL_MODO_TRATAMENTO[t.modo]} ${LABEL_LINHA[t.linha]}`
+            .toLowerCase()
+            .includes(busca.toLowerCase())
+        )
+        // Ordem alfabética pelo que aparece no card — não pela ordem de arrasto (essa
+        // continua existindo e valendo pra Consulta, só não é mais o que rege esta lista).
+        .sort((a, b) => tituloExibido(a).localeCompare(tituloExibido(b), 'pt-BR')),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tratamentos, busca, resumoItens, medicamentos]
   )
@@ -201,15 +213,6 @@ export function TratamentosPage() {
       setErro((e as Error).message)
     } finally {
       setParaExcluir(null)
-    }
-  }
-
-  async function reordenarTratamentos(novaOrdem: Tratamento[]) {
-    setTratamentos(novaOrdem)
-    try {
-      await tratamentosApi.reorder(novaOrdem.map((t, idx) => ({ id: t.id, ordem: idx })))
-    } catch (e) {
-      setErro((e as Error).message)
     }
   }
 
@@ -361,18 +364,18 @@ export function TratamentosPage() {
             ) : filtrados.length === 0 ? (
               <p className="text-sm text-text-dim px-1">Nenhuma prescrição cadastrada.</p>
             ) : (
-              <SortableList
-                items={filtrados}
-                onReorder={reordenarTratamentos}
-                renderItem={(t) => (
-                  <button
-                    onClick={() => selecionar(t)}
-                    className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
-                      selecionadoId === t.id
-                        ? 'bg-accent-dim border-accent'
-                        : 'bg-surface border-border hover:border-text-faint'
-                    }`}
-                  >
+              // Lista em ordem alfabética — sem arrastar-pra-reordenar aqui (a ordem que
+              // rege a Consulta continua existindo, só não é mais o critério desta lista).
+              filtrados.map((t) => (
+                <div
+                  key={t.id}
+                  className={`w-full flex items-center gap-1 rounded-lg border transition-colors ${
+                    selecionadoId === t.id
+                      ? 'bg-accent-dim border-accent'
+                      : 'bg-surface border-border hover:border-text-faint'
+                  }`}
+                >
+                  <button onClick={() => selecionar(t)} className="flex-1 min-w-0 text-left px-3 py-2">
                     <span className="block text-sm text-text font-medium truncate">
                       {t.titulo || resumoTratamento(t) || `${LABEL_MODO_TRATAMENTO[t.modo]} · ${LABEL_LINHA[t.linha]}`}
                     </span>
@@ -381,8 +384,19 @@ export function TratamentosPage() {
                       {t.titulo && resumoTratamento(t) && ` · ${resumoTratamento(t)}`}
                     </span>
                   </button>
-                )}
-              />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setParaExcluir(t)
+                    }}
+                    className="shrink-0 text-danger hover:text-danger/80 transition-colors p-2 mr-1"
+                    title="Excluir prescrição"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))
             )}
           </div>
         </div>
@@ -572,7 +586,7 @@ export function TratamentosPage() {
       <ConfirmDialog
         aberto={!!paraExcluir}
         titulo="Excluir prescrição"
-        mensagem={`Excluir "${paraExcluir?.titulo || 'esta prescrição'}"? Isso apaga também todos os itens dela.`}
+        mensagem={`Excluir "${paraExcluir ? tituloExibido(paraExcluir) : 'esta prescrição'}"? Isso apaga também todos os itens dela.`}
         onConfirmar={() => paraExcluir && excluirTratamento(paraExcluir)}
         onCancelar={() => setParaExcluir(null)}
       />
