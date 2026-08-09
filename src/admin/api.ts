@@ -7,6 +7,8 @@ import type {
   PatologiaInput,
   Medicamento,
   MedicamentoInput,
+  Apresentacao,
+  ApresentacaoInput,
   Tratamento,
   TratamentoInput,
   TratamentoItem,
@@ -85,6 +87,20 @@ export const patologiasApi = {
 
 export const medicamentosApi = {
   ...crud<Medicamento, MedicamentoInput>('medicamentos', 'nome'),
+}
+
+export const apresentacoesApi = {
+  ...crud<Apresentacao, ApresentacaoInput>('apresentacoes', 'ordem'),
+  async listByMedicamento(medicamentoId: number): Promise<Apresentacao[]> {
+    const { data, error } = await supabase
+      .from('apresentacoes')
+      .select('*')
+      .eq('medicamento_id', medicamentoId)
+      .order('ordem', { ascending: true })
+    if (error) throw error
+    return (data ?? []) as Apresentacao[]
+  },
+  reorder: (itens: { id: number; ordem: number }[]) => reorder('apresentacoes', itens),
 }
 
 export const tratamentosApi = {

@@ -1,27 +1,32 @@
-import type { Medicamento, TratamentoItem, ModoTratamento } from '../admin/types'
+import type { Medicamento, Apresentacao, TratamentoItem, ModoTratamento } from '../admin/types'
 import { textoReceitaDoItem, estaUsandoCustom } from '../core/receita'
+import { formatarApresentacao } from '../core/apresentacao'
 import { CopyButton } from './components/CopyButton'
 import { AlertaGestacao } from './components/AlertaGestacao'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Clock } from 'lucide-react'
 
 export function ItemLinha({
   item,
   medicamento,
+  apresentacao,
   modoTratamento,
   semMoldura = false,
 }: {
   item: TratamentoItem
   medicamento: Medicamento | null
+  apresentacao: Apresentacao | null
   modoTratamento: ModoTratamento
   /** Quando o tratamento tem um único item, o card externo (TratamentoCard) já dá a
    *  moldura — renderiza só o conteúdo, sem duplicar borda/fundo. */
   semMoldura?: boolean
 }) {
   const nomeExibido = medicamento?.nome ?? item.nome_livre ?? '—'
-  const texto = textoReceitaDoItem(item, medicamento?.nome ?? null)
+  const texto = textoReceitaDoItem(item, medicamento?.nome ?? null, apresentacao)
   const custom = estaUsandoCustom(item.receita_custom)
 
   const detalhes: { rotulo: string; valor: string | null }[] = [
+    { rotulo: 'Apresentação', valor: apresentacao ? formatarApresentacao(apresentacao) : null },
+    { rotulo: 'Quantidade', valor: item.quantidade },
     { rotulo: 'Dose', valor: item.dose },
     { rotulo: 'Via', valor: item.via },
     { rotulo: 'Posologia', valor: item.posologia },
@@ -55,6 +60,15 @@ export function ItemLinha({
         )}
         <p className="tabular text-sm text-text font-medium leading-relaxed">{texto || '—'}</p>
       </div>
+
+      {/* Condição (SOS) — muda QUANDO tomar, não é só mais um detalhe: destaque próprio,
+          separado da grade de dose/via/posologia. */}
+      {item.condicao?.trim() && (
+        <div className="flex items-center gap-2 text-sm font-medium text-accent bg-accent-dim border border-accent/30 rounded-md px-3 py-2">
+          <Clock className="w-4 h-4 shrink-0" />
+          <span>{item.condicao}</span>
+        </div>
+      )}
 
       {detalhesPreenchidos.length > 0 && (
         <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2">

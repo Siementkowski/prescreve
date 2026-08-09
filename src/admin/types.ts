@@ -43,6 +43,19 @@ export interface Medicamento {
 }
 export type MedicamentoInput = Omit<Medicamento, 'id'>
 
+export interface Apresentacao {
+  id: number
+  medicamento_id: number
+  forma: string
+  concentracao: number | null
+  unidade: string | null
+  por_volume: number | null
+  por_volume_unidade: string | null
+  descricao: string | null
+  ordem: number
+}
+export type ApresentacaoInput = Omit<Apresentacao, 'id'>
+
 export interface Tratamento {
   id: number
   patologia_id: number
@@ -62,10 +75,13 @@ export interface TratamentoItem {
   tratamento_id: number
   medicamento_id: number | null
   nome_livre: string | null
+  apresentacao_id: number | null
+  quantidade: string | null
   dose: string | null
   via: string | null
   posologia: string | null
   duracao: string | null
+  condicao: string | null
   diluicao: string | null
   receita_custom: string | null
   observacoes: string | null

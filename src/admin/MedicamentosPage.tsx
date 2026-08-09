@@ -6,6 +6,7 @@ import { LABEL_STATUS_RISCO } from './types'
 import { SearchInput } from './components/SearchInput'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { StatusRiscoBadge } from './components/StatusRiscoBadge'
+import { ApresentacoesEditor } from './components/ApresentacoesEditor'
 import { TextField, TextAreaField, SelectField } from './components/Field'
 import { Plus } from 'lucide-react'
 
@@ -192,11 +193,14 @@ export function MedicamentosPage() {
                 onChange={(e) => setForm({ ...form, nome_comercial: e.target.value })}
               />
               <TextField
-                label="Apresentações"
-                hint="Ex: cp 100mg, suspensão 25mg/5ml"
+                label="Apresentações (texto antigo)"
+                hint="Campo legado — as apresentações agora são cadastradas de forma estruturada logo abaixo, uma por uma, pra poder ser escolhida no item da prescrição."
                 value={form.apresentacoes ?? ''}
                 onChange={(e) => setForm({ ...form, apresentacoes: e.target.value })}
               />
+
+              <ApresentacoesEditor medicamentoId={selecionadoId} />
+
               <TextAreaField
                 label="Contraindicações"
                 value={form.contraindicacoes ?? ''}

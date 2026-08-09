@@ -1,7 +1,7 @@
 import { AlertTriangle, ExternalLink } from 'lucide-react'
-import type { Tratamento, TratamentoItem, Medicamento } from '../admin/types'
+import type { Tratamento, TratamentoItem, Medicamento, Apresentacao } from '../admin/types'
 import { LABEL_LINHA } from '../admin/types'
-import { itensDoTratamento, medicamentoPorId, tratamentoTemContraindicadoGestacao } from './filtros'
+import { itensDoTratamento, medicamentoPorId, apresentacaoPorId, tratamentoTemContraindicadoGestacao } from './filtros'
 import { textoReceitaDoItem } from '../core/receita'
 import { precisaRevisar, ehUrl } from '../core/revisao'
 import { useConfiguracoesStore } from '../core/configuracoes'
@@ -20,11 +20,13 @@ export function TratamentoCard({
   tratamento,
   itens,
   medicamentos,
+  apresentacoes,
   gestante,
 }: {
   tratamento: Tratamento
   itens: TratamentoItem[]
   medicamentos: Medicamento[]
+  apresentacoes: Apresentacao[]
   gestante: boolean
 }) {
   const mesesAteRevisar = useConfiguracoesStore((s) => s.mesesAteRevisar)
@@ -37,7 +39,13 @@ export function TratamentoCard({
   )
 
   const textoCombo = itensDoCard
-    .map((item) => textoReceitaDoItem(item, medicamentoPorId(medicamentos, item.medicamento_id)?.nome ?? null))
+    .map((item) =>
+      textoReceitaDoItem(
+        item,
+        medicamentoPorId(medicamentos, item.medicamento_id)?.nome ?? null,
+        apresentacaoPorId(apresentacoes, item.apresentacao_id)
+      )
+    )
     .join('\n')
 
   return (
@@ -72,6 +80,7 @@ export function TratamentoCard({
             key={item.id}
             item={item}
             medicamento={medicamentoPorId(medicamentos, item.medicamento_id)}
+            apresentacao={apresentacaoPorId(apresentacoes, item.apresentacao_id)}
             modoTratamento={tratamento.modo}
             semMoldura={itensDoCard.length === 1}
           />

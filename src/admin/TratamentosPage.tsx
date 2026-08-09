@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronRight, Lock, Plus, Trash2 } from 'lucide-react'
-import { areasApi, patologiasApi, tratamentosApi, tratamentoItensApi, medicamentosApi } from './api'
+import { areasApi, patologiasApi, tratamentosApi, tratamentoItensApi, medicamentosApi, apresentacoesApi } from './api'
 import type {
   Area,
   Patologia,
@@ -9,6 +9,7 @@ import type {
   TratamentoItem,
   Medicamento,
   MedicamentoInput,
+  Apresentacao,
   ModoTratamento,
   Linha,
 } from './types'
@@ -56,6 +57,7 @@ export function TratamentosPage() {
   const [patologias, setPatologias] = useState<Patologia[]>([])
   const [patologiaSelecionada, setPatologiaSelecionada] = useState<number | null>(null)
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([])
+  const [apresentacoes, setApresentacoes] = useState<Apresentacao[]>([])
 
   const [tratamentos, setTratamentos] = useState<Tratamento[]>([])
   const [carregando, setCarregando] = useState(true)
@@ -76,6 +78,7 @@ export function TratamentosPage() {
       if (lista.length > 0) setAreaSelecionada(lista[0].id)
     })
     medicamentosApi.list().then(setMedicamentos)
+    apresentacoesApi.list().then(setApresentacoes)
   }, [])
 
   useEffect(() => {
@@ -192,10 +195,13 @@ export function TratamentosPage() {
         tratamento_id: selecionadoId,
         medicamento_id: null,
         nome_livre: '',
+        apresentacao_id: null,
+        quantidade: '',
         dose: '',
         via: '',
         posologia: '',
         duracao: '',
+        condicao: '',
         diluicao: '',
         receita_custom: '',
         observacoes: '',
@@ -486,6 +492,7 @@ export function TratamentosPage() {
                       <TratamentoItemRow
                         item={item}
                         medicamentos={medicamentos}
+                        apresentacoes={apresentacoes}
                         modoTratamento={form?.modo ?? 'ambulatorial'}
                         arrastando={arrastando}
                         onSalvar={salvarItem}

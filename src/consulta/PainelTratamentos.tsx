@@ -15,6 +15,7 @@ export function PainelTratamentos() {
   const tratamentos = useSyncStore((s) => s.tratamentos)
   const itens = useSyncStore((s) => s.itens)
   const medicamentos = useSyncStore((s) => s.medicamentos)
+  const apresentacoes = useSyncStore((s) => s.apresentacoes)
   const patologiaSelecionadaId = useConsultaStore((s) => s.patologiaSelecionadaId)
 
   const patologia = patologias.find((p) => p.id === patologiaSelecionadaId) ?? null
@@ -80,6 +81,7 @@ export function PainelTratamentos() {
                       tratamento={t}
                       itens={itens}
                       medicamentos={medicamentos}
+                      apresentacoes={apresentacoes}
                       gestante={gestante}
                     />
                   ))}

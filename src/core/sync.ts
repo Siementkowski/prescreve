@@ -5,8 +5,15 @@ import { create } from 'zustand'
 import { supabase } from './supabase'
 import { estaOnline, assinarConectividade, forcarOffline } from './network'
 import { lerCache, gravarCache } from './db-local'
-import { areasApi, patologiasApi, medicamentosApi, tratamentosApi, tratamentoItensApi } from '../admin/api'
-import type { Area, Patologia, Medicamento, Tratamento, TratamentoItem } from '../admin/types'
+import {
+  areasApi,
+  patologiasApi,
+  medicamentosApi,
+  apresentacoesApi,
+  tratamentosApi,
+  tratamentoItensApi,
+} from '../admin/api'
+import type { Area, Patologia, Medicamento, Apresentacao, Tratamento, TratamentoItem } from '../admin/types'
 
 const CHAVE_CACHE = 'base'
 
@@ -15,6 +22,7 @@ interface BaseCacheada {
   areas: Area[]
   patologias: Patologia[]
   medicamentos: Medicamento[]
+  apresentacoes: Apresentacao[]
   tratamentos: Tratamento[]
   itens: TratamentoItem[]
   sincronizadoEm: string
@@ -33,6 +41,7 @@ interface SyncState {
   areas: Area[]
   patologias: Patologia[]
   medicamentos: Medicamento[]
+  apresentacoes: Apresentacao[]
   tratamentos: Tratamento[]
   itens: TratamentoItem[]
 
@@ -53,6 +62,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   areas: [],
   patologias: [],
   medicamentos: [],
+  apresentacoes: [],
   tratamentos: [],
   itens: [],
 
@@ -73,6 +83,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
           areas: cache.areas,
           patologias: cache.patologias,
           medicamentos: cache.medicamentos,
+          apresentacoes: cache.apresentacoes ?? [],
           tratamentos: cache.tratamentos,
           itens: cache.itens,
           versaoLocal: cache.versao,
@@ -124,10 +135,11 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         return
       }
 
-      const [areas, patologias, medicamentos, tratamentos, itens] = await Promise.all([
+      const [areas, patologias, medicamentos, apresentacoes, tratamentos, itens] = await Promise.all([
         areasApi.list(),
         patologiasApi.list(),
         medicamentosApi.list(),
+        apresentacoesApi.list(),
         tratamentosApi.list(),
         tratamentoItensApi.list(),
       ])
@@ -138,6 +150,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         areas,
         patologias,
         medicamentos,
+        apresentacoes,
         tratamentos,
         itens,
         sincronizadoEm,
@@ -148,6 +161,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         areas,
         patologias,
         medicamentos,
+        apresentacoes,
         tratamentos,
         itens,
         versaoLocal: versaoServidor,

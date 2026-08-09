@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Trash2, Pencil } from 'lucide-react'
-import type { Medicamento, ModoTratamento, TratamentoItem } from '../types'
+import type { Medicamento, Apresentacao, ModoTratamento, TratamentoItem } from '../types'
 import { gerarTextoReceita, gerarTextoPadrao, estaUsandoCustom } from '../../core/receita'
+import { formatarApresentacao } from '../../core/apresentacao'
 import { MedicamentoPicker } from './MedicamentoPicker'
-import { TextField, TextAreaField } from './Field'
+import { TextField, TextAreaField, SelectField } from './Field'
 
 function resolveNome(item: Pick<TratamentoItem, 'medicamento_id' | 'nome_livre'>, medicamentos: Medicamento[]): string {
   if (item.medicamento_id) {
@@ -16,10 +17,13 @@ function saoIguais(a: TratamentoItem, b: TratamentoItem): boolean {
   return (
     a.medicamento_id === b.medicamento_id &&
     a.nome_livre === b.nome_livre &&
+    a.apresentacao_id === b.apresentacao_id &&
+    a.quantidade === b.quantidade &&
     a.dose === b.dose &&
     a.via === b.via &&
     a.posologia === b.posologia &&
     a.duracao === b.duracao &&
+    a.condicao === b.condicao &&
     a.diluicao === b.diluicao &&
     a.receita_custom === b.receita_custom &&
     a.observacoes === b.observacoes
@@ -29,6 +33,7 @@ function saoIguais(a: TratamentoItem, b: TratamentoItem): boolean {
 export function TratamentoItemRow({
   item,
   medicamentos,
+  apresentacoes,
   modoTratamento,
   arrastando,
   onSalvar,
@@ -37,6 +42,7 @@ export function TratamentoItemRow({
 }: {
   item: TratamentoItem
   medicamentos: Medicamento[]
+  apresentacoes: Apresentacao[]
   modoTratamento: ModoTratamento
   arrastando: boolean
   onSalvar: (id: number, dados: Partial<TratamentoItem>) => Promise<void>
@@ -55,22 +61,21 @@ export function TratamentoItemRow({
 
   const dirty = !saoIguais(local, item)
   const nomeResolvido = resolveNome(local, medicamentos)
-  const textoPadrao = gerarTextoPadrao({
+  const apresentacoesDoMedicamento = apresentacoes.filter((a) => a.medicamento_id === local.medicamento_id)
+  const apresentacaoSelecionada = apresentacoesDoMedicamento.find((a) => a.id === local.apresentacao_id) ?? null
+
+  const dadosReceita = {
     nomeMedicamento: nomeResolvido,
+    apresentacao: apresentacaoSelecionada,
+    quantidade: local.quantidade,
     dose: local.dose,
     via: local.via,
     posologia: local.posologia,
     duracao: local.duracao,
-    receitaCustom: null,
-  })
-  const textoFinal = gerarTextoReceita({
-    nomeMedicamento: nomeResolvido,
-    dose: local.dose,
-    via: local.via,
-    posologia: local.posologia,
-    duracao: local.duracao,
-    receitaCustom: local.receita_custom,
-  })
+    condicao: local.condicao,
+  }
+  const textoPadrao = gerarTextoPadrao({ ...dadosReceita, receitaCustom: null })
+  const textoFinal = gerarTextoReceita({ ...dadosReceita, receitaCustom: local.receita_custom })
   const usandoCustom = estaUsandoCustom(local.receita_custom)
 
   async function salvar() {
@@ -78,15 +83,30 @@ export function TratamentoItemRow({
     setErro(null)
     try {
       // Só os campos editáveis — id/tratamento_id/ordem não fazem parte do payload de update.
-      const { medicamento_id, nome_livre, dose, via, posologia, duracao, diluicao, receita_custom, observacoes } =
-        local
-      await onSalvar(item.id, {
+      const {
         medicamento_id,
         nome_livre,
+        apresentacao_id,
+        quantidade,
         dose,
         via,
         posologia,
         duracao,
+        condicao,
+        diluicao,
+        receita_custom,
+        observacoes,
+      } = local
+      await onSalvar(item.id, {
+        medicamento_id,
+        nome_livre,
+        apresentacao_id,
+        quantidade,
+        dose,
+        via,
+        posologia,
+        duracao,
+        condicao,
         diluicao,
         receita_custom,
         observacoes,
@@ -133,7 +153,7 @@ export function TratamentoItemRow({
             <MedicamentoPicker
               medicamentos={medicamentos}
               valorId={local.medicamento_id}
-              onSelecionar={(id) => setLocal({ ...local, medicamento_id: id })}
+              onSelecionar={(id) => setLocal({ ...local, medicamento_id: id, apresentacao_id: null })}
               onCriar={onCriarMedicamento}
             />
           ) : (
@@ -155,6 +175,38 @@ export function TratamentoItemRow({
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Apresentação do catálogo — carrega as apresentações do medicamento escolhido;
+          quantidade é texto porque aceita faixa ("1 a 2"). */}
+      {usaCadastro && local.medicamento_id && (
+        <div className="grid grid-cols-[1fr_auto] gap-3">
+          <SelectField
+            label="Apresentação"
+            value={local.apresentacao_id ?? ''}
+            onChange={(e) =>
+              setLocal({ ...local, apresentacao_id: e.target.value ? Number(e.target.value) : null })
+            }
+          >
+            <option value="">
+              {apresentacoesDoMedicamento.length === 0 ? 'Nenhuma cadastrada — use "Dose" abaixo' : '— nenhuma —'}
+            </option>
+            {apresentacoesDoMedicamento.map((a) => (
+              <option key={a.id} value={a.id}>
+                {formatarApresentacao(a)}
+              </option>
+            ))}
+          </SelectField>
+          <TextField
+            label="Quantidade"
+            hint="Aceita faixa"
+            value={local.quantidade ?? ''}
+            onChange={(e) => setLocal({ ...local, quantidade: e.target.value })}
+            placeholder="1 a 2"
+            className="w-28"
+            disabled={!local.apresentacao_id}
+          />
+        </div>
+      )}
 
       <div className={`grid gap-3 ${modoTratamento !== 'ambulatorial' ? 'grid-cols-5' : 'grid-cols-4'}`}>
         <TextField
@@ -190,6 +242,14 @@ export function TratamentoItemRow({
           />
         )}
       </div>
+
+      <TextField
+        label="Condição (SOS)"
+        hint='Só pra quando não há duração fixa — "se dor ou febre", "se náusea". Deixe em branco pra uso contínuo.'
+        value={local.condicao ?? ''}
+        onChange={(e) => setLocal({ ...local, condicao: e.target.value })}
+        placeholder="se dor ou febre"
+      />
 
       <TextAreaField
         label="Observações do item"

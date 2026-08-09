@@ -1,4 +1,13 @@
-import type { Area, Patologia, Tratamento, TratamentoItem, Medicamento, ModoTratamento, Linha } from '../admin/types'
+import type {
+  Area,
+  Patologia,
+  Tratamento,
+  TratamentoItem,
+  Medicamento,
+  Apresentacao,
+  ModoTratamento,
+  Linha,
+} from '../admin/types'
 
 export function areasVisiveis(areas: Area[], modo: ModoTratamento): Area[] {
   return areas
@@ -55,6 +64,11 @@ export function itensDoTratamento(itens: TratamentoItem[], tratamentoId: number)
 export function medicamentoPorId(medicamentos: Medicamento[], id: number | null): Medicamento | null {
   if (id == null) return null
   return medicamentos.find((m) => m.id === id) ?? null
+}
+
+export function apresentacaoPorId(apresentacoes: Apresentacao[], id: number | null): Apresentacao | null {
+  if (id == null) return null
+  return apresentacoes.find((a) => a.id === id) ?? null
 }
 
 /** Um tratamento "contém contraindicado" se algum dos seus itens usa medicamento do cadastro
