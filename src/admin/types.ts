@@ -4,6 +4,7 @@ export type ModoArea = 'ambulatorial' | 'hospitalar' | 'ambos'
 export type ModoTratamento = 'ambulatorial' | 'hospitalar' | 'ambos'
 export type Linha = '1a_linha' | 'alternativa' | 'opcao' | 'off_label'
 export type StatusRisco = 'seguro' | 'cautela' | 'contraindicado' | 'sem_dados'
+export type PapelTratamento = 'principal' | 'complemento'
 
 export interface Area {
   id: number
@@ -58,7 +59,9 @@ export type ApresentacaoInput = Omit<Apresentacao, 'id'>
 
 export interface Tratamento {
   id: number
-  patologia_id: number
+  // Null só pra complemento — ele não pertence a uma patologia fixa, vive na biblioteca e
+  // se liga a várias via patologia_complementos.
+  patologia_id: number | null
   modo: ModoTratamento
   linha: Linha
   titulo: string | null
@@ -67,8 +70,22 @@ export interface Tratamento {
   revisado_em: string | null
   precisa_revisao: boolean
   ordem: number
+  // 'principal' = a conduta que resolve (escolha única na consulta). 'complemento' =
+  // suporte sintomático opcional, reutilizável entre patologias (escolha múltipla).
+  papel: PapelTratamento
+  // Só complemento usa — agrupamento visual no seletor (Analgésicos, Antieméticos...).
+  // Nunca é a unidade de vínculo: quem se liga à patologia é o complemento em si.
+  classe: string | null
 }
 export type TratamentoInput = Omit<Tratamento, 'id'>
+
+/** Vínculo entre uma patologia e um complemento da biblioteca — N:N, com ordem própria
+ *  por patologia (a mesma dipirona pode estar em 1º lugar numa patologia e em 3º noutra). */
+export interface PatologiaComplemento {
+  patologia_id: number
+  tratamento_id: number
+  ordem: number
+}
 
 export interface TratamentoItem {
   id: number
@@ -106,6 +123,11 @@ export const LABEL_LINHA: Record<Linha, string> = {
   alternativa: 'Alternativa',
   opcao: 'Opção',
   off_label: 'Off label',
+}
+
+export const LABEL_PAPEL: Record<PapelTratamento, string> = {
+  principal: 'Principal',
+  complemento: 'Complemento',
 }
 
 export const LABEL_STATUS_RISCO: Record<StatusRisco, string> = {

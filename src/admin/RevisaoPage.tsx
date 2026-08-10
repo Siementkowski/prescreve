@@ -39,7 +39,10 @@ export function RevisaoPage() {
       })
   }, [tratamentos, mesesAteRevisar])
 
-  function contexto(patologiaId: number) {
+  function contexto(patologiaId: number | null) {
+    // Complemento não tem patologia fixa — vive na biblioteca, então o "contexto" dele é
+    // isso mesmo, não uma área/patologia específica.
+    if (patologiaId == null) return { patologia: 'Complemento', area: 'Biblioteca' }
     const p = patologias.find((x) => x.id === patologiaId)
     const a = p ? areas.find((x) => x.id === p.area_id) : null
     return { patologia: p?.nome ?? '—', area: a?.nome ?? '—' }

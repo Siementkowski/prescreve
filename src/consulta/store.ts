@@ -23,13 +23,28 @@ interface ConsultaState {
   selecionarPatologia: (id: number | null) => void
   irPara: (areaId: number, patologiaId: number) => void
   voltar: () => void
+
+  // Esquema escolhido ("Escolha um esquema", único) + complementos marcados ("Adicione se
+  // precisar", múltiplo). Nunca persiste — é da consulta atual, zera ao trocar de patologia
+  // ou de modo (o esquema de outra patologia não faz sentido continuar marcado).
+  principalSelecionadoId: number | null
+  complementosSelecionadosIds: number[]
+  selecionarPrincipal: (id: number | null) => void
+  toggleComplemento: (id: number) => void
 }
 
 export const useConsultaStore = create<ConsultaState>()(
   persist(
     (set, get) => ({
       modo: 'ambulatorial',
-      setModo: (modo) => set({ modo, areaSelecionadaId: null, patologiaSelecionadaId: null }),
+      setModo: (modo) =>
+        set({
+          modo,
+          areaSelecionadaId: null,
+          patologiaSelecionadaId: null,
+          principalSelecionadoId: null,
+          complementosSelecionadosIds: [],
+        }),
 
       gestante: false,
       setGestante: (gestante) => set({ gestante }),
@@ -38,14 +53,38 @@ export const useConsultaStore = create<ConsultaState>()(
 
       areaSelecionadaId: null,
       patologiaSelecionadaId: null,
-      selecionarArea: (id) => set({ areaSelecionadaId: id, patologiaSelecionadaId: null }),
-      selecionarPatologia: (id) => set({ patologiaSelecionadaId: id }),
-      irPara: (areaId, patologiaId) => set({ areaSelecionadaId: areaId, patologiaSelecionadaId: patologiaId }),
+      selecionarArea: (id) =>
+        set({
+          areaSelecionadaId: id,
+          patologiaSelecionadaId: null,
+          principalSelecionadoId: null,
+          complementosSelecionadosIds: [],
+        }),
+      selecionarPatologia: (id) =>
+        set({ patologiaSelecionadaId: id, principalSelecionadoId: null, complementosSelecionadosIds: [] }),
+      irPara: (areaId, patologiaId) =>
+        set({
+          areaSelecionadaId: areaId,
+          patologiaSelecionadaId: patologiaId,
+          principalSelecionadoId: null,
+          complementosSelecionadosIds: [],
+        }),
       voltar: () => {
         const { patologiaSelecionadaId, areaSelecionadaId } = get()
         if (patologiaSelecionadaId != null) set({ patologiaSelecionadaId: null })
         else if (areaSelecionadaId != null) set({ areaSelecionadaId: null })
       },
+
+      principalSelecionadoId: null,
+      complementosSelecionadosIds: [],
+      selecionarPrincipal: (id) =>
+        set((s) => ({ principalSelecionadoId: s.principalSelecionadoId === id ? null : id })),
+      toggleComplemento: (id) =>
+        set((s) => ({
+          complementosSelecionadosIds: s.complementosSelecionadosIds.includes(id)
+            ? s.complementosSelecionadosIds.filter((x) => x !== id)
+            : [...s.complementosSelecionadosIds, id],
+        })),
     }),
     {
       name: 'prescreve-consulta',

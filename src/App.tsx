@@ -14,6 +14,7 @@ import { AdminLayout } from './admin/AdminLayout'
 import { AreasPage } from './admin/AreasPage'
 import { PatologiasPage } from './admin/PatologiasPage'
 import { MedicamentosPage } from './admin/MedicamentosPage'
+import { ComplementosPage } from './admin/ComplementosPage'
 import { TratamentosPage } from './admin/TratamentosPage'
 import { RevisaoPage } from './admin/RevisaoPage'
 import { AdminHub } from './admin/AdminHub'
@@ -125,6 +126,7 @@ function App() {
             <Route path="areas" element={<AreasPage />} />
             <Route path="patologias" element={<PatologiasPage />} />
             <Route path="medicamentos" element={<MedicamentosPage />} />
+            <Route path="complementos" element={<ComplementosPage />} />
             <Route path="tratamentos" element={<TratamentosPage />} />
             <Route path="revisao" element={<RevisaoPage />} />
           </Route>

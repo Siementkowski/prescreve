@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Trash2 } from 'lucide-react'
-import { areasApi, patologiasApi } from './api'
-import type { Area, Patologia, PatologiaInput } from './types'
+import { areasApi, patologiasApi, medicamentosApi } from './api'
+import type { Area, Patologia, PatologiaInput, Medicamento } from './types'
 import { AdminPageShell } from './components/AdminPageShell'
 import { SortableList } from './components/SortableList'
 import { ConfirmDialog } from './components/ConfirmDialog'
+import { ComplementoSeletor } from './components/ComplementoSeletor'
 import { TextField, TextAreaField, SelectField } from './components/Field'
 
 function vazio(areaId: number, ordem: number): PatologiaInput {
@@ -15,6 +16,7 @@ export function PatologiasPage() {
   const [areas, setAreas] = useState<Area[]>([])
   const [areaSelecionada, setAreaSelecionada] = useState<number | null>(null)
   const [patologias, setPatologias] = useState<Patologia[]>([])
+  const [medicamentos, setMedicamentos] = useState<Medicamento[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const [busca, setBusca] = useState('')
@@ -28,6 +30,7 @@ export function PatologiasPage() {
       setAreas(lista)
       if (lista.length > 0) setAreaSelecionada(lista[0].id)
     })
+    medicamentosApi.list().then(setMedicamentos)
   }, [])
 
   useEffect(() => {
@@ -213,6 +216,8 @@ export function PatologiasPage() {
                   onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
                   rows={3}
                 />
+
+                <ComplementoSeletor patologiaId={selecionadaId} medicamentos={medicamentos} />
 
                 {erro && (
                   <p className="text-sm text-danger bg-danger-dim border border-danger/30 rounded-lg px-3 py-2">

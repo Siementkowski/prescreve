@@ -1,8 +1,13 @@
-import { AlertTriangle, ExternalLink } from 'lucide-react'
+import { AlertTriangle, ExternalLink, Circle, CircleCheck, Square, SquareCheck } from 'lucide-react'
 import type { Tratamento, TratamentoItem, Medicamento, Apresentacao } from '../admin/types'
 import { LABEL_LINHA } from '../admin/types'
-import { itensDoTratamento, medicamentoPorId, apresentacaoPorId, tratamentoTemContraindicadoGestacao } from './filtros'
-import { textoReceitaDoItem } from '../core/receita'
+import {
+  itensDoTratamento,
+  medicamentoPorId,
+  apresentacaoPorId,
+  textoTratamentoCompleto,
+  tratamentoTemContraindicadoGestacao,
+} from './filtros'
 import { precisaRevisar, ehUrl } from '../core/revisao'
 import { useConfiguracoesStore } from '../core/configuracoes'
 import { ItemLinha } from './ItemLinha'
@@ -16,18 +21,29 @@ const CHIP_LINHA: Record<Tratamento['linha'], string> = {
   off_label: 'text-danger border-danger/40 bg-danger/10',
 }
 
+/** Presença opcional de seleção — "Escolha um esquema" (rádio, só um) ou "Adicione se
+ *  precisar" (checkbox, vários). Sem essa prop o card funciona como sempre funcionou
+ *  (só visualização + copiar). */
+interface Selecao {
+  tipo: 'unico' | 'multiplo'
+  selecionado: boolean
+  onToggle: () => void
+}
+
 export function TratamentoCard({
   tratamento,
   itens,
   medicamentos,
   apresentacoes,
   gestante,
+  selecao,
 }: {
   tratamento: Tratamento
   itens: TratamentoItem[]
   medicamentos: Medicamento[]
   apresentacoes: Apresentacao[]
   gestante: boolean
+  selecao?: Selecao
 }) {
   const mesesAteRevisar = useConfiguracoesStore((s) => s.mesesAteRevisar)
   const itensDoCard = itensDoTratamento(itens, tratamento.id)
@@ -38,22 +54,39 @@ export function TratamentoCard({
     mesesAteRevisar
   )
 
-  // Linha em branco entre itens — cada um já vem em duas linhas (medicamento + como
-  // tomar), sem o espaçamento eles colariam um no outro e ficaria ilegível no combo.
-  const textoCombo = itensDoCard
-    .map((item) =>
-      textoReceitaDoItem(
-        item,
-        medicamentoPorId(medicamentos, item.medicamento_id)?.nome ?? null,
-        apresentacaoPorId(apresentacoes, item.apresentacao_id)
-      )
-    )
-    .join('\n\n')
+  const textoCombo = textoTratamentoCompleto(tratamento, itens, medicamentos, apresentacoes)
+
+  const IconeSelecao = selecao
+    ? selecao.tipo === 'unico'
+      ? selecao.selecionado
+        ? CircleCheck
+        : Circle
+      : selecao.selecionado
+        ? SquareCheck
+        : Square
+    : null
 
   return (
     <div
-      className={`border rounded-xl p-4 flex flex-col gap-3 transition-opacity ${
-        esmaecido ? 'border-danger/50 bg-surface opacity-60 hover:opacity-100' : 'border-border bg-surface'
+      role={selecao ? 'button' : undefined}
+      tabIndex={selecao ? 0 : undefined}
+      onClick={selecao ? () => selecao.onToggle() : undefined}
+      onKeyDown={
+        selecao
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                selecao.onToggle()
+              }
+            }
+          : undefined
+      }
+      className={`border rounded-xl p-4 flex flex-col gap-3 transition-opacity ${selecao ? 'cursor-pointer' : ''} ${
+        esmaecido
+          ? 'border-danger/50 bg-surface opacity-60 hover:opacity-100'
+          : selecao?.selecionado
+            ? 'border-accent bg-accent-dim/40'
+            : 'border-border bg-surface'
       }`}
     >
       {esmaecido && (
@@ -65,6 +98,11 @@ export function TratamentoCard({
 
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
+          {IconeSelecao && (
+            <IconeSelecao
+              className={`w-4 h-4 shrink-0 ${selecao?.selecionado ? 'text-accent' : 'text-text-faint'}`}
+            />
+          )}
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${CHIP_LINHA[tratamento.linha]}`}>
             {LABEL_LINHA[tratamento.linha]}
           </span>
@@ -97,6 +135,7 @@ export function TratamentoCard({
                 href={tratamento.referencia}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 className="text-accent hover:underline flex items-center gap-0.5"
               >
                 Referência <ExternalLink className="w-3 h-3" />

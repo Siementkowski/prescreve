@@ -1,38 +1,27 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronRight, Lock, Plus, Trash2 } from 'lucide-react'
-import { areasApi, patologiasApi, tratamentosApi, tratamentoItensApi, medicamentosApi, apresentacoesApi } from './api'
-import type {
-  Area,
-  Patologia,
-  Tratamento,
-  TratamentoInput,
-  TratamentoItem,
-  Medicamento,
-  MedicamentoInput,
-  Apresentacao,
-  ModoTratamento,
-  Linha,
-} from './types'
-import { LABEL_MODO_TRATAMENTO, LABEL_LINHA } from './types'
+import { Lock, Plus, Trash2, Users } from 'lucide-react'
+import { tratamentosApi, tratamentoItensApi, medicamentosApi, apresentacoesApi, patologiaComplementosApi } from './api'
+import type { Tratamento, TratamentoInput, TratamentoItem, Medicamento, MedicamentoInput, Apresentacao, ModoTratamento } from './types'
+import { LABEL_MODO_TRATAMENTO } from './types'
 import { SearchInput } from './components/SearchInput'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { SortableList } from './components/SortableList'
 import { TratamentoItemRow } from './components/TratamentoItemRow'
 import { TextField, SelectField, CheckboxField } from './components/Field'
 
-function vazio(patologiaId: number, ordem: number): TratamentoInput {
+function vazio(ordem: number): TratamentoInput {
   return {
-    patologia_id: patologiaId,
+    patologia_id: null,
     modo: 'ambulatorial',
-    linha: '1a_linha',
+    linha: '1a_linha', // sem efeito pra complemento — não agrupa por linha em lugar nenhum
     titulo: '',
     observacoes: '',
     referencia: '',
     revisado_em: null,
     precisa_revisao: false,
     ordem,
-    papel: 'principal',
-    classe: null,
+    papel: 'complemento',
+    classe: '',
   }
 }
 
@@ -53,15 +42,15 @@ function medicamentoVazio(nome: string): MedicamentoInput {
   }
 }
 
-export function TratamentosPage() {
-  const [areas, setAreas] = useState<Area[]>([])
-  const [areaSelecionada, setAreaSelecionada] = useState<number | null>(null)
-  const [patologias, setPatologias] = useState<Patologia[]>([])
-  const [patologiaSelecionada, setPatologiaSelecionada] = useState<number | null>(null)
+/** Biblioteca de complementos — suporte sintomático (dipirona, escopolamina...) cadastrado
+ *  uma vez e vinculado a várias patologias (em Patologias, seção "Complementos vinculados").
+ *  Mesmo editor de item que Prescrições, sem patologia/linha e com classe pra agrupar no
+ *  seletor. Corrigir a dose aqui propaga pra todo lugar que usa esse complemento — por
+ *  isso mostra em quantas patologias ele está antes de editar ou excluir. */
+export function ComplementosPage() {
+  const [complementos, setComplementos] = useState<Tratamento[]>([])
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([])
   const [apresentacoes, setApresentacoes] = useState<Apresentacao[]>([])
-
-  const [tratamentos, setTratamentos] = useState<Tratamento[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const [busca, setBusca] = useState('')
@@ -69,103 +58,75 @@ export function TratamentosPage() {
   const [selecionadoId, setSelecionadoId] = useState<number | null>(null)
   const [form, setForm] = useState<TratamentoInput | null>(null)
   const [salvando, setSalvando] = useState(false)
+  const [usoAtual, setUsoAtual] = useState<{ patologia_id: number; nome: string }[]>([])
+  const [carregandoUso, setCarregandoUso] = useState(false)
   const [paraExcluir, setParaExcluir] = useState<Tratamento | null>(null)
+  const [usoParaExcluir, setUsoParaExcluir] = useState<{ patologia_id: number; nome: string }[]>([])
 
   const [itens, setItens] = useState<TratamentoItem[]>([])
   const [carregandoItens, setCarregandoItens] = useState(false)
-  // Itens de TODOS os tratamentos da patologia atual — só pra montar um resumo (nome do
-  // medicamento) na lista da esquerda, que sem isso mostrava "Ambulatorial · 1ª linha"
-  // repetido em cada card, sem dar pra distinguir um do outro.
   const [resumoItens, setResumoItens] = useState<Record<number, TratamentoItem[]>>({})
 
+  async function recarregar() {
+    setCarregando(true)
+    try {
+      const lista = await tratamentosApi.listComplementos()
+      setComplementos(lista)
+      const todosItens = await tratamentoItensApi.listByTratamentos(lista.map((t) => t.id))
+      const agrupados: Record<number, TratamentoItem[]> = {}
+      for (const item of todosItens) {
+        ;(agrupados[item.tratamento_id] ??= []).push(item)
+      }
+      setResumoItens(agrupados)
+      setErro(null)
+    } catch (e) {
+      setErro((e as Error).message)
+    } finally {
+      setCarregando(false)
+    }
+  }
+
   useEffect(() => {
-    areasApi.list().then((lista) => {
-      // Ordem alfabética — bem mais fácil de achar a área numa lista grande do que a
-      // ordem de arrasto (que é pra outra coisa: a ordem de navegação da Consulta).
-      const ordenada = [...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-      setAreas(ordenada)
-      if (ordenada.length > 0) setAreaSelecionada(ordenada[0].id)
-    })
+    recarregar()
     medicamentosApi.list().then(setMedicamentos)
     apresentacoesApi.list().then(setApresentacoes)
   }, [])
 
-  useEffect(() => {
-    if (areaSelecionada == null) return
-    patologiasApi.listByArea(areaSelecionada).then((lista) => {
-      const ordenada = [...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-      setPatologias(ordenada)
-      setPatologiaSelecionada(ordenada.length > 0 ? ordenada[0].id : null)
-    })
-  }, [areaSelecionada])
-
-  useEffect(() => {
-    if (patologiaSelecionada == null) {
-      setTratamentos([])
-      return
-    }
-    setCarregando(true)
-    tratamentosApi
-      .listByPatologia(patologiaSelecionada)
-      .then(async (lista) => {
-        setTratamentos(lista)
-        setSelecionadoId(null)
-        setForm(vazio(patologiaSelecionada, lista.length))
-        setItens([])
-        setErro(null)
-
-        const todosItens = await tratamentoItensApi.listByTratamentos(lista.map((t) => t.id))
-        const agrupados: Record<number, TratamentoItem[]> = {}
-        for (const item of todosItens) {
-          ;(agrupados[item.tratamento_id] ??= []).push(item)
-        }
-        setResumoItens(agrupados)
-      })
-      .catch((e) => setErro(e.message))
-      .finally(() => setCarregando(false))
-  }, [patologiaSelecionada])
-
-  /** "Amoxicilina" (1 item) ou "Amoxicilina +2" (combo) — o que de fato diferencia um
-   *  card do outro na lista, já que vários tratamentos podem ter o mesmo modo e linha. */
-  function resumoTratamento(t: Tratamento): string {
-    const itensDoTratamento = (resumoItens[t.id] ?? [])
-      .slice()
-      .sort((a, b) => a.ordem - b.ordem)
-    if (itensDoTratamento.length === 0) return ''
-    const nomes = itensDoTratamento.map((i) =>
+  /** "Dipirona" (1 item) ou "Dipirona +2" (combo raro, mas o campo aceita). */
+  function resumoComplemento(t: Tratamento): string {
+    const itensDoComplemento = (resumoItens[t.id] ?? []).slice().sort((a, b) => a.ordem - b.ordem)
+    if (itensDoComplemento.length === 0) return ''
+    const nomes = itensDoComplemento.map((i) =>
       i.medicamento_id ? medicamentos.find((m) => m.id === i.medicamento_id)?.nome ?? '—' : i.nome_livre || '—'
     )
     return nomes.length === 1 ? nomes[0] : `${nomes[0]} +${nomes.length - 1}`
   }
 
   function tituloExibido(t: Tratamento): string {
-    return t.titulo || resumoTratamento(t) || `${LABEL_MODO_TRATAMENTO[t.modo]} · ${LABEL_LINHA[t.linha]}`
+    return t.titulo || resumoComplemento(t) || 'Complemento sem medicamento ainda'
   }
+
+  const classesExistentes = useMemo(
+    () => Array.from(new Set(complementos.map((c) => c.classe?.trim()).filter((c): c is string => !!c))).sort(),
+    [complementos]
+  )
 
   const filtrados = useMemo(
     () =>
-      tratamentos
+      complementos
         .filter((t) =>
-          `${t.titulo ?? ''} ${resumoTratamento(t)} ${LABEL_MODO_TRATAMENTO[t.modo]} ${LABEL_LINHA[t.linha]}`
-            .toLowerCase()
-            .includes(busca.toLowerCase())
+          `${t.titulo ?? ''} ${resumoComplemento(t)} ${t.classe ?? ''}`.toLowerCase().includes(busca.toLowerCase())
         )
-        // Ordem alfabética pelo que aparece no card — não pela ordem de arrasto (essa
-        // continua existindo e valendo pra Consulta, só não é mais o que rege esta lista).
         .sort((a, b) => tituloExibido(a).localeCompare(tituloExibido(b), 'pt-BR')),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tratamentos, busca, resumoItens, medicamentos]
+    [complementos, busca, resumoItens, medicamentos]
   )
 
-  const nomeArea = areas.find((a) => a.id === areaSelecionada)?.nome ?? ''
-  const nomePatologia = patologias.find((p) => p.id === patologiaSelecionada)?.nome ?? ''
-  const tratamentoSelecionado = tratamentos.find((t) => t.id === selecionadoId) ?? null
-
   function novo() {
-    if (patologiaSelecionada == null) return
     setSelecionadoId(null)
-    setForm(vazio(patologiaSelecionada, tratamentos.length))
+    setForm(vazio(complementos.length))
     setItens([])
+    setUsoAtual([])
     setErro(null)
   }
 
@@ -174,12 +135,18 @@ export function TratamentosPage() {
     setForm(t)
     setErro(null)
     setCarregandoItens(true)
+    setCarregandoUso(true)
     try {
       setItens(await tratamentoItensApi.listByTratamento(t.id))
     } catch (e) {
       setErro((e as Error).message)
     } finally {
       setCarregandoItens(false)
+    }
+    try {
+      setUsoAtual(await patologiaComplementosApi.listPatologiasUsando(t.id))
+    } finally {
+      setCarregandoUso(false)
     }
   }
 
@@ -189,30 +156,29 @@ export function TratamentosPage() {
     setErro(null)
     try {
       if (selecionadoId) {
-        // Só os campos editáveis — `form` vem de setForm(t) ao selecionar, então carrega
-        // o id junto (a tipagem TratamentoInput não pega isso em tempo de execução); mandar
-        // o id no payload de update quebra ("column id can only be updated to DEFAULT").
-        const { patologia_id, modo, linha, titulo, observacoes, referencia, revisado_em, precisa_revisao, ordem } =
-          form
+        const { modo, titulo, observacoes, referencia, revisado_em, precisa_revisao, ordem, classe } = form
         const atualizado = await tratamentosApi.update(selecionadoId, {
-          patologia_id,
+          patologia_id: null,
           modo,
-          linha,
+          linha: '1a_linha',
           titulo,
           observacoes,
           referencia,
           revisado_em,
           precisa_revisao,
           ordem,
+          papel: 'complemento',
+          classe,
         })
-        setTratamentos((prev) => prev.map((t) => (t.id === selecionadoId ? atualizado : t)))
+        setComplementos((prev) => prev.map((t) => (t.id === selecionadoId ? atualizado : t)))
         setForm(atualizado)
       } else {
         const criado = await tratamentosApi.insert(form)
-        setTratamentos((prev) => [...prev, criado])
+        setComplementos((prev) => [...prev, criado])
         setSelecionadoId(criado.id)
         setForm(criado)
         setItens([])
+        setUsoAtual([])
       }
     } catch (e) {
       setErro((e as Error).message)
@@ -221,20 +187,24 @@ export function TratamentosPage() {
     }
   }
 
-  async function excluirTratamento(t: Tratamento) {
+  async function pedirExclusao(t: Tratamento) {
+    setParaExcluir(t)
+    setUsoParaExcluir(await patologiaComplementosApi.listPatologiasUsando(t.id))
+  }
+
+  async function excluirComplemento(t: Tratamento) {
     try {
       await tratamentosApi.remove(t.id)
-      setTratamentos((prev) => prev.filter((x) => x.id !== t.id))
+      setComplementos((prev) => prev.filter((x) => x.id !== t.id))
       if (selecionadoId === t.id) novo()
     } catch (e) {
       setErro((e as Error).message)
     } finally {
       setParaExcluir(null)
+      setUsoParaExcluir([])
     }
   }
 
-  /** Mantém o resumo da lista (nome do medicamento no card) em dia depois de qualquer
-   *  alteração nos itens — sem isso o card só atualizava ao trocar de patologia e voltar. */
   function sincronizarResumo(tratamentoId: number, novaLista: TratamentoItem[]) {
     setResumoItens((prev) => ({ ...prev, [tratamentoId]: novaLista }))
   }
@@ -294,15 +264,12 @@ export function TratamentosPage() {
     }
   }
 
-  /** Cadastro rápido de medicamento direto do item — evita trocar de aba no meio da receita. */
   async function criarMedicamentoRapido(nome: string): Promise<Medicamento> {
     const criado = await medicamentosApi.insert(medicamentoVazio(nome))
     setMedicamentos((prev) => [...prev, criado].sort((a, b) => a.nome.localeCompare(b.nome)))
     return criado
   }
 
-  /** Cadastro rápido de apresentação direto do item — mesma tabela do cadastro do
-   *  medicamento, só um atalho a mais pra não sair do editor da prescrição. */
   async function criarApresentacaoRapida(
     medicamentoId: number,
     dados: { forma: string; concentracao: number | null; unidade: string; por_volume: number | null; por_volume_unidade: string }
@@ -322,49 +289,17 @@ export function TratamentosPage() {
     return criada
   }
 
-  if (areas.length === 0) {
-    return <p className="text-sm text-text-dim">Cadastre uma área e uma patologia primeiro.</p>
-  }
-  if (patologias.length === 0) {
-    return (
-      <p className="text-sm text-text-dim">
-        Esta área ainda não tem patologias. Cadastre uma na aba "Patologias".
-      </p>
-    )
-  }
-
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 h-full min-h-0">
         <div className="flex flex-col gap-3 min-h-0">
-          <div className="grid grid-cols-2 gap-2">
-            <SelectField
-              label="Área"
-              value={areaSelecionada ?? ''}
-              onChange={(e) => setAreaSelecionada(Number(e.target.value))}
-            >
-              {areas.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.nome}
-                </option>
-              ))}
-            </SelectField>
-            <SelectField
-              label="Patologia"
-              value={patologiaSelecionada ?? ''}
-              onChange={(e) => setPatologiaSelecionada(Number(e.target.value))}
-            >
-              {patologias.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nome}
-                </option>
-              ))}
-            </SelectField>
-          </div>
-
+          <p className="text-xs text-text-dim leading-relaxed -mt-1">
+            Suporte sintomático (dipirona, escopolamina...) cadastrado uma vez e vinculado a várias
+            patologias em <span className="text-text-dim/90">Patologias → Complementos vinculados</span>.
+          </p>
           <div className="flex gap-2">
             <div className="flex-1">
-              <SearchInput value={busca} onChange={setBusca} placeholder="Buscar prescrição…" />
+              <SearchInput value={busca} onChange={setBusca} placeholder="Buscar complemento…" />
             </div>
             <button
               onClick={novo}
@@ -379,10 +314,8 @@ export function TratamentosPage() {
             {carregando ? (
               <p className="text-sm text-text-dim px-1">Carregando…</p>
             ) : filtrados.length === 0 ? (
-              <p className="text-sm text-text-dim px-1">Nenhuma prescrição cadastrada.</p>
+              <p className="text-sm text-text-dim px-1">Nenhum complemento cadastrado.</p>
             ) : (
-              // Lista em ordem alfabética — sem arrastar-pra-reordenar aqui (a ordem que
-              // rege a Consulta continua existindo, só não é mais o critério desta lista).
               filtrados.map((t) => (
                 <div key={t.id} className="w-full flex items-center gap-1.5">
                   <button
@@ -394,18 +327,18 @@ export function TratamentosPage() {
                     }`}
                   >
                     <span className="block text-sm text-text font-medium truncate">
-                      {t.titulo || resumoTratamento(t) || `${LABEL_MODO_TRATAMENTO[t.modo]} · ${LABEL_LINHA[t.linha]}`}
+                      {t.titulo || resumoComplemento(t) || 'Complemento sem medicamento ainda'}
                     </span>
                     <span className="block text-xs text-text-dim truncate">
-                      {LABEL_MODO_TRATAMENTO[t.modo]} · {LABEL_LINHA[t.linha]}
-                      {t.titulo && resumoTratamento(t) && ` · ${resumoTratamento(t)}`}
+                      {t.classe || 'Sem classe'}
+                      {t.titulo && resumoComplemento(t) && ` · ${resumoComplemento(t)}`}
                     </span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => setParaExcluir(t)}
+                    onClick={() => pedirExclusao(t)}
                     className="shrink-0 text-danger hover:text-danger/80 transition-colors p-2"
-                    title="Excluir prescrição"
+                    title="Excluir complemento"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -416,18 +349,31 @@ export function TratamentosPage() {
         </div>
 
         <div className="min-h-0 overflow-y-auto flex flex-col gap-5 pb-6">
-          {/* Trilha de contexto — nunca perder onde você está na hierarquia */}
           <div className="flex items-center gap-1.5 text-xs text-text-dim">
-            <span>{nomeArea}</span>
-            <ChevronRight className="w-3 h-3" />
-            <span>{nomePatologia}</span>
-            <ChevronRight className="w-3 h-3" />
             <span className="text-text font-medium">
-              {tratamentoSelecionado
-                ? tratamentoSelecionado.titulo || `${LABEL_MODO_TRATAMENTO[tratamentoSelecionado.modo]} · ${LABEL_LINHA[tratamentoSelecionado.linha]}`
-                : 'Nova prescrição'}
+              {(() => {
+                const atual = selecionadoId ? complementos.find((c) => c.id === selecionadoId) : null
+                return atual ? tituloExibido(atual) : 'Novo complemento'
+              })()}
             </span>
           </div>
+
+          {selecionadoId && (
+            <div className="flex items-center gap-2 text-xs rounded-lg border border-border bg-surface-2 px-3 py-2 text-text-dim">
+              <Users className="w-3.5 h-3.5 shrink-0" />
+              {carregandoUso ? (
+                'Verificando em quantas patologias está vinculado…'
+              ) : usoAtual.length === 0 ? (
+                'Ainda não vinculado a nenhuma patologia.'
+              ) : (
+                <span>
+                  Usado em <strong className="text-text">{usoAtual.length}</strong> patologia
+                  {usoAtual.length > 1 ? 's' : ''}: {usoAtual.map((u) => u.nome).join(', ')} — editar aqui
+                  propaga pra todas.
+                </span>
+              )}
+            </div>
+          )}
 
           {form && (
             <div className="bg-surface border border-border rounded-xl p-6">
@@ -435,15 +381,23 @@ export function TratamentosPage() {
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent-dim text-accent text-[11px] font-bold shrink-0">
                   1
                 </span>
-                <h2 className="text-sm font-semibold text-text">Cabeçalho da prescrição</h2>
+                <h2 className="text-sm font-semibold text-text">Cabeçalho do complemento</h2>
               </div>
               <p className="text-xs text-text-dim mb-4 ml-7.5">
-                A prescrição é o contêiner — modo, linha e título. Os medicamentos com dose e posologia
-                entram na seção 2, depois de salvar aqui.
+                Sem patologia fixa — a classe é só pra agrupar visualmente no seletor da patologia.
+                O medicamento com dose e posologia entra na seção 2, depois de salvar aqui.
               </p>
 
               <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-2 gap-3">
+                  <TextField
+                    label="Classe"
+                    hint="Ex: Analgésicos/antitérmicos, Antieméticos"
+                    list="classes-complemento"
+                    value={form.classe ?? ''}
+                    onChange={(e) => setForm({ ...form, classe: e.target.value })}
+                    placeholder="Analgésicos/antitérmicos"
+                  />
                   <SelectField
                     label="Modo"
                     value={form.modo}
@@ -455,24 +409,19 @@ export function TratamentosPage() {
                       </option>
                     ))}
                   </SelectField>
-                  <SelectField
-                    label="Linha"
-                    value={form.linha}
-                    onChange={(e) => setForm({ ...form, linha: e.target.value as Linha })}
-                  >
-                    {Object.entries(LABEL_LINHA).map(([v, l]) => (
-                      <option key={v} value={v}>
-                        {l}
-                      </option>
-                    ))}
-                  </SelectField>
                 </div>
+                <datalist id="classes-complemento">
+                  {classesExistentes.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
 
                 <TextField
                   label="Título (opcional)"
+                  hint="Só se o nome do medicamento não bastar pra identificar"
                   value={form.titulo ?? ''}
                   onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                  placeholder="Ex: Esquema padrão"
+                  placeholder="Ex: Dipirona gotas"
                 />
 
                 <div className="grid grid-cols-2 gap-3">
@@ -504,11 +453,11 @@ export function TratamentosPage() {
                 <div className="flex items-center justify-between mt-2">
                   {selecionadoId ? (
                     <button
-                      onClick={() => setParaExcluir(tratamentos.find((t) => t.id === selecionadoId) ?? null)}
+                      onClick={() => pedirExclusao(complementos.find((t) => t.id === selecionadoId)!)}
                       className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
-                      Excluir prescrição
+                      Excluir complemento
                     </button>
                   ) : (
                     <span />
@@ -518,15 +467,13 @@ export function TratamentosPage() {
                     disabled={salvando}
                     className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
                   >
-                    {salvando ? 'Salvando…' : selecionadoId ? 'Salvar cabeçalho' : 'Criar prescrição e liberar itens →'}
+                    {salvando ? 'Salvando…' : selecionadoId ? 'Salvar cabeçalho' : 'Criar complemento e liberar item →'}
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Seção 2 sempre visível — trancada até o cabeçalho existir, em vez de simplesmente
-              não aparecer. É essa transição invisível que confundia antes. */}
           <div
             className={`bg-surface border rounded-xl p-6 ${
               selecionadoId ? 'border-border' : 'border-border border-dashed'
@@ -542,7 +489,7 @@ export function TratamentosPage() {
                   2
                 </span>
                 <h2 className={`text-sm font-semibold ${selecionadoId ? 'text-text' : 'text-text-faint'}`}>
-                  Itens — medicamento, dose, via, posologia
+                  Item — medicamento, dose, via, posologia
                 </h2>
               </div>
               {selecionadoId && (
@@ -559,13 +506,13 @@ export function TratamentosPage() {
             {!selecionadoId ? (
               <p className="flex items-center gap-1.5 text-xs text-text-faint mt-3 ml-7.5">
                 <Lock className="w-3.5 h-3.5 shrink-0" />
-                Salve o cabeçalho na seção 1 pra liberar a adição de itens aqui.
+                Salve o cabeçalho na seção 1 pra liberar a adição do item aqui.
               </p>
             ) : (
               <>
                 <p className="text-xs text-text-dim mb-4 ml-7.5">
-                  Cada item é um medicamento da receita. Uma prescrição ambulatorial simples tem 1 item; um
-                  combo hospitalar costuma ter vários — arraste pra reordenar.
+                  Quase sempre 1 item só (o próprio complemento) — mas aceita mais de um se for um
+                  combo sintomático fixo.
                 </p>
                 {carregandoItens ? (
                   <p className="text-sm text-text-dim">Carregando itens…</p>
@@ -599,10 +546,17 @@ export function TratamentosPage() {
 
       <ConfirmDialog
         aberto={!!paraExcluir}
-        titulo="Excluir prescrição"
-        mensagem={`Excluir "${paraExcluir ? tituloExibido(paraExcluir) : 'esta prescrição'}"? Isso apaga também todos os itens dela.`}
-        onConfirmar={() => paraExcluir && excluirTratamento(paraExcluir)}
-        onCancelar={() => setParaExcluir(null)}
+        titulo="Excluir complemento"
+        mensagem={
+          usoParaExcluir.length === 0
+            ? `Excluir "${paraExcluir ? tituloExibido(paraExcluir) : 'este complemento'}"? Isso apaga também o(s) item(ns) dele.`
+            : `"${paraExcluir ? tituloExibido(paraExcluir) : ''}" está vinculado a ${usoParaExcluir.length} patologia${usoParaExcluir.length > 1 ? 's' : ''}: ${usoParaExcluir.map((u) => u.nome).join(', ')}. Excluir remove de todas elas também. Confirma?`
+        }
+        onConfirmar={() => paraExcluir && excluirComplemento(paraExcluir)}
+        onCancelar={() => {
+          setParaExcluir(null)
+          setUsoParaExcluir([])
+        }}
       />
     </>
   )

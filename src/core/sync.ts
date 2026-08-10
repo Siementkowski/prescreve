@@ -12,8 +12,17 @@ import {
   apresentacoesApi,
   tratamentosApi,
   tratamentoItensApi,
+  patologiaComplementosApi,
 } from '../admin/api'
-import type { Area, Patologia, Medicamento, Apresentacao, Tratamento, TratamentoItem } from '../admin/types'
+import type {
+  Area,
+  Patologia,
+  Medicamento,
+  Apresentacao,
+  Tratamento,
+  TratamentoItem,
+  PatologiaComplemento,
+} from '../admin/types'
 
 const CHAVE_CACHE = 'base'
 
@@ -25,6 +34,7 @@ interface BaseCacheada {
   apresentacoes: Apresentacao[]
   tratamentos: Tratamento[]
   itens: TratamentoItem[]
+  patologiaComplementos: PatologiaComplemento[]
   sincronizadoEm: string
 }
 
@@ -44,6 +54,7 @@ interface SyncState {
   apresentacoes: Apresentacao[]
   tratamentos: Tratamento[]
   itens: TratamentoItem[]
+  patologiaComplementos: PatologiaComplemento[]
 
   inicializar: () => Promise<void>
   sincronizar: (opts?: { forcar?: boolean }) => Promise<void>
@@ -65,6 +76,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   apresentacoes: [],
   tratamentos: [],
   itens: [],
+  patologiaComplementos: [],
 
   async inicializar() {
     if (get().inicializado) return
@@ -86,6 +98,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
           apresentacoes: cache.apresentacoes ?? [],
           tratamentos: cache.tratamentos,
           itens: cache.itens,
+          patologiaComplementos: cache.patologiaComplementos ?? [],
           versaoLocal: cache.versao,
           ultimaSincronizacao: cache.sincronizadoEm,
         })
@@ -135,14 +148,16 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         return
       }
 
-      const [areas, patologias, medicamentos, apresentacoes, tratamentos, itens] = await Promise.all([
-        areasApi.list(),
-        patologiasApi.list(),
-        medicamentosApi.list(),
-        apresentacoesApi.list(),
-        tratamentosApi.list(),
-        tratamentoItensApi.list(),
-      ])
+      const [areas, patologias, medicamentos, apresentacoes, tratamentos, itens, patologiaComplementos] =
+        await Promise.all([
+          areasApi.list(),
+          patologiasApi.list(),
+          medicamentosApi.list(),
+          apresentacoesApi.list(),
+          tratamentosApi.list(),
+          tratamentoItensApi.list(),
+          patologiaComplementosApi.list(),
+        ])
 
       const sincronizadoEm = new Date().toISOString()
       const cache: BaseCacheada = {
@@ -153,6 +168,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         apresentacoes,
         tratamentos,
         itens,
+        patologiaComplementos,
         sincronizadoEm,
       }
       await gravarCache(CHAVE_CACHE, cache)
@@ -164,6 +180,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         apresentacoes,
         tratamentos,
         itens,
+        patologiaComplementos,
         versaoLocal: versaoServidor,
         ultimaSincronizacao: sincronizadoEm,
         sincronizando: false,
