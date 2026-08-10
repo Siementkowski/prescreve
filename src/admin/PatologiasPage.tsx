@@ -73,7 +73,18 @@ export function PatologiasPage() {
     setErro(null)
     try {
       if (selecionadaId) {
-        const atualizada = await patologiasApi.update(selecionadaId, form)
+        // Só os campos editáveis — `form` vem de setForm(p) ao selecionar e carrega o id
+        // junto; mandá-lo no payload de update quebra ("column id can only be updated to
+        // DEFAULT").
+        const { area_id, nome, sinonimos, orientacoes, observacoes, ordem } = form
+        const atualizada = await patologiasApi.update(selecionadaId, {
+          area_id,
+          nome,
+          sinonimos,
+          orientacoes,
+          observacoes,
+          ordem,
+        })
         setPatologias((prev) => prev.map((p) => (p.id === selecionadaId ? atualizada : p)))
       } else {
         const criada = await patologiasApi.insert(form)

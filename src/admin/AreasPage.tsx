@@ -64,7 +64,11 @@ export function AreasPage() {
     setErro(null)
     try {
       if (selecionadaId) {
-        const atualizada = await areasApi.update(selecionadaId, form)
+        // Só os campos editáveis — `form` vem de setForm(area) ao selecionar e carrega o
+        // id junto; mandá-lo no payload de update quebra ("column id can only be updated
+        // to DEFAULT").
+        const { nome, modo, icone, cor, ordem } = form
+        const atualizada = await areasApi.update(selecionadaId, { nome, modo, icone, cor, ordem })
         setAreas((prev) => prev.map((a) => (a.id === selecionadaId ? atualizada : a)))
       } else {
         const criada = await areasApi.insert(form)

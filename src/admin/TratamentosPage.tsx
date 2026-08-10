@@ -187,7 +187,22 @@ export function TratamentosPage() {
     setErro(null)
     try {
       if (selecionadoId) {
-        const atualizado = await tratamentosApi.update(selecionadoId, form)
+        // Só os campos editáveis — `form` vem de setForm(t) ao selecionar, então carrega
+        // o id junto (a tipagem TratamentoInput não pega isso em tempo de execução); mandar
+        // o id no payload de update quebra ("column id can only be updated to DEFAULT").
+        const { patologia_id, modo, linha, titulo, observacoes, referencia, revisado_em, precisa_revisao, ordem } =
+          form
+        const atualizado = await tratamentosApi.update(selecionadoId, {
+          patologia_id,
+          modo,
+          linha,
+          titulo,
+          observacoes,
+          referencia,
+          revisado_em,
+          precisa_revisao,
+          ordem,
+        })
         setTratamentos((prev) => prev.map((t) => (t.id === selecionadoId ? atualizado : t)))
         setForm(atualizado)
       } else {

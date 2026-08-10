@@ -98,7 +98,37 @@ export function MedicamentosPage() {
     setErro(null)
     try {
       if (selecionadoId) {
-        const atualizado = await medicamentosApi.update(selecionadoId, form)
+        // Só os campos editáveis — `form` vem de setForm(m) ao selecionar e carrega o id
+        // junto; mandá-lo no payload de update quebra ("column id can only be updated to
+        // DEFAULT").
+        const {
+          nome,
+          nome_comercial,
+          apresentacoes,
+          gestacao_status,
+          gestacao_obs,
+          lactacao_status,
+          contraindicacoes,
+          ped_mg_kg_dia,
+          ped_dose_max_dia,
+          ped_concentracao,
+          ped_volume_ref,
+          ped_obs,
+        } = form
+        const atualizado = await medicamentosApi.update(selecionadoId, {
+          nome,
+          nome_comercial,
+          apresentacoes,
+          gestacao_status,
+          gestacao_obs,
+          lactacao_status,
+          contraindicacoes,
+          ped_mg_kg_dia,
+          ped_dose_max_dia,
+          ped_concentracao,
+          ped_volume_ref,
+          ped_obs,
+        })
         setMedicamentos((prev) => prev.map((m) => (m.id === selecionadoId ? atualizado : m)))
       } else {
         const criado = await medicamentosApi.insert(form)
