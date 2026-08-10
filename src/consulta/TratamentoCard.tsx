@@ -7,6 +7,7 @@ import {
   apresentacaoPorId,
   textoTratamentoCompleto,
   tratamentoTemContraindicadoGestacao,
+  nomeCabecalhoTratamento,
 } from './filtros'
 import { precisaRevisar, ehUrl } from '../core/revisao'
 import { useConfiguracoesStore } from '../core/configuracoes'
@@ -47,6 +48,7 @@ export function TratamentoCard({
 }) {
   const mesesAteRevisar = useConfiguracoesStore((s) => s.mesesAteRevisar)
   const itensDoCard = itensDoTratamento(itens, tratamento.id)
+  const nomeCabecalho = nomeCabecalhoTratamento(tratamento, itens, medicamentos)
   const temContraindicado = tratamentoTemContraindicadoGestacao(tratamento.id, itens, medicamentos)
   const esmaecido = gestante && temContraindicado
   const revisar = precisaRevisar(
@@ -106,7 +108,7 @@ export function TratamentoCard({
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${CHIP_LINHA[tratamento.linha]}`}>
             {LABEL_LINHA[tratamento.linha]}
           </span>
-          {tratamento.titulo && <h3 className="font-display text-base font-semibold text-text">{tratamento.titulo}</h3>}
+          {nomeCabecalho && <h3 className="font-display text-base font-semibold text-text">{nomeCabecalho}</h3>}
           {revisar && <SeloRevisao revisadoEm={tratamento.revisado_em} />}
         </div>
         {itensDoCard.length > 1 && (

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { EyeOff, ClipboardList } from 'lucide-react'
+import { EyeOff, ClipboardList, ChevronDown } from 'lucide-react'
 import { useConsultaStore } from './store'
 import { useSyncStore } from '../core/sync'
 import {
@@ -9,9 +9,11 @@ import {
   complementosDaPatologia,
   textoTratamentoCompleto,
   tratamentoTemContraindicadoGestacao,
+  nomeCabecalhoTratamento,
 } from './filtros'
 import { LABEL_LINHA } from '../admin/types'
 import { TratamentoCard } from './TratamentoCard'
+import { ComplementoLinha } from './ComplementoLinha'
 import { CopyButton } from './components/CopyButton'
 
 export function PainelTratamentos() {
@@ -29,6 +31,8 @@ export function PainelTratamentos() {
   const complementosSelecionadosIds = useConsultaStore((s) => s.complementosSelecionadosIds)
   const selecionarPrincipal = useConsultaStore((s) => s.selecionarPrincipal)
   const toggleComplemento = useConsultaStore((s) => s.toggleComplemento)
+  const secaoEsquemaAberta = useConsultaStore((s) => s.secaoEsquemaAberta)
+  const toggleSecaoEsquema = useConsultaStore((s) => s.toggleSecaoEsquema)
 
   const patologia = patologias.find((p) => p.id === patologiaSelecionadaId) ?? null
 
@@ -59,6 +63,7 @@ export function PainelTratamentos() {
   const temComplementos = gruposComplementos.length > 0 || ocultosComplementos > 0
 
   const principal = tratamentos.find((t) => t.id === principalSelecionadoId) ?? null
+  const nomePrincipal = principal ? nomeCabecalhoTratamento(principal, itens, medicamentos) : null
   const complementosSelecionados = complementosSelecionadosIds
     .map((id) => tratamentos.find((t) => t.id === id))
     .filter((t): t is NonNullable<typeof t> => !!t)
@@ -123,51 +128,91 @@ export function PainelTratamentos() {
             />
           </div>
 
-          {/* Escolha um esquema — só um, agrupado por linha (1ª linha, alternativa...). */}
+          {/* Escolha um esquema — só um, agrupado por linha (1ª linha, alternativa...).
+              Recolhe sozinho ao escolher; o cabeçalho continua clicável pra reabrir e
+              trocar a qualquer momento. */}
           <div className="flex flex-col gap-2.5">
-            <h4 className="text-xs font-semibold text-text-dim uppercase tracking-wide">Escolha um esquema</h4>
+            <button
+              type="button"
+              onClick={toggleSecaoEsquema}
+              className={`flex items-center justify-between w-full gap-2 text-left transition-colors ${
+                !secaoEsquemaAberta && nomePrincipal
+                  ? 'rounded-lg border border-surface bg-surface hover:bg-surface-2 px-3 py-2.5'
+                  : ''
+              }`}
+            >
+              <h4
+                className={
+                  !secaoEsquemaAberta && nomePrincipal
+                    ? 'text-sm text-text'
+                    : 'text-xs font-semibold text-text-dim uppercase tracking-wide'
+                }
+              >
+                {!secaoEsquemaAberta && nomePrincipal ? (
+                  <>
+                    Escolha um esquema · <span className="font-semibold text-accent">{nomePrincipal}</span>
+                  </>
+                ) : (
+                  'Escolha um esquema'
+                )}
+              </h4>
+              <span className="flex items-center gap-1.5 shrink-0">
+                {!secaoEsquemaAberta && nomePrincipal && (
+                  <span className="text-xs font-semibold text-text">Trocar</span>
+                )}
+                <ChevronDown
+                  className={`w-3.5 h-3.5 shrink-0 ${
+                    !secaoEsquemaAberta && nomePrincipal ? 'text-text' : 'text-text-dim'
+                  } transition-transform ${secaoEsquemaAberta ? 'rotate-180' : ''}`}
+                />
+              </span>
+            </button>
 
-            {ocultosPrincipais > 0 && (
-              <div className="flex items-center gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-md px-3 py-2">
-                <EyeOff className="w-3.5 h-3.5 shrink-0" />
-                {ocultosPrincipais} esquema{ocultosPrincipais > 1 ? 's' : ''} oculto{ocultosPrincipais > 1 ? 's' : ''} por
-                contraindicação na gestação
-              </div>
-            )}
-
-            {gruposPrincipais.length === 0 ? (
-              <p className="text-sm text-text-dim px-1">Nenhuma prescrição cadastrada neste modo.</p>
-            ) : (
-              gruposPrincipais.map((grupo) => (
-                <div key={grupo.linha} className="flex flex-col gap-2.5">
-                  <h5 className="text-[11px] font-semibold text-text-faint uppercase tracking-wide">
-                    {LABEL_LINHA[grupo.linha]}
-                  </h5>
-                  <div className="flex flex-col gap-3">
-                    {grupo.tratamentos.map((t) => (
-                      <TratamentoCard
-                        key={t.id}
-                        tratamento={t}
-                        itens={itens}
-                        medicamentos={medicamentos}
-                        apresentacoes={apresentacoes}
-                        gestante={gestante}
-                        selecao={{
-                          tipo: 'unico',
-                          selecionado: principalSelecionadoId === t.id,
-                          onToggle: () => selecionarPrincipal(t.id),
-                        }}
-                      />
-                    ))}
+            {secaoEsquemaAberta && (
+              <>
+                {ocultosPrincipais > 0 && (
+                  <div className="flex items-center gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-md px-3 py-2">
+                    <EyeOff className="w-3.5 h-3.5 shrink-0" />
+                    {ocultosPrincipais} esquema{ocultosPrincipais > 1 ? 's' : ''} oculto{ocultosPrincipais > 1 ? 's' : ''} por
+                    contraindicação na gestação
                   </div>
-                </div>
-              ))
+                )}
+
+                {gruposPrincipais.length === 0 ? (
+                  <p className="text-sm text-text-dim px-1">Nenhuma prescrição cadastrada neste modo.</p>
+                ) : (
+                  gruposPrincipais.map((grupo) => (
+                    <div key={grupo.linha} className="flex flex-col gap-2.5">
+                      <h5 className="text-[11px] font-semibold text-text-faint uppercase tracking-wide">
+                        {LABEL_LINHA[grupo.linha]}
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {grupo.tratamentos.map((t) => (
+                          <TratamentoCard
+                            key={t.id}
+                            tratamento={t}
+                            itens={itens}
+                            medicamentos={medicamentos}
+                            apresentacoes={apresentacoes}
+                            gestante={gestante}
+                            selecao={{
+                              tipo: 'unico',
+                              selecionado: principalSelecionadoId === t.id,
+                              onToggle: () => selecionarPrincipal(t.id),
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </>
             )}
           </div>
 
-          {/* Adicione se precisar — complementos vinculados, múltipla escolha, agrupados
-              por classe. Só aparece quando a patologia tem algum vinculado. */}
-          {temComplementos && (
+          {/* Adicione se precisar — só aparece depois de escolher o esquema, sempre
+              visível (sem recolher), linhas compactas agrupadas por classe. */}
+          {principal && temComplementos && (
             <div className="flex flex-col gap-2.5">
               <h4 className="text-xs font-semibold text-text-dim uppercase tracking-wide">Adicione se precisar</h4>
 
@@ -180,24 +225,21 @@ export function PainelTratamentos() {
               )}
 
               {gruposComplementos.map((grupo) => (
-                <div key={grupo.classe} className="flex flex-col gap-2.5">
+                <div key={grupo.classe} className="flex flex-col gap-1.5">
                   <h5 className="text-[11px] font-semibold text-text-faint uppercase tracking-wide">
                     {grupo.classe}
                   </h5>
-                  <div className="flex flex-col gap-3">
+                  <div className="border border-border rounded-lg bg-surface divide-y divide-border overflow-hidden">
                     {grupo.tratamentos.map((t) => (
-                      <TratamentoCard
+                      <ComplementoLinha
                         key={t.id}
                         tratamento={t}
                         itens={itens}
                         medicamentos={medicamentos}
                         apresentacoes={apresentacoes}
                         gestante={gestante}
-                        selecao={{
-                          tipo: 'multiplo',
-                          selecionado: complementosSelecionadosIds.includes(t.id),
-                          onToggle: () => toggleComplemento(t.id),
-                        }}
+                        selecionado={complementosSelecionadosIds.includes(t.id)}
+                        onToggle={() => toggleComplemento(t.id)}
                       />
                     ))}
                   </div>

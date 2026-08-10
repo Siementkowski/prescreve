@@ -39,13 +39,17 @@ export function ItemLinha({
 
   return (
     <div className={semMoldura ? 'flex flex-col gap-3' : 'border border-border rounded-lg p-4 bg-surface-2 flex flex-col gap-3'}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-display text-base font-semibold text-text">{nomeExibido}</p>
-          {medicamento?.apresentacoes && (
-            <p className="text-xs text-text-dim mt-0.5">{medicamento.apresentacoes}</p>
-          )}
-        </div>
+      {/* Nome já aparece no cabeçalho do card quando é item único (semMoldura) — não repete
+          aqui, só o botão de copiar individual continua sempre presente. */}
+      <div className={`flex items-start gap-3 ${semMoldura ? 'justify-end' : 'justify-between'}`}>
+        {!semMoldura && (
+          <div className="min-w-0">
+            <p className="font-display text-base font-semibold text-text">{nomeExibido}</p>
+            {medicamento?.apresentacoes && (
+              <p className="text-xs text-text-dim mt-0.5">{medicamento.apresentacoes}</p>
+            )}
+          </div>
+        )}
         <CopyButton texto={texto} label="Copiar" />
       </div>
 

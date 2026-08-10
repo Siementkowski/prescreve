@@ -110,6 +110,23 @@ export function apresentacaoPorId(apresentacoes: Apresentacao[], id: number | nu
   return apresentacoes.find((a) => a.id === id) ?? null
 }
 
+/** Nome exibido no cabeçalho de um tratamento — o título cadastrado, ou (só quando o
+ *  tratamento tem um único item) o nome do medicamento/nome livre desse item. É o nome
+ *  que aparece uma única vez por card (cabeçalho do TratamentoCard e cabeçalho recolhido
+ *  de "Escolha um esquema") — nunca duplicado com o nome dentro do ItemLinha. */
+export function nomeCabecalhoTratamento(
+  tratamento: Tratamento,
+  itens: TratamentoItem[],
+  medicamentos: Medicamento[]
+): string | null {
+  const titulo = tratamento.titulo?.trim()
+  if (titulo) return titulo
+  const itensDoCard = itensDoTratamento(itens, tratamento.id)
+  if (itensDoCard.length !== 1) return null
+  const item = itensDoCard[0]
+  return medicamentoPorId(medicamentos, item.medicamento_id)?.nome ?? item.nome_livre ?? null
+}
+
 /** Texto completo de um tratamento (todos os itens, cada um em duas linhas, separados por
  *  linha em branco) — usado tanto no "Copiar tudo" de um card quanto no "Copiar
  *  prescrição" que junta o esquema escolhido com os complementos marcados. */

@@ -31,6 +31,11 @@ interface ConsultaState {
   complementosSelecionadosIds: number[]
   selecionarPrincipal: (id: number | null) => void
   toggleComplemento: (id: number) => void
+
+  // "Escolha um esquema" recolhe sozinho ao escolher, reabre ao trocar de patologia ou
+  // clicar de novo no cabeçalho — nunca persiste, é do estado da consulta atual.
+  secaoEsquemaAberta: boolean
+  toggleSecaoEsquema: () => void
 }
 
 export const useConsultaStore = create<ConsultaState>()(
@@ -59,15 +64,22 @@ export const useConsultaStore = create<ConsultaState>()(
           patologiaSelecionadaId: null,
           principalSelecionadoId: null,
           complementosSelecionadosIds: [],
+          secaoEsquemaAberta: true,
         }),
       selecionarPatologia: (id) =>
-        set({ patologiaSelecionadaId: id, principalSelecionadoId: null, complementosSelecionadosIds: [] }),
+        set({
+          patologiaSelecionadaId: id,
+          principalSelecionadoId: null,
+          complementosSelecionadosIds: [],
+          secaoEsquemaAberta: true,
+        }),
       irPara: (areaId, patologiaId) =>
         set({
           areaSelecionadaId: areaId,
           patologiaSelecionadaId: patologiaId,
           principalSelecionadoId: null,
           complementosSelecionadosIds: [],
+          secaoEsquemaAberta: true,
         }),
       voltar: () => {
         const { patologiaSelecionadaId, areaSelecionadaId } = get()
@@ -78,13 +90,19 @@ export const useConsultaStore = create<ConsultaState>()(
       principalSelecionadoId: null,
       complementosSelecionadosIds: [],
       selecionarPrincipal: (id) =>
-        set((s) => ({ principalSelecionadoId: s.principalSelecionadoId === id ? null : id })),
+        set((s) => {
+          const novo = s.principalSelecionadoId === id ? null : id
+          return { principalSelecionadoId: novo, secaoEsquemaAberta: novo === null }
+        }),
       toggleComplemento: (id) =>
         set((s) => ({
           complementosSelecionadosIds: s.complementosSelecionadosIds.includes(id)
             ? s.complementosSelecionadosIds.filter((x) => x !== id)
             : [...s.complementosSelecionadosIds, id],
         })),
+
+      secaoEsquemaAberta: true,
+      toggleSecaoEsquema: () => set((s) => ({ secaoEsquemaAberta: !s.secaoEsquemaAberta })),
     }),
     {
       name: 'prescreve-consulta',
