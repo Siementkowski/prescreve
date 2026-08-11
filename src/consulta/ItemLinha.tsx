@@ -1,5 +1,5 @@
 import type { Medicamento, Apresentacao, TratamentoItem, ModoTratamento } from '../admin/types'
-import { textoReceitaDoItem, estaUsandoCustom } from '../core/receita'
+import { textoReceitaDoItem } from '../core/receita'
 import { formatarApresentacao } from '../core/apresentacao'
 import { CopyButton } from './components/CopyButton'
 import { AlertaGestacao } from './components/AlertaGestacao'
@@ -22,7 +22,6 @@ export function ItemLinha({
 }) {
   const nomeExibido = medicamento?.nome ?? item.nome_livre ?? '—'
   const texto = textoReceitaDoItem(item, medicamento?.nome ?? null, apresentacao)
-  const custom = estaUsandoCustom(item.receita_custom)
 
   const detalhes: { rotulo: string; valor: string | null }[] = [
     { rotulo: 'Apresentação', valor: apresentacao ? formatarApresentacao(apresentacao) : null },
@@ -59,9 +58,6 @@ export function ItemLinha({
       {/* Receita montada — o que vai ser colado na prescrição, sempre em destaque. Mono:
           lê como um rótulo de bula, não como prosa qualquer. */}
       <div className="rounded-md bg-bg border border-border px-3 py-2.5">
-        {custom && (
-          <span className="block text-[11px] font-medium text-warn mb-1">Texto customizado</span>
-        )}
         <p className="tabular text-sm text-text font-medium leading-relaxed whitespace-pre-line">{texto || '—'}</p>
       </div>
 

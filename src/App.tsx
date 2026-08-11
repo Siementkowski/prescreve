@@ -63,8 +63,10 @@ function App() {
   return (
     <div className="h-screen w-full bg-bg text-text flex flex-col">
       <div className="shrink-0 px-4 sm:px-6 pt-4">
-        <header className="flex items-center justify-between gap-3 bg-surface border border-border rounded-full pl-5 pr-2.5 py-2.5 shadow-[0_10px_30px_-14px_rgba(32,31,46,0.25)]">
-          <div className="flex items-center gap-5 min-w-0">
+        <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-surface border border-border rounded-full pl-5 pr-2.5 py-2.5 shadow-[0_10px_30px_-14px_rgba(32,31,46,0.25)]">
+          {/* Três colunas de largura equilibrada (1fr/auto/1fr) — a nav fica no centro
+              real do header, não só no meio do espaço que sobra entre logo e avatar. */}
+          <div className="flex items-center min-w-0 justify-self-start">
             <NavLink
               to="/"
               className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight shrink-0"
@@ -72,28 +74,30 @@ function App() {
               <span className="w-2 h-2 rounded-full bg-cat-areas" aria-hidden="true" />
               Prescreve
             </NavLink>
-            <nav className="flex items-center gap-1">
-              <NavLink to="/" end className={navPillClass}>
-                <Home className="w-4 h-4" />
-                <span className="hidden sm:inline">Página Inicial</span>
-              </NavLink>
-              <NavLink to="/consulta" className={navPillClass}>
-                <Stethoscope className="w-4 h-4" />
-                <span className="hidden sm:inline">Consulta</span>
-              </NavLink>
-              <NavLink to="/pediatria" className={navPillClass}>
-                <Baby className="w-4 h-4" />
-                <span className="hidden sm:inline">Pediatria</span>
-              </NavLink>
-              {isEditor && (
-                <NavLink to="/painel" className={() => navPillClass({ isActive: painelAtivo })}>
-                  <Settings className="w-4 h-4" />
-                  <span className="hidden sm:inline">Painel</span>
-                </NavLink>
-              )}
-            </nav>
           </div>
-          <div className="flex items-center gap-2.5 text-sm text-text-dim min-w-0">
+
+          <nav className="flex items-center gap-1 justify-self-center">
+            <NavLink to="/" end className={navPillClass}>
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Página Inicial</span>
+            </NavLink>
+            <NavLink to="/consulta" className={navPillClass}>
+              <Stethoscope className="w-4 h-4" />
+              <span className="hidden sm:inline">Consulta</span>
+            </NavLink>
+            <NavLink to="/pediatria" className={navPillClass}>
+              <Baby className="w-4 h-4" />
+              <span className="hidden sm:inline">Pediatria</span>
+            </NavLink>
+            {isEditor && (
+              <NavLink to="/painel" className={() => navPillClass({ isActive: painelAtivo })}>
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline">Painel</span>
+              </NavLink>
+            )}
+          </nav>
+
+          <div className="flex items-center gap-2.5 text-sm text-text-dim min-w-0 justify-self-end">
             {!isEditor && (
               <span className="hidden md:inline text-warn text-xs bg-warn-dim border border-warn/30 rounded-full px-2.5 py-1 shrink-0">
                 Modo leitura
