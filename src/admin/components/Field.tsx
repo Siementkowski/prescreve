@@ -40,11 +40,18 @@ export function TextAreaField({
   label,
   hint,
   className,
+  textareaClassName,
   ...props
-}: { label: string; hint?: string; className?: string } & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+}: {
+  label: string
+  hint?: string
+  className?: string
+  /** Classes extras no <textarea> em si (ex: fonte mono) — `className` vai no wrapper. */
+  textareaClassName?: string
+} & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <FieldShell label={label} hint={hint} className={className}>
-      <textarea {...props} className={`${inputClass} resize-y min-h-20`} />
+      <textarea {...props} className={`${inputClass} resize-y min-h-20 ${textareaClassName ?? ''}`} />
     </FieldShell>
   )
 }

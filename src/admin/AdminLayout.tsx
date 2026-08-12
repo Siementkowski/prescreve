@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { ArrowLeft, MapPinned, FolderHeart, Pill, Layers, ListChecks, ClipboardCheck } from 'lucide-react'
+import { ArrowLeft, MapPinned, FolderHeart, Pill, Layers, ListChecks, ClipboardCheck, FileCode2 } from 'lucide-react'
 import { OfflineBanner } from './components/OfflineBanner'
 import { useRevisaoStore } from './revisaoStore'
 import { useConfiguracoesStore } from '../core/configuracoes'
@@ -12,6 +12,7 @@ const SECOES = [
   { to: '/painel/medicamentos', label: 'Medicamentos', icone: Pill },
   { to: '/painel/complementos', label: 'Complementos', icone: Layers },
   { to: '/painel/tratamentos', label: 'Prescrições', icone: ListChecks },
+  { to: '/painel/geradores', label: 'Geradores', icone: FileCode2 },
   { to: '/painel/revisao', label: 'Revisão', icone: ClipboardCheck },
 ]
 

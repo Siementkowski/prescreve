@@ -109,6 +109,20 @@ export interface TratamentoItem {
 }
 export type TratamentoItemInput = Omit<TratamentoItem, 'id'>
 
+/** Gerador de anamnese — HTML+JS autocontido, colado no admin e executado isolado num
+ *  iframe sandbox (nunca no DOM da aplicação). `html` é o arquivo inteiro que a pessoa
+ *  cola; `atualizado_em` é mantido pelo banco (trigger), não editável no client. */
+export interface Gerador {
+  id: number
+  nome: string
+  descricao: string | null
+  html: string
+  ativo: boolean
+  ordem: number
+  atualizado_em: string
+}
+export type GeradorInput = Omit<Gerador, 'id' | 'atualizado_em'>
+
 export const LABEL_MODO_AREA: Record<ModoArea, string> = {
   ambulatorial: 'Ambulatorial',
   hospitalar: 'Hospitalar',

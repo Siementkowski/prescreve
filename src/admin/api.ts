@@ -14,6 +14,8 @@ import type {
   TratamentoItem,
   TratamentoItemInput,
   PatologiaComplemento,
+  Gerador,
+  GeradorInput,
 } from './types'
 
 const MENSAGEM_OFFLINE = 'Sem conexão — edição bloqueada até a rede voltar. Sincronizar edições offline exigiria resolver conflitos, e não vale a complexidade: edite no PC com internet.'
@@ -223,4 +225,19 @@ export const tratamentoItensApi = {
     return (data ?? []) as TratamentoItem[]
   },
   reorder: (itens: { id: number; ordem: number }[]) => reorder('tratamento_itens', itens),
+}
+
+export const geradoresApi = {
+  ...crud<Gerador, GeradorInput>('geradores', 'ordem'),
+  /** Só os ativos — a Consulta nunca deve listar um gerador desativado. */
+  async listAtivos(): Promise<Gerador[]> {
+    const { data, error } = await supabase
+      .from('geradores')
+      .select('*')
+      .eq('ativo', true)
+      .order('ordem', { ascending: true })
+    if (error) throw error
+    return (data ?? []) as Gerador[]
+  },
+  reorder: (itens: { id: number; ordem: number }[]) => reorder('geradores', itens),
 }

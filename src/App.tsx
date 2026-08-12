@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Stethoscope, Settings, Baby, Home } from 'lucide-react'
+import { Stethoscope, Settings, Baby, Home, FileText } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
 import { LoginPage } from './core/auth/LoginPage'
 import { useSyncStore } from './core/sync'
@@ -10,12 +10,14 @@ import { PwaUpdatePrompt } from './core/components/PwaUpdatePrompt'
 import { AtualizacaoDisponivelBanner } from './core/components/AtualizacaoDisponivelBanner'
 import { ConsultaPage } from './consulta/ConsultaPage'
 import { PediatriaPage } from './pediatria/PediatriaPage'
+import { AnamnesePage } from './anamnese/AnamnesePage'
 import { AdminLayout } from './admin/AdminLayout'
 import { AreasPage } from './admin/AreasPage'
 import { PatologiasPage } from './admin/PatologiasPage'
 import { MedicamentosPage } from './admin/MedicamentosPage'
 import { ComplementosPage } from './admin/ComplementosPage'
 import { TratamentosPage } from './admin/TratamentosPage'
+import { GeradoresPage } from './admin/GeradoresPage'
 import { RevisaoPage } from './admin/RevisaoPage'
 import { AdminHub } from './admin/AdminHub'
 import { AvisoUsoProfissional } from './core/components/AvisoUsoProfissional'
@@ -89,6 +91,10 @@ function App() {
               <Baby className="w-4 h-4" />
               <span className="hidden sm:inline">Pediatria</span>
             </NavLink>
+            <NavLink to="/anamnese" className={navPillClass}>
+              <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline">Anamnese</span>
+            </NavLink>
             {isEditor && (
               <NavLink to="/painel" className={() => navPillClass({ isActive: painelAtivo })}>
                 <Settings className="w-4 h-4" />
@@ -125,6 +131,7 @@ function App() {
           <Route path="/" element={<AdminHub />} />
           <Route path="/consulta" element={<ConsultaPage />} />
           <Route path="/pediatria" element={<PediatriaPage />} />
+          <Route path="/anamnese" element={<AnamnesePage />} />
           <Route path="/painel" element={<AdminLayout />}>
             <Route index element={<Navigate to="areas" replace />} />
             <Route path="areas" element={<AreasPage />} />
@@ -132,6 +139,7 @@ function App() {
             <Route path="medicamentos" element={<MedicamentosPage />} />
             <Route path="complementos" element={<ComplementosPage />} />
             <Route path="tratamentos" element={<TratamentosPage />} />
+            <Route path="geradores" element={<GeradoresPage />} />
             <Route path="revisao" element={<RevisaoPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
