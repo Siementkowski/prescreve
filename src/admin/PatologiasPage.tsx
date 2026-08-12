@@ -27,8 +27,9 @@ export function PatologiasPage() {
 
   useEffect(() => {
     areasApi.list().then((lista) => {
-      setAreas(lista)
-      if (lista.length > 0) setAreaSelecionada(lista[0].id)
+      const ordenada = [...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      setAreas(ordenada)
+      if (ordenada.length > 0) setAreaSelecionada(ordenada[0].id)
     })
     medicamentosApi.list().then(setMedicamentos)
   }, [])

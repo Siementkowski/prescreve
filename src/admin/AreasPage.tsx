@@ -4,7 +4,6 @@ import { areasApi } from './api'
 import type { Area, AreaInput, ModoArea } from './types'
 import { LABEL_MODO_AREA } from './types'
 import { AdminPageShell } from './components/AdminPageShell'
-import { SortableList } from './components/SortableList'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { IconPicker, IconePorNome } from './components/IconPicker'
 import { ColorPicker } from './components/ColorPicker'
@@ -25,7 +24,11 @@ export function AreasPage() {
   async function recarregar() {
     setCarregando(true)
     try {
-      setAreas(await areasApi.list())
+      // Ordem alfabética — mais fácil de achar a área numa lista grande do que a ordem
+      // de arrasto. A ordem que rege a navegação da Consulta continua salva no banco
+      // (campo `ordem`), só não dá mais pra arrastar aqui pra reorganizar ela.
+      const lista = await areasApi.list()
+      setAreas([...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')))
       setErro(null)
     } catch (e) {
       setErro((e as Error).message)
@@ -94,17 +97,6 @@ export function AreasPage() {
     }
   }
 
-  async function reordenar(novaOrdem: Area[]) {
-    setAreas(novaOrdem)
-    const payload = novaOrdem.map((a, idx) => ({ id: a.id, ordem: idx }))
-    try {
-      await areasApi.reorder(payload)
-    } catch (e) {
-      setErro((e as Error).message)
-      recarregar()
-    }
-  }
-
   return (
     <>
       <AdminPageShell
@@ -119,31 +111,28 @@ export function AreasPage() {
           ) : filtradas.length === 0 ? (
             <p className="text-sm text-text-dim px-1">Nenhuma área encontrada.</p>
           ) : (
-            <SortableList
-              items={filtradas}
-              onReorder={reordenar}
-              renderItem={(area) => (
-                <button
-                  onClick={() => selecionar(area)}
-                  className={`w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-lg border transition-colors ${
-                    selecionadaId === area.id
-                      ? 'bg-accent-dim border-accent'
-                      : 'bg-surface border-border hover:border-text-dim'
-                  }`}
+            filtradas.map((area) => (
+              <button
+                key={area.id}
+                onClick={() => selecionar(area)}
+                className={`w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-lg border transition-colors ${
+                  selecionadaId === area.id
+                    ? 'bg-accent-dim border-accent'
+                    : 'bg-surface border-border hover:border-text-dim'
+                }`}
+              >
+                <span
+                  className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: (area.cor ?? '#2dd4e8') + '22', color: area.cor ?? '#2dd4e8' }}
                 >
-                  <span
-                    className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: (area.cor ?? '#2dd4e8') + '22', color: area.cor ?? '#2dd4e8' }}
-                  >
-                    <IconePorNome nome={area.icone} className="w-3.5 h-3.5" />
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className="block font-display text-[15px] text-text truncate">{area.nome}</span>
-                    <span className="block text-xs text-text-dim">{LABEL_MODO_AREA[area.modo]}</span>
-                  </span>
-                </button>
-              )}
-            />
+                  <IconePorNome nome={area.icone} className="w-3.5 h-3.5" />
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block font-display text-[15px] text-text truncate">{area.nome}</span>
+                  <span className="block text-xs text-text-dim">{LABEL_MODO_AREA[area.modo]}</span>
+                </span>
+              </button>
+            ))
           )
         }
         formulario={
