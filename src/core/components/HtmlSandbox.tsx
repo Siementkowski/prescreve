@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 
-const ALTURA_PADRAO = 640
-const ALTURA_MINIMA = 200
-const ALTURA_MAXIMA = 4000
+// Sem medição ainda: sem `alturaPadrao` (Consulta), preenche a altura do container pai —
+// é o pai que define o quanto de tela está disponível. Com `alturaPadrao` (preview do
+// admin, que fica dentro de um formulário rolável, não da viewport inteira), usa esse
+// valor fixo. Nos dois casos, o scroll que aparece por padrão é o interno do iframe.
+const ALTURA_MINIMA_ACEITA = 40 // abaixo disso, o valor não parece altura de documento real
+const ALTURA_MAXIMA_ACEITA = 20000 // acima disso, é claramente um valor absurdo — ignora
 
 /** Executa HTML colado (geradores de anamnese) isolado num iframe sandbox — nunca no DOM
  *  da aplicação, nunca via dangerouslySetInnerHTML. `sandbox="allow-scripts"` sem
@@ -12,30 +15,48 @@ const ALTURA_MAXIMA = 4000
  *  conferido.
  *
  *  Altura: como o iframe é cross-origin por causa do sandbox, não dá pra medir o conteúdo
- *  de fora — o próprio HTML avisa a altura via postMessage (ver trecho documentado na tela
- *  de Geradores). Sem esse aviso, fica na altura padrão com scroll interno do iframe. */
-export function HtmlSandbox({ html, className }: { html: string; className?: string }) {
-  const [altura, setAltura] = useState(ALTURA_PADRAO)
+ *  de fora — o próprio HTML avisa a altura via postMessage (ver SNIPPET_ALTURA, exibido na
+ *  tela de Geradores). Até chegar o primeiro aviso válido, o iframe preenche o espaço
+ *  disponível (ou `alturaPadrao`, se informado) com scroll interno — nunca os dois scrolls
+ *  (página + iframe) ao mesmo tempo, porque só um dos dois cresce além do necessário. */
+export function HtmlSandbox({
+  html,
+  className,
+  alturaPadrao,
+}: {
+  html: string
+  className?: string
+  /** Altura fixa (px) antes/sem medição — omitir faz preencher 100% do container pai
+   *  (uso na Consulta, que já reserva a altura da viewport). O preview do admin passa um
+   *  valor fixo porque vive dentro de um formulário rolável, não da viewport inteira. */
+  alturaPadrao?: number
+}) {
+  const [alturaMedida, setAlturaMedida] = useState<number | null>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
-    setAltura(ALTURA_PADRAO)
+    setAlturaMedida(null) // HTML novo — volta a preencher o espaço até medir de novo
   }, [html])
 
   useEffect(() => {
     function aoReceberMensagem(e: MessageEvent) {
       // Sandbox sem allow-same-origin faz e.origin vir como "null" — não dá pra validar
       // por origem. Validamos por e.source (é sempre a janela deste iframe específico) e
-      // pelo formato exato da mensagem, então uma mensagem de outra origem/aba não afeta.
+      // pelo formato exato da mensagem, então uma mensagem de outra origem/aba/iframe não
+      // afeta este componente.
       if (e.source !== iframeRef.current?.contentWindow) return
       const dados = e.data
-      if (dados && typeof dados === 'object' && dados.tipo === 'prescreve:altura' && typeof dados.altura === 'number') {
-        setAltura(Math.min(ALTURA_MAXIMA, Math.max(ALTURA_MINIMA, Math.round(dados.altura))))
-      }
+      if (!dados || typeof dados !== 'object' || dados.tipo !== 'prescreve:altura') return
+      const altura = dados.altura
+      if (typeof altura !== 'number' || !Number.isFinite(altura)) return
+      if (altura < ALTURA_MINIMA_ACEITA || altura > ALTURA_MAXIMA_ACEITA) return // valor absurdo — ignora
+      setAlturaMedida(Math.round(altura))
     }
     window.addEventListener('message', aoReceberMensagem)
     return () => window.removeEventListener('message', aoReceberMensagem)
   }, [])
+
+  const altura = alturaMedida ?? alturaPadrao ?? '100%'
 
   return (
     <iframe
@@ -43,15 +64,17 @@ export function HtmlSandbox({ html, className }: { html: string; className?: str
       srcDoc={html}
       sandbox="allow-scripts"
       title="Gerador"
-      className={`w-full border-0 rounded-lg ${className ?? ''}`}
+      className={`w-full border-0 rounded-lg block ${className ?? ''}`}
       style={{ height: altura }}
     />
   )
 }
 
-/** Trecho pra colar no `<head>` (ou fim do `<body>`) do HTML do gerador — sem isso, o
- *  iframe fica na altura padrão com scroll interno em vez de ajustar sozinho. Exportado
- *  pra tela de admin exibir literalmente o mesmo texto (fonte única, nunca desalinha). */
+/** Trecho pra colar no HTML do gerador — mede a altura real do documento, avisa o app via
+ *  postMessage, e reage a mudanças de conteúdo (seções que abrem, campos que aparecem) com
+ *  ResizeObserver. Opcional, mas recomendado: sem ele, o gerador fica na altura padrão com
+ *  scroll interno em vez de acompanhar o conteúdo. Exportado pra tela de admin exibir
+ *  literalmente o mesmo texto (fonte única, nunca desalinha). */
 export const SNIPPET_ALTURA = `<script>
   function avisarAltura() {
     parent.postMessage({ tipo: 'prescreve:altura', altura: document.documentElement.scrollHeight }, '*');

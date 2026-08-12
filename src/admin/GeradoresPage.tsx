@@ -180,8 +180,11 @@ export function GeradoresPage() {
                 <p className="text-xs text-text-dim leading-relaxed">
                   O HTML colado abaixo roda dentro de um iframe sandbox (sem <code>allow-same-origin</code>),
                   numa origem opaca própria: o script funciona normalmente, mas não enxerga
-                  localStorage, cookies, nem a sessão do Supabase. Pra altura ajustar sozinha
-                  conforme o conteúdo cresce, cole este trecho no seu HTML:
+                  localStorage, cookies, nem a sessão do Supabase.
+                </p>
+                <p className="text-xs text-text-dim leading-relaxed">
+                  Opcional, mas recomendado: cole este trecho no fim do seu HTML pra altura
+                  acompanhar sozinha o conteúdo (seções que abrem, campos que aparecem):
                 </p>
                 <div className="relative">
                   <pre className="text-[11px] font-mono bg-bg border border-border rounded-md p-2.5 overflow-x-auto whitespace-pre-wrap">
@@ -190,7 +193,8 @@ export function GeradoresPage() {
                   <CopyButton texto={SNIPPET_ALTURA} label="Copiar" className="absolute top-1.5 right-1.5" />
                 </div>
                 <p className="text-xs text-text-dim/80">
-                  Sem esse trecho, o gerador aparece numa altura padrão generosa com scroll interno.
+                  Sem esse trecho, o gerador preenche o espaço disponível na tela com scroll
+                  interno — funciona, só não cresce/encolhe sozinho conforme o conteúdo muda.
                 </p>
               </div>
 
@@ -237,7 +241,7 @@ export function GeradoresPage() {
               <span className="text-[11px] font-medium text-text-dim uppercase tracking-wide">Preview</span>
               {form.html.trim() ? (
                 <div className="border border-border rounded-lg overflow-hidden bg-white">
-                  <HtmlSandbox html={form.html} />
+                  <HtmlSandbox html={form.html} alturaPadrao={500} />
                 </div>
               ) : (
                 <p className="text-xs text-text-dim border border-dashed border-border rounded-lg px-3 py-6 text-center">
