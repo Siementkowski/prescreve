@@ -19,6 +19,9 @@ import { textoDaVia } from './via'
 export interface DadosItemReceita {
   nomeMedicamento: string | null | undefined // resolvido: nome do cadastro OU nome_livre
   apresentacao: DadosApresentacao | null | undefined // resolvida a partir de apresentacao_id
+  // Texto livre de apresentação — só quando o item não tem medicamento cadastrado (não há
+  // apresentações pra escolher). Entra na mesma posição que `apresentacao` entraria.
+  apresentacaoLivre: string | null | undefined
   quantidade: string | null | undefined
   dose: string | null | undefined
   via: string | null | undefined
@@ -45,7 +48,8 @@ function juntarSegmentos(segmentos: Segmento[]): string {
 }
 
 /** Linha 1 — identificação: "Dipirona 500 mg". A concentração vem da apresentação
- *  escolhida; na ausência dela, a dose livre (campo legado) faz esse papel. */
+ *  escolhida; sem cadastro, a apresentação em texto livre faz esse papel; sem nenhuma das
+ *  duas, a dose livre (campo legado) é o último fallback. */
 function montarLinha1(dados: DadosItemReceita): string {
   const segmentos: Segmento[] = []
 
@@ -53,7 +57,7 @@ function montarLinha1(dados: DadosItemReceita): string {
   if (nome) segmentos.push({ texto: nome, virgulaAntes: false })
 
   const concentracao = dados.apresentacao ? formatarConcentracao(dados.apresentacao) : null
-  const forca = concentracao ?? dados.dose?.trim() ?? null
+  const forca = concentracao ?? dados.apresentacaoLivre?.trim() ?? dados.dose?.trim() ?? null
   if (forca) segmentos.push({ texto: forca, virgulaAntes: false })
 
   return juntarSegmentos(segmentos)
@@ -70,7 +74,7 @@ function montarLinha2(dados: DadosItemReceita): string {
   if (via) segmentos.push({ texto: via, virgulaAntes: false })
 
   const quantidade = dados.quantidade?.trim()
-  const forma = dados.apresentacao?.forma?.trim()
+  const forma = dados.apresentacao?.forma?.trim() ?? dados.apresentacaoLivre?.trim()
   if (quantidade && forma) {
     segmentos.push({ texto: `${quantidade} ${formaComQuantidade(forma, quantidade)}`, virgulaAntes: false })
   }
@@ -113,6 +117,7 @@ export interface ItemReceitaBruto {
   medicamento_id: number | null
   nome_livre: string | null
   apresentacao_id: number | null
+  apresentacao_livre: string | null
   quantidade: string | null
   dose: string | null
   via: string | null
@@ -134,6 +139,7 @@ export function textoReceitaDoItem(
   return gerarTextoReceita({
     nomeMedicamento,
     apresentacao: item.apresentacao_id ? apresentacao : null,
+    apresentacaoLivre: item.apresentacao_id ? null : item.apresentacao_livre,
     quantidade: item.quantidade,
     dose: item.dose,
     via: item.via,

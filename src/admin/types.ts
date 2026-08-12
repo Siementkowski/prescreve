@@ -93,6 +93,9 @@ export interface TratamentoItem {
   medicamento_id: number | null
   nome_livre: string | null
   apresentacao_id: number | null
+  // Só usado quando o item é 'Nome livre' — sem medicamento cadastrado não há apresentacoes
+  // pra escolher, então esse texto entra na receita no lugar da apresentação estruturada.
+  apresentacao_livre: string | null
   quantidade: string | null
   dose: string | null
   via: string | null

@@ -18,6 +18,7 @@ function saoIguais(a: TratamentoItem, b: TratamentoItem): boolean {
     a.medicamento_id === b.medicamento_id &&
     a.nome_livre === b.nome_livre &&
     a.apresentacao_id === b.apresentacao_id &&
+    a.apresentacao_livre === b.apresentacao_livre &&
     a.quantidade === b.quantidade &&
     a.dose === b.dose &&
     a.via === b.via &&
@@ -69,6 +70,7 @@ export function TratamentoItemRow({
   const dadosReceita = {
     nomeMedicamento: nomeResolvido,
     apresentacao: apresentacaoSelecionada,
+    apresentacaoLivre: local.apresentacao_livre,
     quantidade: local.quantidade,
     dose: local.dose,
     via: local.via,
@@ -89,6 +91,7 @@ export function TratamentoItemRow({
         medicamento_id,
         nome_livre,
         apresentacao_id,
+        apresentacao_livre,
         quantidade,
         dose,
         via,
@@ -103,6 +106,7 @@ export function TratamentoItemRow({
         medicamento_id,
         nome_livre,
         apresentacao_id,
+        apresentacao_livre,
         quantidade,
         dose,
         via,
@@ -132,7 +136,7 @@ export function TratamentoItemRow({
             type="button"
             onClick={() => {
               setUsaCadastro(true)
-              setLocal({ ...local, nome_livre: null })
+              setLocal({ ...local, nome_livre: null, apresentacao_livre: null })
             }}
             className={`px-2 py-1 transition-colors ${usaCadastro ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
           >
@@ -142,7 +146,7 @@ export function TratamentoItemRow({
             type="button"
             onClick={() => {
               setUsaCadastro(false)
-              setLocal({ ...local, medicamento_id: null })
+              setLocal({ ...local, medicamento_id: null, apresentacao_id: null })
             }}
             className={`px-2 py-1 transition-colors ${!usaCadastro ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
           >
@@ -178,8 +182,10 @@ export function TratamentoItemRow({
         </button>
       </div>
 
-      {/* Apresentação do catálogo — carrega as apresentações do medicamento escolhido;
-          quantidade é texto porque aceita faixa ("1 a 2"). */}
+      {/* Apresentação + quantidade — no Cadastro vem do seletor (carrega as apresentações
+          do medicamento escolhido); no Nome livre é texto solto, já que sem medicamento
+          cadastrado não há apresentações pra escolher. Quantidade é texto porque aceita
+          faixa ("1 a 2") nos dois modos. */}
       {usaCadastro && local.medicamento_id && (
         <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
           <label className="flex flex-col gap-1.5">
@@ -203,6 +209,27 @@ export function TratamentoItemRow({
             placeholder="1 a 2"
             className="w-28"
             disabled={!local.apresentacao_id}
+          />
+        </div>
+      )}
+
+      {!usaCadastro && (
+        <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
+          <TextField
+            label="Apresentação"
+            hint="Texto livre — sem medicamento cadastrado não há apresentações pra escolher"
+            value={local.apresentacao_livre ?? ''}
+            onChange={(e) => setLocal({ ...local, apresentacao_livre: e.target.value })}
+            placeholder='Ex: "bolsa 500ml"'
+          />
+          <TextField
+            label="Quantidade"
+            hint="Aceita faixa"
+            value={local.quantidade ?? ''}
+            onChange={(e) => setLocal({ ...local, quantidade: e.target.value })}
+            placeholder="1 a 2"
+            className="w-28"
+            disabled={!local.apresentacao_livre?.trim()}
           />
         </div>
       )}

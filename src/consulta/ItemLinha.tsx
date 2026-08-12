@@ -24,7 +24,7 @@ export function ItemLinha({
   const texto = textoReceitaDoItem(item, medicamento?.nome ?? null, apresentacao)
 
   const detalhes: { rotulo: string; valor: string | null }[] = [
-    { rotulo: 'Apresentação', valor: apresentacao ? formatarApresentacao(apresentacao) : null },
+    { rotulo: 'Apresentação', valor: apresentacao ? formatarApresentacao(apresentacao) : item.apresentacao_livre },
     { rotulo: 'Quantidade', valor: item.quantidade },
     { rotulo: 'Dose', valor: item.dose },
     { rotulo: 'Via', valor: item.via },

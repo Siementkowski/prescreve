@@ -217,6 +217,7 @@ export function ComplementosPage() {
         medicamento_id: null,
         nome_livre: '',
         apresentacao_id: null,
+        apresentacao_livre: '',
         quantidade: '',
         dose: '',
         via: '',
