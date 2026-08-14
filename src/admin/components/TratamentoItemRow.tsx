@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { Trash2, Pencil } from 'lucide-react'
+import { Trash2, Pencil, Calculator } from 'lucide-react'
 import type { Medicamento, Apresentacao, ModoTratamento, TratamentoItem } from '../types'
 import { gerarTextoReceita, gerarTextoPadrao, estaUsandoCustom } from '../../core/receita'
+import { calcularDose, formatarDoseCalculada } from '../../core/dose'
 import { MedicamentoPicker } from './MedicamentoPicker'
 import { ApresentacaoPicker, type NovaApresentacaoDados } from './ApresentacaoPicker'
 import { TextField, TextAreaField } from './Field'
@@ -13,31 +13,16 @@ function resolveNome(item: Pick<TratamentoItem, 'medicamento_id' | 'nome_livre'>
   return item.nome_livre ?? ''
 }
 
-function saoIguais(a: TratamentoItem, b: TratamentoItem): boolean {
-  return (
-    a.medicamento_id === b.medicamento_id &&
-    a.nome_livre === b.nome_livre &&
-    a.apresentacao_id === b.apresentacao_id &&
-    a.apresentacao_livre === b.apresentacao_livre &&
-    a.quantidade === b.quantidade &&
-    a.dose === b.dose &&
-    a.via === b.via &&
-    a.posologia === b.posologia &&
-    a.duracao === b.duracao &&
-    a.condicao === b.condicao &&
-    a.diluicao === b.diluicao &&
-    a.receita_custom === b.receita_custom &&
-    a.observacoes === b.observacoes
-  )
-}
-
+/** Um item dentro do rascunho do esquema — totalmente controlado (sem buffer local, sem
+ *  Salvar/Cancelar próprio): cada mudança já entra no rascunho do EsquemaEditor, e só vira
+ *  escrita no banco quando o esquema inteiro é salvo. */
 export function TratamentoItemRow({
   item,
   medicamentos,
   apresentacoes,
   modoTratamento,
   arrastando,
-  onSalvar,
+  onChange,
   onExcluir,
   onCriarMedicamento,
   onCriarApresentacao,
@@ -47,82 +32,43 @@ export function TratamentoItemRow({
   apresentacoes: Apresentacao[]
   modoTratamento: ModoTratamento
   arrastando: boolean
-  onSalvar: (id: number, dados: Partial<TratamentoItem>) => Promise<void>
-  onExcluir: (id: number) => void
+  onChange: (patch: Partial<TratamentoItem>) => void
+  onExcluir: () => void
   onCriarMedicamento?: (nome: string) => Promise<Medicamento>
   onCriarApresentacao?: (medicamentoId: number, dados: NovaApresentacaoDados) => Promise<Apresentacao>
 }) {
-  const [local, setLocal] = useState<TratamentoItem>(item)
-  const [salvando, setSalvando] = useState(false)
-  const [erro, setErro] = useState<string | null>(null)
-  const [usaCadastro, setUsaCadastro] = useState(!!item.medicamento_id)
+  // Item recém-criado (os dois nulos) cai em "Cadastro" por padrão; assim que um dos dois
+  // modos é usado (medicamento_id ou nome_livre preenchidos), o estado real decide sozinho.
+  const modoAtual: 'cadastro' | 'livre' = item.medicamento_id ? 'cadastro' : item.nome_livre ? 'livre' : 'cadastro'
 
-  useEffect(() => {
-    setLocal(item)
-    setUsaCadastro(!!item.medicamento_id)
-  }, [item])
-
-  const dirty = !saoIguais(local, item)
-  const nomeResolvido = resolveNome(local, medicamentos)
-  const apresentacoesDoMedicamento = apresentacoes.filter((a) => a.medicamento_id === local.medicamento_id)
-  const apresentacaoSelecionada = apresentacoesDoMedicamento.find((a) => a.id === local.apresentacao_id) ?? null
+  const nomeResolvido = resolveNome(item, medicamentos)
+  const apresentacoesDoMedicamento = apresentacoes.filter((a) => a.medicamento_id === item.medicamento_id)
+  const apresentacaoSelecionada = apresentacoesDoMedicamento.find((a) => a.id === item.apresentacao_id) ?? null
 
   const dadosReceita = {
     nomeMedicamento: nomeResolvido,
     apresentacao: apresentacaoSelecionada,
-    apresentacaoLivre: local.apresentacao_livre,
-    quantidade: local.quantidade,
-    dose: local.dose,
-    via: local.via,
-    posologia: local.posologia,
-    duracao: local.duracao,
-    condicao: local.condicao,
+    apresentacaoLivre: item.apresentacao_livre,
+    quantidade: item.quantidade,
+    dose: item.dose,
+    via: item.via,
+    posologia: item.posologia,
+    duracao: item.duracao,
+    condicao: item.condicao,
   }
   const textoPadrao = gerarTextoPadrao({ ...dadosReceita, receitaCustom: null })
-  const textoFinal = gerarTextoReceita({ ...dadosReceita, receitaCustom: local.receita_custom })
-  const usandoCustom = estaUsandoCustom(local.receita_custom)
+  const textoFinal = gerarTextoReceita({ ...dadosReceita, receitaCustom: item.receita_custom })
+  const usandoCustom = estaUsandoCustom(item.receita_custom)
 
-  async function salvar() {
-    setSalvando(true)
-    setErro(null)
-    try {
-      // Só os campos editáveis — id/tratamento_id/ordem não fazem parte do payload de update.
-      const {
-        medicamento_id,
-        nome_livre,
-        apresentacao_id,
-        apresentacao_livre,
-        quantidade,
-        dose,
-        via,
-        posologia,
-        duracao,
-        condicao,
-        diluicao,
-        receita_custom,
-        observacoes,
-      } = local
-      await onSalvar(item.id, {
-        medicamento_id,
-        nome_livre,
-        apresentacao_id,
-        apresentacao_livre,
-        quantidade,
-        dose,
-        via,
-        posologia,
-        duracao,
-        condicao,
-        diluicao,
-        receita_custom,
-        observacoes,
-      })
-    } catch (e) {
-      setErro((e as Error).message)
-    } finally {
-      setSalvando(false)
-    }
-  }
+  // Dose derivada de quantidade × concentração — não digitada. Se o valor guardado em
+  // `dose` bate com o calculado, é automático; se diverge (a pessoa digitou algo diferente
+  // por cima), fica marcado como override, sem esconder o que foi calculado.
+  const doseCalculada = apresentacaoSelecionada ? calcularDose(apresentacaoSelecionada, item.quantidade) : null
+  const doseCalculadaTexto = doseCalculada ? formatarDoseCalculada(doseCalculada) : null
+  // Só conta como "override" quando existe um valor calculado sendo sobrescrito — dose
+  // digitada sem nenhum cálculo possível (sem concentração cadastrada, por ex.) é apenas
+  // texto manual, não uma divergência de nada.
+  const doseEhOverride = !!doseCalculadaTexto && !!item.dose?.trim() && item.dose.trim() !== doseCalculadaTexto
 
   return (
     <div
@@ -134,38 +80,32 @@ export function TratamentoItemRow({
         <div className="flex rounded-md overflow-hidden border border-border text-xs shrink-0">
           <button
             type="button"
-            onClick={() => {
-              setUsaCadastro(true)
-              setLocal({ ...local, nome_livre: null, apresentacao_livre: null })
-            }}
-            className={`px-2 py-1 transition-colors ${usaCadastro ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
+            onClick={() => onChange({ nome_livre: null, apresentacao_livre: null })}
+            className={`px-2 py-1 transition-colors ${modoAtual === 'cadastro' ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
           >
             Cadastro
           </button>
           <button
             type="button"
-            onClick={() => {
-              setUsaCadastro(false)
-              setLocal({ ...local, medicamento_id: null, apresentacao_id: null })
-            }}
-            className={`px-2 py-1 transition-colors ${!usaCadastro ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
+            onClick={() => onChange({ medicamento_id: null, apresentacao_id: null, nome_livre: item.nome_livre ?? '' })}
+            className={`px-2 py-1 transition-colors ${modoAtual === 'livre' ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
           >
             Nome livre
           </button>
         </div>
 
         <div className="flex-1">
-          {usaCadastro ? (
+          {modoAtual === 'cadastro' ? (
             <MedicamentoPicker
               medicamentos={medicamentos}
-              valorId={local.medicamento_id}
-              onSelecionar={(id) => setLocal({ ...local, medicamento_id: id, apresentacao_id: null })}
+              valorId={item.medicamento_id}
+              onSelecionar={(id) => onChange({ medicamento_id: id, apresentacao_id: null })}
               onCriar={onCriarMedicamento}
             />
           ) : (
             <input
-              value={local.nome_livre ?? ''}
-              onChange={(e) => setLocal({ ...local, nome_livre: e.target.value })}
+              value={item.nome_livre ?? ''}
+              onChange={(e) => onChange({ nome_livre: e.target.value })}
               placeholder='Ex: "SF 0,9%"'
               className="w-full bg-surface-2 border border-border rounded-md px-3 py-2 text-sm text-text outline-none focus:border-accent transition-colors"
             />
@@ -174,7 +114,7 @@ export function TratamentoItemRow({
 
         <button
           type="button"
-          onClick={() => onExcluir(item.id)}
+          onClick={onExcluir}
           className="shrink-0 text-text-dim hover:text-danger transition-colors p-1.5"
           title="Remover item"
         >
@@ -182,21 +122,17 @@ export function TratamentoItemRow({
         </button>
       </div>
 
-      {/* Apresentação + quantidade — no Cadastro vem do seletor (carrega as apresentações
-          do medicamento escolhido); no Nome livre é texto solto, já que sem medicamento
-          cadastrado não há apresentações pra escolher. Quantidade é texto porque aceita
-          faixa ("1 a 2") nos dois modos. */}
-      {usaCadastro && local.medicamento_id && (
+      {modoAtual === 'cadastro' && item.medicamento_id && (
         <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
           <label className="flex flex-col gap-1.5">
             <span className="text-[11px] font-medium text-text-dim uppercase tracking-wide">Apresentação</span>
             <ApresentacaoPicker
               apresentacoes={apresentacoesDoMedicamento}
-              valorId={local.apresentacao_id}
-              onSelecionar={(id) => setLocal({ ...local, apresentacao_id: id })}
+              valorId={item.apresentacao_id}
+              onSelecionar={(id) => onChange({ apresentacao_id: id })}
               onCriar={
-                onCriarApresentacao && local.medicamento_id
-                  ? (dados) => onCriarApresentacao(local.medicamento_id!, dados)
+                onCriarApresentacao && item.medicamento_id
+                  ? (dados) => onCriarApresentacao(item.medicamento_id!, dados)
                   : undefined
               }
             />
@@ -204,66 +140,84 @@ export function TratamentoItemRow({
           <TextField
             label="Quantidade"
             hint="Aceita faixa"
-            value={local.quantidade ?? ''}
-            onChange={(e) => setLocal({ ...local, quantidade: e.target.value })}
+            value={item.quantidade ?? ''}
+            onChange={(e) => onChange({ quantidade: e.target.value })}
             placeholder="1 a 2"
             className="w-28"
-            disabled={!local.apresentacao_id}
+            disabled={!item.apresentacao_id}
           />
         </div>
       )}
 
-      {!usaCadastro && (
+      {modoAtual === 'livre' && (
         <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
           <TextField
             label="Apresentação"
             hint="Texto livre — sem medicamento cadastrado não há apresentações pra escolher"
-            value={local.apresentacao_livre ?? ''}
-            onChange={(e) => setLocal({ ...local, apresentacao_livre: e.target.value })}
+            value={item.apresentacao_livre ?? ''}
+            onChange={(e) => onChange({ apresentacao_livre: e.target.value })}
             placeholder='Ex: "bolsa 500ml"'
           />
           <TextField
             label="Quantidade"
             hint="Aceita faixa"
-            value={local.quantidade ?? ''}
-            onChange={(e) => setLocal({ ...local, quantidade: e.target.value })}
+            value={item.quantidade ?? ''}
+            onChange={(e) => onChange({ quantidade: e.target.value })}
             placeholder="1 a 2"
             className="w-28"
-            disabled={!local.apresentacao_livre?.trim()}
+            disabled={!item.apresentacao_livre?.trim()}
           />
         </div>
       )}
 
       <div className={`grid gap-3 ${modoTratamento !== 'ambulatorial' ? 'grid-cols-5' : 'grid-cols-4'}`}>
-        <TextField
-          label="Dose"
-          value={local.dose ?? ''}
-          onChange={(e) => setLocal({ ...local, dose: e.target.value })}
-          placeholder="100 mg"
-        />
+        <label className="flex flex-col gap-1.5">
+          <span className="flex items-center gap-1 text-[11px] font-medium text-text-dim uppercase tracking-wide">
+            Dose
+            {doseEhOverride ? (
+              <Pencil className="w-3 h-3 text-warn" />
+            ) : doseCalculada ? (
+              <Calculator className="w-3 h-3 text-text-faint" />
+            ) : null}
+          </span>
+          <input
+            value={item.dose ?? ''}
+            onChange={(e) => onChange({ dose: e.target.value })}
+            placeholder={doseCalculadaTexto ?? '100 mg'}
+            className={`bg-surface-2 border rounded-lg px-3 py-2 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent/40 transition-colors w-full ${
+              doseEhOverride ? 'border-warn/60 text-warn' : 'border-border text-text'
+            }`}
+          />
+          {doseCalculada && !item.dose?.trim() && (
+            <span className="text-xs text-text-dim/80">Calculado: {doseCalculadaTexto} — digite pra sobrescrever</span>
+          )}
+          {doseEhOverride && doseCalculadaTexto && (
+            <span className="text-xs text-warn/80">Digitado — o cálculo daria {doseCalculadaTexto}</span>
+          )}
+        </label>
         <TextField
           label="Via"
-          value={local.via ?? ''}
-          onChange={(e) => setLocal({ ...local, via: e.target.value })}
+          value={item.via ?? ''}
+          onChange={(e) => onChange({ via: e.target.value })}
           placeholder="VO"
         />
         <TextField
           label="Posologia"
-          value={local.posologia ?? ''}
-          onChange={(e) => setLocal({ ...local, posologia: e.target.value })}
+          value={item.posologia ?? ''}
+          onChange={(e) => onChange({ posologia: e.target.value })}
           placeholder="6/6h"
         />
         <TextField
           label="Duração"
-          value={local.duracao ?? ''}
-          onChange={(e) => setLocal({ ...local, duracao: e.target.value })}
+          value={item.duracao ?? ''}
+          onChange={(e) => onChange({ duracao: e.target.value })}
           placeholder="5 dias"
         />
         {modoTratamento !== 'ambulatorial' && (
           <TextField
             label="Diluição"
-            value={local.diluicao ?? ''}
-            onChange={(e) => setLocal({ ...local, diluicao: e.target.value })}
+            value={item.diluicao ?? ''}
+            onChange={(e) => onChange({ diluicao: e.target.value })}
             placeholder="SF 100ml"
           />
         )}
@@ -272,15 +226,15 @@ export function TratamentoItemRow({
       <TextField
         label="Condição (SOS)"
         hint='Só pra quando não há duração fixa — "se dor ou febre", "se náusea". Deixe em branco pra uso contínuo.'
-        value={local.condicao ?? ''}
-        onChange={(e) => setLocal({ ...local, condicao: e.target.value })}
+        value={item.condicao ?? ''}
+        onChange={(e) => onChange({ condicao: e.target.value })}
         placeholder="se dor ou febre"
       />
 
       <TextAreaField
         label="Observações do item"
-        value={local.observacoes ?? ''}
-        onChange={(e) => setLocal({ ...local, observacoes: e.target.value })}
+        value={item.observacoes ?? ''}
+        onChange={(e) => onChange({ observacoes: e.target.value })}
         rows={2}
       />
 
@@ -306,32 +260,10 @@ export function TratamentoItemRow({
       <TextAreaField
         label="Receita customizada (opcional)"
         hint="Preencha só quando o texto automático não servir — ele passa a ser ignorado."
-        value={local.receita_custom ?? ''}
-        onChange={(e) => setLocal({ ...local, receita_custom: e.target.value })}
+        value={item.receita_custom ?? ''}
+        onChange={(e) => onChange({ receita_custom: e.target.value })}
         rows={2}
       />
-
-      {erro && <p className="text-xs text-danger">{erro}</p>}
-
-      {dirty && (
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => setLocal(item)}
-            className="text-xs text-text-dim hover:text-text transition-colors px-2 py-1"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={salvar}
-            disabled={salvando}
-            className="text-xs bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text rounded-lg px-3 py-1.5 transition-colors"
-          >
-            {salvando ? 'Salvando…' : 'Salvar item'}
-          </button>
-        </div>
-      )}
     </div>
   )
 }
