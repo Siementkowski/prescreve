@@ -47,11 +47,17 @@ export type MedicamentoInput = Omit<Medicamento, 'id'>
 export interface Apresentacao {
   id: number
   medicamento_id: number
+  // Ainda text no banco — a conversão pra enum forma_farmaceutica fica pendente até o
+  // registro "frasco" (Soro Fisiológico) ser resolvido manualmente. Ver src/core/formas.ts.
   forma: string
   concentracao: number | null
   unidade: string | null
   por_volume: number | null
   por_volume_unidade: string | null
+  // Só forma 'gotas' usa — varia por produto (dipirona ~20 gotas/mL, paracetamol ~15), não
+  // dá pra assumir um valor padrão. É o que permite converter mg em gotas na calculadora
+  // pediátrica. Null até ser preenchido caso a caso.
+  gotas_por_ml: number | null
   descricao: string | null
   ordem: number
 }

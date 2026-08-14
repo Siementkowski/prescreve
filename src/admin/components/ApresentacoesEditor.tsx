@@ -36,6 +36,7 @@ export function ApresentacoesEditor({ medicamentoId }: { medicamentoId: number |
         unidade: null,
         por_volume: null,
         por_volume_unidade: null,
+        gotas_por_ml: null,
         descricao: null,
         ordem: apresentacoes.length,
       })

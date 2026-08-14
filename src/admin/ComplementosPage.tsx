@@ -283,6 +283,7 @@ export function ComplementosPage() {
       unidade: dados.unidade.trim() || null,
       por_volume: dados.por_volume,
       por_volume_unidade: dados.por_volume_unidade.trim() || null,
+      gotas_por_ml: null,
       descricao: null,
       ordem,
     })
