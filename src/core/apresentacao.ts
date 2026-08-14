@@ -1,12 +1,13 @@
-// Formatação de apresentações estruturadas (forma + concentração ± volume) — usado tanto
-// no rótulo exibido no cadastro do medicamento quanto no segmento de receita gerado.
+// Formatação de apresentações estruturadas (forma + concentração ± volume ± extras) — usado
+// tanto no rótulo exibido no cadastro do medicamento/seletor de item quanto no segmento de
+// receita gerado. A geração do rótulo em si vive em core/formas.ts (gerarRotuloApresentacao),
+// guiada pelo descritor FORMAS_CONFIG — aqui só adapta pro formato que a receita e o restante
+// do app já conhecem.
 
-export interface DadosApresentacao {
+import { gerarRotuloApresentacao, type DadosCamposForma } from './formas'
+
+export interface DadosApresentacao extends DadosCamposForma {
   forma: string | null | undefined
-  concentracao: number | null | undefined
-  unidade: string | null | undefined
-  por_volume: number | null | undefined
-  por_volume_unidade: string | null | undefined
   descricao?: string | null | undefined
 }
 
@@ -15,7 +16,8 @@ function formatarNumero(n: number): string {
   return Number.isInteger(n) ? String(n) : String(n).replace('.', ',')
 }
 
-/** "500 mg", "250 mg/5 ml", "500 mg/ml" (por_volume = 1 some da exibição). */
+/** "500 mg", "250 mg/5 ml", "500 mg/ml" (por_volume = 1 some da exibição). Só a parte de
+ *  concentração — usada isolada na linha 1 da receita ("Dipirona 500 mg"). */
 export function formatarConcentracao(a: DadosApresentacao): string | null {
   if (a.concentracao == null || !a.unidade?.trim()) return null
   let texto = `${formatarNumero(a.concentracao)} ${a.unidade.trim()}`
@@ -27,15 +29,14 @@ export function formatarConcentracao(a: DadosApresentacao): string | null {
   return texto
 }
 
-/** Rótulo completo pra listas/seletores: "comprimido 500 mg". Usa a descrição manual
- *  quando cadastrada (cobre apresentações que não cabem no padrão forma+concentração). */
+/** Rótulo completo pra listas/seletores: "Comprimido 500 mg", "Ampola 500 mg/mL, 10 mL".
+ *  Usa a descrição manual quando cadastrada (cobre apresentações que não cabem no padrão
+ *  forma+concentração); senão delega a montagem pro descritor de formas (core/formas.ts) —
+ *  nenhuma regra de forma específica mora aqui. */
 export function formatarApresentacao(a: DadosApresentacao): string {
   if (a.descricao?.trim()) return a.descricao.trim()
-  const partes: string[] = []
-  if (a.forma?.trim()) partes.push(a.forma.trim())
-  const concentracao = formatarConcentracao(a)
-  if (concentracao) partes.push(concentracao)
-  return partes.join(' ')
+  if (!a.forma?.trim()) return ''
+  return gerarRotuloApresentacao(a.forma.trim(), a)
 }
 
 /** Pluraliza a forma farmacêutica (comprimido → comprimidos). Regras simples de PT-BR,

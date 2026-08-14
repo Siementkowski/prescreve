@@ -2,31 +2,32 @@ import { useState } from 'react'
 import { ChevronDown, Plus } from 'lucide-react'
 import type { Apresentacao } from '../types'
 import { formatarApresentacao } from '../../core/apresentacao'
-import { TextField } from './Field'
+import { camposFaltando, type DadosCamposForma, type FormaFarmaceutica } from '../../core/formas'
+import { FormaToggle } from './FormaToggle'
+import { CamposFormaDinamicos } from './CamposFormaDinamicos'
 
-function numOuNull(v: string): number | null {
-  if (v.trim() === '') return null
-  const n = Number(v.replace(',', '.'))
-  return Number.isFinite(n) ? n : null
-}
-
-const NOVO_VAZIO = {
+const NOVO_VAZIO: DadosCamposForma & { forma: string } = {
   forma: '',
-  concentracao: null as number | null,
-  unidade: '',
-  por_volume: null as number | null,
-  por_volume_unidade: '',
+  concentracao: null,
+  unidade: null,
+  por_volume: null,
+  por_volume_unidade: null,
+  gotas_por_ml: null,
+  volume_ampola: null,
+  concentracao_percentual: null,
+  peso_tubo: null,
 }
 
 /** Payload de uma apresentação nova, sem os campos que quem chama já sabe preencher
- *  (medicamento_id, ordem) — mantém o mesmo dado do cadastro do medicamento, só entra
- *  por um atalho a mais. */
+ *  (medicamento_id, ordem, descricao) — mantém o mesmo dado do cadastro do medicamento, só
+ *  entra por um atalho a mais. */
 export type NovaApresentacaoDados = typeof NOVO_VAZIO
 
 /** Seletor de apresentação do item da prescrição — igual em espírito ao MedicamentoPicker,
  *  mas com "+ Nova apresentação" abrindo um formulário inline (não só um nome) porque uma
- *  apresentação tem vários campos. Salva vinculada ao medicamento já selecionado no item —
- *  é a mesma tabela do cadastro do medicamento, sem fonte paralela. */
+ *  apresentação tem vários campos. Mesmo formulário por forma do cadastro do medicamento
+ *  (FormaToggle + CamposFormaDinamicos, guiado por core/formas.ts) — salva vinculada ao
+ *  medicamento já selecionado no item, é a mesma tabela, sem fonte paralela. */
 export function ApresentacaoPicker({
   apresentacoes,
   valorId,
@@ -42,21 +43,29 @@ export function ApresentacaoPicker({
   const [criando, setCriando] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [tentouSalvar, setTentouSalvar] = useState(false)
   const [novo, setNovo] = useState<NovaApresentacaoDados>(NOVO_VAZIO)
 
   const selecionada = apresentacoes.find((a) => a.id === valorId) ?? null
+  const faltando = camposFaltando(novo.forma, novo)
 
   function fechar() {
     setAberto(false)
     setCriando(false)
     setNovo(NOVO_VAZIO)
     setErro(null)
+    setTentouSalvar(false)
   }
 
   async function salvarNova() {
     if (!onCriar) return
     if (!novo.forma.trim()) {
-      setErro('Forma é obrigatória.')
+      setErro('Escolha uma forma.')
+      return
+    }
+    setTentouSalvar(true)
+    if (faltando.length > 0) {
+      setErro(`Falta preencher: ${faltando.map((c) => c.label).join(', ')}.`)
       return
     }
     setSalvando(true)
@@ -86,7 +95,7 @@ export function ApresentacaoPicker({
       </button>
 
       {aberto && (
-        <div className="absolute z-20 mt-1 w-72 bg-surface border border-border rounded-lg shadow-2xl shadow-black/40 overflow-hidden">
+        <div className="absolute z-20 mt-1 w-80 bg-surface border border-border rounded-lg shadow-2xl shadow-black/40 overflow-hidden">
           {!criando ? (
             <>
               <div className="max-h-52 overflow-y-auto">
@@ -130,44 +139,18 @@ export function ApresentacaoPicker({
               )}
             </>
           ) : (
-            <div className="p-3 flex flex-col gap-2.5">
-              <div className="grid grid-cols-2 gap-2">
-                <TextField
-                  label="Forma"
-                  value={novo.forma}
-                  onChange={(e) => setNovo({ ...novo, forma: e.target.value })}
-                  placeholder="comprimido"
-                />
-                <TextField
-                  label="Concentração"
-                  type="number"
-                  step="any"
-                  value={novo.concentracao ?? ''}
-                  onChange={(e) => setNovo({ ...novo, concentracao: numOuNull(e.target.value) })}
-                  placeholder="500"
-                />
-                <TextField
-                  label="Unidade"
-                  value={novo.unidade}
-                  onChange={(e) => setNovo({ ...novo, unidade: e.target.value })}
-                  placeholder="mg"
-                />
-                <TextField
-                  label="Por volume"
-                  hint="líquidos: 5=/5ml"
-                  type="number"
-                  step="any"
-                  value={novo.por_volume ?? ''}
-                  onChange={(e) => setNovo({ ...novo, por_volume: numOuNull(e.target.value) })}
-                  placeholder="5"
-                />
-              </div>
-              {novo.por_volume != null && (
-                <TextField
-                  label="Unidade do volume"
-                  value={novo.por_volume_unidade}
-                  onChange={(e) => setNovo({ ...novo, por_volume_unidade: e.target.value })}
-                  placeholder="ml"
+            <div className="p-3 flex flex-col gap-2.5 max-h-96 overflow-y-auto">
+              <FormaToggle
+                valor={novo.forma}
+                onChange={(forma: FormaFarmaceutica) => setNovo({ ...novo, forma })}
+              />
+
+              {novo.forma.trim() && (
+                <CamposFormaDinamicos
+                  forma={novo.forma}
+                  dados={novo}
+                  onChange={(patch) => setNovo({ ...novo, ...patch })}
+                  destacarFaltando={tentouSalvar}
                 />
               )}
 
@@ -179,6 +162,7 @@ export function ApresentacaoPicker({
                   onClick={() => {
                     setCriando(false)
                     setErro(null)
+                    setTentouSalvar(false)
                   }}
                   className="text-xs text-text-dim hover:text-text transition-colors px-2 py-1"
                 >

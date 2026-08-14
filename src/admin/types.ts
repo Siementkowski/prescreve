@@ -59,6 +59,13 @@ export interface Apresentacao {
   // dá pra assumir um valor padrão. É o que permite converter mg em gotas na calculadora
   // pediátrica. Null até ser preenchido caso a caso.
   gotas_por_ml: number | null
+  // Só forma 'ampola' usa — volume total da ampola/frasco (ex: 10 mL), distinto de
+  // `por_volume` (a base da concentração, ex: 50mg/mL).
+  volume_ampola: number | null
+  // Só forma 'pomada' usa — concentração em % (ex: 1 = "1%") em vez de concentração+unidade.
+  concentracao_percentual: number | null
+  // Só forma 'pomada' usa — peso do tubo/bisnaga em gramas.
+  peso_tubo: number | null
   descricao: string | null
   ordem: number
 }

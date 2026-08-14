@@ -18,6 +18,7 @@ import { SearchInput } from './components/SearchInput'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { SortableList } from './components/SortableList'
 import { TratamentoItemRow } from './components/TratamentoItemRow'
+import type { NovaApresentacaoDados } from './components/ApresentacaoPicker'
 import { TextField, SelectField, CheckboxField } from './components/Field'
 
 function vazio(patologiaId: number, ordem: number): TratamentoInput {
@@ -304,19 +305,12 @@ export function TratamentosPage() {
 
   /** Cadastro rápido de apresentação direto do item — mesma tabela do cadastro do
    *  medicamento, só um atalho a mais pra não sair do editor da prescrição. */
-  async function criarApresentacaoRapida(
-    medicamentoId: number,
-    dados: { forma: string; concentracao: number | null; unidade: string; por_volume: number | null; por_volume_unidade: string }
-  ): Promise<Apresentacao> {
+  async function criarApresentacaoRapida(medicamentoId: number, dados: NovaApresentacaoDados): Promise<Apresentacao> {
     const ordem = apresentacoes.filter((a) => a.medicamento_id === medicamentoId).length
     const criada = await apresentacoesApi.insert({
       medicamento_id: medicamentoId,
+      ...dados,
       forma: dados.forma.trim(),
-      concentracao: dados.concentracao,
-      unidade: dados.unidade.trim() || null,
-      por_volume: dados.por_volume,
-      por_volume_unidade: dados.por_volume_unidade.trim() || null,
-      gotas_por_ml: null,
       descricao: null,
       ordem,
     })

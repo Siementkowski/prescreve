@@ -2,13 +2,10 @@ import { useEffect, useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import type { Apresentacao } from '../types'
 import { formatarApresentacao } from '../../core/apresentacao'
+import { camposFaltando, type DadosCamposForma, type FormaFarmaceutica } from '../../core/formas'
+import { FormaToggle } from './FormaToggle'
+import { CamposFormaDinamicos } from './CamposFormaDinamicos'
 import { TextField } from './Field'
-
-function numOuNull(v: string): number | null {
-  if (v.trim() === '') return null
-  const n = Number(v.replace(',', '.'))
-  return Number.isFinite(n) ? n : null
-}
 
 function saoIguais(a: Apresentacao, b: Apresentacao): boolean {
   return (
@@ -17,13 +14,18 @@ function saoIguais(a: Apresentacao, b: Apresentacao): boolean {
     a.unidade === b.unidade &&
     a.por_volume === b.por_volume &&
     a.por_volume_unidade === b.por_volume_unidade &&
+    a.gotas_por_ml === b.gotas_por_ml &&
+    a.volume_ampola === b.volume_ampola &&
+    a.concentracao_percentual === b.concentracao_percentual &&
+    a.peso_tubo === b.peso_tubo &&
     a.descricao === b.descricao
   )
 }
 
 /** Uma linha editável de apresentação, dentro da lista aninhada no cadastro do medicamento.
- *  Rótulo ("comprimido 500 mg") sempre derivado dos campos — nunca digitado à parte,
- *  a não ser que a descrição manual seja usada pra casos fora do padrão. */
+ *  Forma escolhida em toggles, campos gerados a partir do descritor (core/formas.ts) e
+ *  rótulo ("Comprimido 500 mg") sempre derivado — nunca digitado à parte, a não ser que a
+ *  descrição manual seja usada pra casos fora do padrão. */
 export function ApresentacaoRow({
   apresentacao,
   arrastando,
@@ -38,22 +40,56 @@ export function ApresentacaoRow({
   const [local, setLocal] = useState<Apresentacao>(apresentacao)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [tentouSalvar, setTentouSalvar] = useState(false)
 
   useEffect(() => setLocal(apresentacao), [apresentacao])
 
   const dirty = !saoIguais(local, apresentacao)
   const rotulo = formatarApresentacao(local)
+  const faltando = camposFaltando(local.forma, local)
+
+  function atualizarCampos(patch: Partial<DadosCamposForma>) {
+    setLocal({ ...local, ...patch })
+  }
 
   async function salvar() {
     if (!local.forma.trim()) {
-      setErro('Forma é obrigatória.')
+      setErro('Escolha uma forma.')
+      return
+    }
+    setTentouSalvar(true)
+    if (faltando.length > 0) {
+      setErro(`Falta preencher: ${faltando.map((c) => c.label).join(', ')}.`)
       return
     }
     setSalvando(true)
     setErro(null)
     try {
-      const { forma, concentracao, unidade, por_volume, por_volume_unidade, descricao } = local
-      await onSalvar(apresentacao.id, { forma, concentracao, unidade, por_volume, por_volume_unidade, descricao })
+      const {
+        forma,
+        concentracao,
+        unidade,
+        por_volume,
+        por_volume_unidade,
+        gotas_por_ml,
+        volume_ampola,
+        concentracao_percentual,
+        peso_tubo,
+        descricao,
+      } = local
+      await onSalvar(apresentacao.id, {
+        forma,
+        concentracao,
+        unidade,
+        por_volume,
+        por_volume_unidade,
+        gotas_por_ml,
+        volume_ampola,
+        concentracao_percentual,
+        peso_tubo,
+        descricao,
+      })
+      setTentouSalvar(false)
     } catch (e) {
       setErro((e as Error).message)
     } finally {
@@ -64,7 +100,7 @@ export function ApresentacaoRow({
   return (
     <div className={`bg-surface-2 border rounded-md p-3 flex flex-col gap-2.5 ${arrastando ? 'border-accent' : 'border-border'}`}>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium text-text">{rotulo || 'Apresentação sem rótulo — preencha a forma'}</span>
+        <span className="text-sm font-medium text-text">{rotulo || 'Apresentação sem rótulo — escolha a forma'}</span>
         <button
           type="button"
           onClick={() => onExcluir(apresentacao.id)}
@@ -75,45 +111,14 @@ export function ApresentacaoRow({
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-        <TextField
-          label="Forma"
-          value={local.forma}
-          onChange={(e) => setLocal({ ...local, forma: e.target.value })}
-          placeholder="comprimido"
-          className="sm:col-span-2"
-        />
-        <TextField
-          label="Concentração"
-          type="number"
-          step="any"
-          value={local.concentracao ?? ''}
-          onChange={(e) => setLocal({ ...local, concentracao: numOuNull(e.target.value) })}
-          placeholder="500"
-        />
-        <TextField
-          label="Unidade"
-          value={local.unidade ?? ''}
-          onChange={(e) => setLocal({ ...local, unidade: e.target.value })}
-          placeholder="mg"
-        />
-        <TextField
-          label="Por volume"
-          hint="Só pra líquidos: 5 = /5ml"
-          type="number"
-          step="any"
-          value={local.por_volume ?? ''}
-          onChange={(e) => setLocal({ ...local, por_volume: numOuNull(e.target.value) })}
-          placeholder="5"
-        />
-      </div>
-      {local.por_volume != null && (
-        <TextField
-          label="Unidade do volume"
-          value={local.por_volume_unidade ?? ''}
-          onChange={(e) => setLocal({ ...local, por_volume_unidade: e.target.value })}
-          placeholder="ml"
-          className="max-w-40"
+      <FormaToggle valor={local.forma} onChange={(forma: FormaFarmaceutica) => setLocal({ ...local, forma })} />
+
+      {local.forma.trim() && (
+        <CamposFormaDinamicos
+          forma={local.forma}
+          dados={local}
+          onChange={atualizarCampos}
+          destacarFaltando={tentouSalvar}
         />
       )}
 
@@ -130,7 +135,11 @@ export function ApresentacaoRow({
         <div className="flex justify-end gap-2">
           <button
             type="button"
-            onClick={() => setLocal(apresentacao)}
+            onClick={() => {
+              setLocal(apresentacao)
+              setErro(null)
+              setTentouSalvar(false)
+            }}
             className="text-xs text-text-dim hover:text-text transition-colors px-2 py-1"
           >
             Cancelar
