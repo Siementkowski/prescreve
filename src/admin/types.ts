@@ -47,8 +47,9 @@ export type MedicamentoInput = Omit<Medicamento, 'id'>
 export interface Apresentacao {
   id: number
   medicamento_id: number
-  // Ainda text no banco — a conversão pra enum forma_farmaceutica fica pendente até o
-  // registro "frasco" (Soro Fisiológico) ser resolvido manualmente. Ver src/core/formas.ts.
+  // No banco já é o enum forma_farmaceutica (ver src/core/formas.ts) — mantido como
+  // string aqui de propósito pra não travar telas com <select> ainda não migrados pro
+  // enum (cadastro rápido via texto livre continua funcionando normalmente).
   forma: string
   concentracao: number | null
   unidade: string | null

@@ -1,11 +1,12 @@
 // Descritor declarativo das formas farmacêuticas — espelha o enum `forma_farmaceutica`
-// do banco (migration normaliza_forma_apresentacoes). Centralizado aqui de propósito,
-// mesmo padrão de core/via.ts: um único lugar pra rótulo, agrupamento, campos exigidos e
-// unidade de administração de cada forma, em vez de espalhar isso pelas telas.
+// do banco (migrations normaliza_forma_apresentacoes / converte_coluna_forma_para_enum).
+// Centralizado aqui de propósito, mesmo padrão de core/via.ts: um único lugar pra rótulo,
+// agrupamento, campos exigidos e unidade de administração de cada forma, em vez de
+// espalhar isso pelas telas.
 //
-// A coluna `apresentacoes.forma` no banco ainda é `text` — a conversão pra este enum fica
-// pendente até o registro "frasco" (Soro Fisiológico) ser resolvido manualmente. Este
-// arquivo não depende disso: já pode ser usado no frontend antes da conversão.
+// 'frasco' foi mantido por decisão explícita (Soro Fisiológico 0,9% é ambíguo — pode ser
+// solução, suspensão ou pó pra reconstituição — e não foi reclassificado). Config abaixo
+// pra ele é uma estimativa razoável (líquido, mL), não uma definição fechada.
 
 export type FormaFarmaceutica =
   | 'comprimido'
@@ -16,6 +17,7 @@ export type FormaFarmaceutica =
   | 'ampola'
   | 'sache'
   | 'pomada'
+  | 'frasco'
 
 export type GrupoForma = 'solidos' | 'liquidos' | 'parenterais' | 'outros'
 
@@ -86,6 +88,12 @@ export const FORMAS_CONFIG: Record<FormaFarmaceutica, FormaConfig> = {
     grupo: 'outros',
     campos: ['concentracao_percentual', 'peso_tubo'],
     unidadeAdministracao: 'aplicações',
+  },
+  frasco: {
+    rotulo: 'Frasco',
+    grupo: 'outros',
+    campos: ['concentracao', 'unidade', 'por_volume'],
+    unidadeAdministracao: 'mL',
   },
 }
 
