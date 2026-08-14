@@ -17,23 +17,6 @@ import { EsquemaEditor } from './components/EsquemaEditor'
 import type { NovaApresentacaoDados } from './components/ApresentacaoPicker'
 import { SelectField } from './components/Field'
 
-function medicamentoVazio(nome: string): MedicamentoInput {
-  return {
-    nome,
-    nome_comercial: null,
-    apresentacoes: null,
-    gestacao_status: null,
-    gestacao_obs: null,
-    lactacao_status: null,
-    contraindicacoes: null,
-    ped_mg_kg_dia: null,
-    ped_dose_max_dia: null,
-    ped_concentracao: null,
-    ped_volume_ref: null,
-    ped_obs: null,
-  }
-}
-
 /** Editor de prescrição — cabeçalho e itens numa tela só (EsquemaEditor), com um único
  *  "Salvar esquema". A navegação (área → patologia → prescrição) e a lista da esquerda
  *  continuam aqui; a edição em si vive no editor compartilhado com Complementos. */
@@ -169,9 +152,10 @@ export function TratamentosPage() {
     }
   }
 
-  /** Cadastro rápido de medicamento direto do item — evita trocar de aba no meio da receita. */
-  async function criarMedicamentoRapido(nome: string): Promise<Medicamento> {
-    const criado = await medicamentosApi.insert(medicamentoVazio(nome))
+  /** Cadastro rápido de medicamento direto do item (Fase 4) — o payload completo (com
+   *  `incompleto: true`) já vem pronto do modal, aqui só persiste e atualiza a lista local. */
+  async function criarMedicamentoRapido(input: MedicamentoInput): Promise<Medicamento> {
+    const criado = await medicamentosApi.insert(input)
     setMedicamentos((prev) => [...prev, criado].sort((a, b) => a.nome.localeCompare(b.nome)))
     return criado
   }

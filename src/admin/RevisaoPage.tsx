@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Check, ExternalLink, Settings2 } from 'lucide-react'
+import { Check, ExternalLink, Settings2, FlaskConical } from 'lucide-react'
 import { useRevisaoStore } from './revisaoStore'
 import { useConfiguracoesStore } from '../core/configuracoes'
-import { areasApi, patologiasApi } from './api'
-import type { Area, Patologia } from './types'
+import { areasApi, patologiasApi, medicamentosApi } from './api'
+import type { Area, Patologia, Medicamento } from './types'
 import { LABEL_LINHA, LABEL_MODO_TRATAMENTO } from './types'
 import { precisaRevisar, tempoDesdeRevisao, ehUrl } from '../core/revisao'
 
@@ -21,11 +21,35 @@ export function RevisaoPage() {
   const [marcando, setMarcando] = useState<number | null>(null)
   const [erro, setErro] = useState<string | null>(null)
 
+  // Medicamentos nascidos do cadastro rápido (Fase 4) — gestação/lactação/pediatria/
+  // contraindicações nunca foram revisadas, então entram na fila junto com as prescrições.
+  const [medicamentosIncompletos, setMedicamentosIncompletos] = useState<Medicamento[]>([])
+  const [marcandoMedicamento, setMarcandoMedicamento] = useState<number | null>(null)
+
+  async function carregarMedicamentosIncompletos() {
+    const lista = await medicamentosApi.list()
+    setMedicamentosIncompletos(lista.filter((m) => m.incompleto))
+  }
+
   useEffect(() => {
     carregar()
     areasApi.list().then(setAreas)
     patologiasApi.list().then(setPatologias)
+    carregarMedicamentosIncompletos()
   }, [carregar])
+
+  async function marcarMedicamentoCompleto(id: number) {
+    setMarcandoMedicamento(id)
+    setErro(null)
+    try {
+      await medicamentosApi.update(id, { incompleto: false })
+      setMedicamentosIncompletos((prev) => prev.filter((m) => m.id !== id))
+    } catch (e) {
+      setErro((e as Error).message)
+    } finally {
+      setMarcandoMedicamento(null)
+    }
+  }
 
   const pendentes = useMemo(() => {
     return tratamentos
@@ -88,6 +112,43 @@ export function RevisaoPage() {
         <p className="text-sm text-danger bg-danger-dim border border-danger/30 rounded-lg px-3 py-2 shrink-0">
           {erro}
         </p>
+      )}
+
+      {medicamentosIncompletos.length > 0 && (
+        <div className="shrink-0 border border-warn/40 bg-warn/10 rounded-xl p-4 flex flex-col gap-2.5">
+          <div className="flex items-center gap-1.5">
+            <FlaskConical className="w-4 h-4 text-warn shrink-0" />
+            <h3 className="text-sm font-semibold text-text">
+              {medicamentosIncompletos.length} medicamento{medicamentosIncompletos.length !== 1 ? 's' : ''} do
+              cadastro rápido, sem gestação/lactação/pediatria revisadas
+            </h3>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            {medicamentosIncompletos.map((m) => (
+              <div
+                key={m.id}
+                className="flex items-center justify-between gap-3 bg-surface border border-border rounded-lg px-3 py-2"
+              >
+                <span className="text-sm text-text">
+                  {m.nome}
+                  {m.nome_comercial && <span className="text-text-dim"> · {m.nome_comercial}</span>}
+                </span>
+                <button
+                  onClick={() => marcarMedicamentoCompleto(m.id)}
+                  disabled={marcandoMedicamento === m.id}
+                  className="flex items-center gap-1.5 text-xs font-medium bg-ok hover:bg-ok/90 disabled:opacity-50 text-white rounded-md px-3 py-1.5 transition-colors shrink-0"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  {marcandoMedicamento === m.id ? 'Marcando…' : 'Marcar como revisado'}
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-text-dim">
+            Preencha gestação/lactação/pediatria/contraindicações em Medicamentos antes de marcar — o botão só
+            tira da fila, não revisa sozinho.
+          </p>
+        </div>
       )}
 
       <div className="flex-1 overflow-y-auto flex flex-col gap-2">

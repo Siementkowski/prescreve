@@ -5,6 +5,7 @@ import type {
   Tratamento,
   TratamentoItem,
   Medicamento,
+  MedicamentoInput,
   Apresentacao,
   ModoTratamento,
   Linha,
@@ -88,7 +89,7 @@ export function EsquemaEditor({
   medicamentos: Medicamento[]
   apresentacoes: Apresentacao[]
   onSalvo: (tratamento: Tratamento, itens: TratamentoItem[]) => void
-  onCriarMedicamento: (nome: string) => Promise<Medicamento>
+  onCriarMedicamento: (input: MedicamentoInput) => Promise<Medicamento>
   onCriarApresentacao: (medicamentoId: number, dados: NovaApresentacaoDados) => Promise<Apresentacao>
   onExcluir?: () => void
   /** Slot pro que cada tela quer mostrar acima do cabeçalho (ex: "usado em N patologias"

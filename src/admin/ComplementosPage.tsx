@@ -7,23 +7,6 @@ import { ConfirmDialog } from './components/ConfirmDialog'
 import { EsquemaEditor } from './components/EsquemaEditor'
 import type { NovaApresentacaoDados } from './components/ApresentacaoPicker'
 
-function medicamentoVazio(nome: string): MedicamentoInput {
-  return {
-    nome,
-    nome_comercial: null,
-    apresentacoes: null,
-    gestacao_status: null,
-    gestacao_obs: null,
-    lactacao_status: null,
-    contraindicacoes: null,
-    ped_mg_kg_dia: null,
-    ped_dose_max_dia: null,
-    ped_concentracao: null,
-    ped_volume_ref: null,
-    ped_obs: null,
-  }
-}
-
 /** Biblioteca de complementos — suporte sintomático (dipirona, escopolamina...) cadastrado
  *  uma vez e vinculado a várias patologias (em Patologias, seção "Complementos vinculados").
  *  Mesmo editor de esquema que Prescrições (EsquemaEditor), sem patologia/linha e com classe
@@ -139,8 +122,8 @@ export function ComplementosPage() {
     }
   }
 
-  async function criarMedicamentoRapido(nome: string): Promise<Medicamento> {
-    const criado = await medicamentosApi.insert(medicamentoVazio(nome))
+  async function criarMedicamentoRapido(input: MedicamentoInput): Promise<Medicamento> {
+    const criado = await medicamentosApi.insert(input)
     setMedicamentos((prev) => [...prev, criado].sort((a, b) => a.nome.localeCompare(b.nome)))
     return criado
   }

@@ -53,7 +53,11 @@ export function ItemLinha({
       </div>
 
       {/* Alerta de gestação — automático, sempre visível, independente de qualquer toggle */}
-      <AlertaGestacao status={medicamento?.gestacao_status ?? null} obs={medicamento?.gestacao_obs ?? null} />
+      <AlertaGestacao
+        status={medicamento?.gestacao_status ?? null}
+        obs={medicamento?.gestacao_obs ?? null}
+        incompleto={medicamento?.incompleto ?? false}
+      />
 
       {/* Receita montada — o que vai ser colado na prescrição, sempre em destaque. Mono:
           lê como um rótulo de bula, não como prosa qualquer. */}

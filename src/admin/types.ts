@@ -41,6 +41,10 @@ export interface Medicamento {
   ped_concentracao: number | null
   ped_volume_ref: number | null
   ped_obs: string | null
+  // true = nasceu do cadastro rápido (Fase 4, modal dentro do editor de esquema) — só nome
+  // + forma + concentração preenchidos, sem gestação/lactação/pediatria/contraindicações.
+  // Entra na fila de Revisão e a Consulta mostra "gestação não avaliada" em vez de nada.
+  incompleto: boolean
 }
 export type MedicamentoInput = Omit<Medicamento, 'id'>
 

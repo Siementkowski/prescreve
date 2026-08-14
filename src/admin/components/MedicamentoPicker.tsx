@@ -6,17 +6,18 @@ export function MedicamentoPicker({
   medicamentos,
   valorId,
   onSelecionar,
-  onCriar,
+  onAbrirCadastro,
 }: {
   medicamentos: Medicamento[]
   valorId: number | null
   onSelecionar: (id: number) => void
-  /** Cadastro rápido — quando a busca não acha nada, oferece criar ali mesmo, sem trocar de tela. */
-  onCriar?: (nome: string) => Promise<Medicamento>
+  /** Busca não achou nada → oferece abrir o modal de cadastro (Fase 4) ali mesmo, sem
+   *  trocar de tela e sem perder o rascunho do esquema. Só abre o modal — quem cria de
+   *  fato é o modal em si (precisa de forma+concentração, não só o nome). */
+  onAbrirCadastro?: (nomeSugestao: string) => void
 }) {
   const [aberto, setAberto] = useState(false)
   const [filtro, setFiltro] = useState('')
-  const [criando, setCriando] = useState(false)
 
   const selecionado = medicamentos.find((m) => m.id === valorId) ?? null
 
@@ -28,17 +29,11 @@ export function MedicamentoPicker({
       .slice(0, 30)
   }, [medicamentos, filtro])
 
-  async function criarAgora() {
-    if (!onCriar || !filtro.trim()) return
-    setCriando(true)
-    try {
-      const novo = await onCriar(filtro.trim())
-      onSelecionar(novo.id)
-      setAberto(false)
-      setFiltro('')
-    } finally {
-      setCriando(false)
-    }
+  function abrirCadastro() {
+    if (!onAbrirCadastro) return
+    onAbrirCadastro(filtro.trim())
+    setAberto(false)
+    setFiltro('')
   }
 
   return (
@@ -67,15 +62,14 @@ export function MedicamentoPicker({
             {filtrados.length === 0 ? (
               <div className="px-3 py-2.5 flex flex-col gap-2">
                 <p className="text-xs text-text-dim">Nenhum medicamento encontrado no catálogo.</p>
-                {onCriar && filtro.trim() && (
+                {onAbrirCadastro && (
                   <button
                     type="button"
-                    onClick={criarAgora}
-                    disabled={criando}
-                    className="flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 disabled:opacity-50 transition-colors"
+                    onClick={abrirCadastro}
+                    className="flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    {criando ? 'Cadastrando…' : `Cadastrar "${filtro.trim()}" como novo medicamento`}
+                    {filtro.trim() ? `Cadastrar "${filtro.trim()}" como novo medicamento` : 'Cadastrar medicamento'}
                   </button>
                 )}
               </div>

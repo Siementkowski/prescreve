@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { Trash2, Pencil, Calculator } from 'lucide-react'
-import type { Medicamento, Apresentacao, ModoTratamento, TratamentoItem } from '../types'
+import type { Medicamento, MedicamentoInput, Apresentacao, ModoTratamento, TratamentoItem } from '../types'
 import { gerarTextoReceita, gerarTextoPadrao, estaUsandoCustom } from '../../core/receita'
 import { calcularDose, formatarDoseCalculada } from '../../core/dose'
 import { MedicamentoPicker } from './MedicamentoPicker'
 import { ApresentacaoPicker, type NovaApresentacaoDados } from './ApresentacaoPicker'
+import { CadastrarMedicamentoModal } from './CadastrarMedicamentoModal'
 import { TextField, TextAreaField } from './Field'
 
 function resolveNome(item: Pick<TratamentoItem, 'medicamento_id' | 'nome_livre'>, medicamentos: Medicamento[]): string {
@@ -34,9 +36,12 @@ export function TratamentoItemRow({
   arrastando: boolean
   onChange: (patch: Partial<TratamentoItem>) => void
   onExcluir: () => void
-  onCriarMedicamento?: (nome: string) => Promise<Medicamento>
+  onCriarMedicamento?: (input: MedicamentoInput) => Promise<Medicamento>
   onCriarApresentacao?: (medicamentoId: number, dados: NovaApresentacaoDados) => Promise<Apresentacao>
 }) {
+  const [modalAberto, setModalAberto] = useState(false)
+  const [nomeSugerido, setNomeSugerido] = useState('')
+
   // Item recém-criado (os dois nulos) cai em "Cadastro" por padrão; assim que um dos dois
   // modos é usado (medicamento_id ou nome_livre preenchidos), o estado real decide sozinho.
   const modoAtual: 'cadastro' | 'livre' = item.medicamento_id ? 'cadastro' : item.nome_livre ? 'livre' : 'cadastro'
@@ -71,6 +76,7 @@ export function TratamentoItemRow({
   const doseEhOverride = !!doseCalculadaTexto && !!item.dose?.trim() && item.dose.trim() !== doseCalculadaTexto
 
   return (
+    <>
     <div
       className={`bg-surface border rounded-md p-3 flex flex-col gap-3 ${
         arrastando ? 'border-accent' : 'border-border'
@@ -100,7 +106,14 @@ export function TratamentoItemRow({
               medicamentos={medicamentos}
               valorId={item.medicamento_id}
               onSelecionar={(id) => onChange({ medicamento_id: id, apresentacao_id: null })}
-              onCriar={onCriarMedicamento}
+              onAbrirCadastro={
+                onCriarMedicamento && onCriarApresentacao
+                  ? (nome) => {
+                      setNomeSugerido(nome)
+                      setModalAberto(true)
+                    }
+                  : undefined
+              }
             />
           ) : (
             <input
@@ -265,5 +278,20 @@ export function TratamentoItemRow({
         rows={2}
       />
     </div>
+
+    {onCriarMedicamento && onCriarApresentacao && (
+      <CadastrarMedicamentoModal
+        aberto={modalAberto}
+        nomeInicial={nomeSugerido}
+        onFechar={() => setModalAberto(false)}
+        onCriarMedicamento={onCriarMedicamento}
+        onCriarApresentacao={onCriarApresentacao}
+        onCriado={(medicamento, apresentacao) => {
+          onChange({ medicamento_id: medicamento.id, apresentacao_id: apresentacao.id })
+          setModalAberto(false)
+        }}
+      />
+    )}
+    </>
   )
 }

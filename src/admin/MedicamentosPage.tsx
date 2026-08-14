@@ -7,7 +7,7 @@ import { SearchInput } from './components/SearchInput'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { StatusRiscoBadge } from './components/StatusRiscoBadge'
 import { ApresentacoesEditor } from './components/ApresentacoesEditor'
-import { TextField, TextAreaField, SelectField } from './components/Field'
+import { TextField, TextAreaField, SelectField, CheckboxField } from './components/Field'
 import { Plus } from 'lucide-react'
 
 const VAZIO: MedicamentoInput = {
@@ -23,6 +23,7 @@ const VAZIO: MedicamentoInput = {
   ped_concentracao: null,
   ped_volume_ref: null,
   ped_obs: '',
+  incompleto: false,
 }
 
 const CORES_BORDA_GESTACAO: Record<StatusRisco, string> = {
@@ -114,6 +115,7 @@ export function MedicamentosPage() {
           ped_concentracao,
           ped_volume_ref,
           ped_obs,
+          incompleto,
         } = form
         const atualizado = await medicamentosApi.update(selecionadoId, {
           nome,
@@ -128,6 +130,7 @@ export function MedicamentosPage() {
           ped_concentracao,
           ped_volume_ref,
           ped_obs,
+          incompleto,
         })
         setMedicamentos((prev) => prev.map((m) => (m.id === selecionadoId ? atualizado : m)))
       } else {
@@ -195,9 +198,16 @@ export function MedicamentosPage() {
                     <span className="font-display text-[15px] text-text truncate">{m.nome}</span>
                     <StatusRiscoBadge status={m.gestacao_status} />
                   </div>
-                  {m.nome_comercial && (
-                    <span className="block text-xs text-text-dim truncate">{m.nome_comercial}</span>
-                  )}
+                  <div className="flex items-center gap-1.5">
+                    {m.nome_comercial && (
+                      <span className="block text-xs text-text-dim truncate">{m.nome_comercial}</span>
+                    )}
+                    {m.incompleto && (
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full border text-warn border-warn/40 bg-warn/10 shrink-0">
+                        Incompleto
+                      </span>
+                    )}
+                  </div>
                 </button>
               ))
             )}
@@ -222,6 +232,25 @@ export function MedicamentosPage() {
                 value={form.nome_comercial ?? ''}
                 onChange={(e) => setForm({ ...form, nome_comercial: e.target.value })}
               />
+
+              {form.incompleto && (
+                <div className="flex items-center justify-between gap-3 rounded-md border border-warn/40 bg-warn/10 px-3 py-2.5">
+                  <div>
+                    <p className="text-sm font-medium text-warn">Cadastro incompleto</p>
+                    <p className="text-xs text-text-dim mt-0.5">
+                      Criado pelo cadastro rápido — sem gestação/lactação/pediatria/contraindicações revisadas.
+                      Preencha e desmarque abaixo pra tirar da fila de revisão.
+                    </p>
+                  </div>
+                  <CheckboxField
+                    label="Incompleto"
+                    checked={form.incompleto}
+                    onChange={(v) => setForm({ ...form, incompleto: v })}
+                    className="shrink-0"
+                  />
+                </div>
+              )}
+
               <TextField
                 label="Apresentações (texto antigo)"
                 hint="Campo legado — as apresentações agora são cadastradas de forma estruturada logo abaixo, uma por uma, pra poder ser escolhida no item da prescrição."
