@@ -14,7 +14,7 @@
 // bug: ele também só aparece quando tem conteúdo.
 
 import { formatarConcentracao, formaComQuantidade, type DadosApresentacao } from './apresentacao'
-import { textoDaVia } from './via'
+import { textoDaVia, siglaParaRepetir } from './via'
 
 export interface DadosItemReceita {
   nomeMedicamento: string | null | undefined // resolvido: nome do cadastro OU nome_livre
@@ -74,9 +74,11 @@ function montarLinha1(dados: DadosItemReceita): string {
   return juntarSegmentos(segmentos)
 }
 
-/** Linha 2 — como tomar: "Tomar 1 comprimido de 6/6h, por 5 dias" ou "Tomar 1 comprimido
- *  1x ao dia, por 5 dias". A sigla da via vira o verbo correspondente (verboDaVia/textoDaVia,
- *  em core/via.ts); via não mapeada mantém a sigla como está. "de" antes da posologia só
+/** Linha 2 — como tomar: "Infundir 1 ampola EV agora" ou "Tomar 1 comprimido de 6/6h, por
+ *  5 dias". A sigla da via vira o verbo correspondente (verboDaVia/textoDaVia, em
+ *  core/via.ts); via não mapeada mantém a sigla como está. Via parenteral (EV/IM) repete a
+ *  sigla depois de quantidade+forma — "Infundir 1 ampola EV" deixa claro como foi aplicado,
+ *  coisa que só o verbo não garante; VO e as demais não repetem. "de" antes da posologia só
  *  entra pra formato de intervalo numérico ("de 6/6h") — frequência por extenso ("1x ao
  *  dia") não leva. Vírgula antes de "por duração" é fixa — só entra quando o campo
  *  correspondente tem conteúdo, como todo o resto aqui. */
@@ -91,6 +93,9 @@ function montarLinha2(dados: DadosItemReceita): string {
   if (quantidade && forma) {
     segmentos.push({ texto: `${quantidade} ${formaComQuantidade(forma, quantidade)}`, virgulaAntes: false })
   }
+
+  const sigla = siglaParaRepetir(dados.via)
+  if (sigla) segmentos.push({ texto: sigla, virgulaAntes: false })
 
   const posologia = dados.posologia?.trim()
   if (posologia) {

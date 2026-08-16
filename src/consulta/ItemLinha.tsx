@@ -1,6 +1,5 @@
 import type { Medicamento, Apresentacao, TratamentoItem, ModoTratamento } from '../admin/types'
 import { textoReceitaDoItem } from '../core/receita'
-import { formatarApresentacao } from '../core/apresentacao'
 import { CopyButton } from './components/CopyButton'
 import { AlertaGestacao } from './components/AlertaGestacao'
 import { AlertTriangle, Clock, Info } from 'lucide-react'
@@ -22,19 +21,6 @@ export function ItemLinha({
 }) {
   const nomeExibido = medicamento?.nome ?? item.nome_livre ?? '—'
   const texto = textoReceitaDoItem(item, medicamento?.nome ?? null, apresentacao)
-
-  const detalhes: { rotulo: string; valor: string | null }[] = [
-    { rotulo: 'Apresentação', valor: apresentacao ? formatarApresentacao(apresentacao) : item.apresentacao_livre },
-    { rotulo: 'Quantidade', valor: item.quantidade },
-    { rotulo: 'Dose', valor: item.dose },
-    { rotulo: 'Via', valor: item.via },
-    { rotulo: 'Posologia', valor: item.posologia },
-    { rotulo: 'Duração', valor: item.duracao },
-  ]
-  if ((modoTratamento === 'hospitalar' || modoTratamento === 'ambos') && item.diluicao) {
-    detalhes.push({ rotulo: 'Diluição', valor: item.diluicao })
-  }
-  const detalhesPreenchidos = detalhes.filter((d) => d.valor?.trim())
 
   return (
     <div className={semMoldura ? 'flex flex-col gap-3' : 'border border-border rounded-lg p-4 bg-surface-2 flex flex-col gap-3'}>
@@ -74,15 +60,14 @@ export function ItemLinha({
         </div>
       )}
 
-      {detalhesPreenchidos.length > 0 && (
-        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2">
-          {detalhesPreenchidos.map((d) => (
-            <div key={d.rotulo}>
-              <dt className="text-[11px] text-text-dim uppercase tracking-wide">{d.rotulo}</dt>
-              <dd className="tabular text-sm text-text">{d.valor}</dd>
-            </div>
-          ))}
-        </dl>
+      {/* Diluição — só hospitalar/ambos, e só ela ficou de fora da receita (as outras —
+          apresentação, quantidade, dose, via, posologia, duração — já estão no texto
+          acima, mostrar de novo embaixo era duplicar informação). */}
+      {(modoTratamento === 'hospitalar' || modoTratamento === 'ambos') && item.diluicao?.trim() && (
+        <div>
+          <dt className="text-[11px] text-text-dim uppercase tracking-wide">Diluição</dt>
+          <dd className="tabular text-sm text-text">{item.diluicao}</dd>
+        </div>
       )}
 
       {/* Observação do item — destaque próprio em amarelo, não some no meio dos detalhes
