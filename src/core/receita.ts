@@ -5,7 +5,7 @@
 //
 // Formato de duas linhas, como uma receita de verdade:
 //   Nitrofurantoína 100 mg
-//   Tomar 1 comprimido de 6/6h, por 5 dias
+//   Tomar 1 comprimido 6/6h, por 5 dias
 //
 // Montagem por segmentos: cada pedaço da frase só entra na lista se tiver conteúdo, e o
 // texto final é a junção dos segmentos presentes — nunca uma concatenação de strings com
@@ -67,10 +67,11 @@ function montarLinha1(dados: DadosItemReceita): string {
   return juntarSegmentos(segmentos)
 }
 
-/** Linha 2 — como tomar: "Tomar 1 comprimido de 6/6h, por 5 dias". A sigla da via vira o
+/** Linha 2 — como tomar: "Tomar 1 comprimido 6/6h, por 5 dias". A sigla da via vira o
  *  verbo correspondente (verboDaVia/textoDaVia, em core/via.ts); via não mapeada mantém a
- *  sigla como está. "de" antes da posologia e vírgula antes de "por duração" são fixos —
- *  só entram quando o campo correspondente tem conteúdo, como todo o resto aqui. */
+ *  sigla como está. Vírgula antes de "por duração" é fixa — só entra quando o campo
+ *  correspondente tem conteúdo, como todo o resto aqui. Sem "de" antes da posologia: soa
+ *  errado tanto pra formato de intervalo ("6/6h") quanto de frequência ("1x ao dia"). */
 function montarLinha2(dados: DadosItemReceita): string {
   const segmentos: Segmento[] = []
 
@@ -79,18 +80,12 @@ function montarLinha2(dados: DadosItemReceita): string {
 
   const quantidade = dados.quantidade?.trim()
   const forma = dados.apresentacao?.forma?.trim() ?? dados.apresentacaoLivre?.trim()
-  const temQuantidadeForma = !!(quantidade && forma)
-  if (temQuantidadeForma) {
+  if (quantidade && forma) {
     segmentos.push({ texto: `${quantidade} ${formaComQuantidade(forma, quantidade)}`, virgulaAntes: false })
   }
 
-  // "de" só faz sentido encaixado depois de "1 comprimido" ("...comprimido de 6/6h") — sem
-  // quantidade+forma antes, vira "Tomar de 6/6h", que soa errado. Sem esse segmento, a
-  // posologia entra sozinha ("Tomar 6/6h").
   const posologia = dados.posologia?.trim()
-  if (posologia) {
-    segmentos.push({ texto: temQuantidadeForma ? `de ${posologia}` : posologia, virgulaAntes: false })
-  }
+  if (posologia) segmentos.push({ texto: posologia, virgulaAntes: false })
 
   const duracao = dados.duracao?.trim()
   if (duracao) segmentos.push({ texto: `por ${duracao}`, virgulaAntes: true })
