@@ -1,28 +1,19 @@
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import type { Medicamento, MedicamentoInput, Apresentacao } from '../types'
-import { camposFaltando, type DadosCamposForma, type FormaFarmaceutica } from '../../core/formas'
+import type { FormaFarmaceutica } from '../../core/formas'
 import { FormaToggle } from './FormaToggle'
-import { CamposFormaDinamicos } from './CamposFormaDinamicos'
 import type { NovaApresentacaoDados } from './ApresentacaoPicker'
 import { TextField } from './Field'
 
-const CAMPOS_VAZIOS: DadosCamposForma = {
-  concentracao: null,
-  unidade: null,
-  por_volume: null,
-  por_volume_unidade: null,
-  gotas_por_ml: null,
-  volume_ampola: null,
-  concentracao_percentual: null,
-  peso_tubo: null,
-}
-
 /** Cadastro de medicamento sem sair da tela — abre por cima do editor de esquema (sem troca
- *  de rota, sem perder o rascunho). Campos mínimos: nome (princípio ativo), nome comercial,
- *  forma e concentração da 1ª apresentação (mesmo formulário por forma da Fase 2). Nasce
- *  com `incompleto = true` — gestação/lactação/pediatria/contraindicações não foram
- *  preenchidas aqui de propósito, isso é revisão clínica, não cabe num cadastro rápido. */
+ *  de rota, sem perder o rascunho). Campos mínimos: nome (princípio ativo), nome comercial
+ *  e forma da 1ª apresentação. Concentração NÃO é pedida aqui de propósito — pedir a força
+ *  do comprimido no cadastro e a dose de novo no item da prescrição é repetir a mesma
+ *  pergunta duas vezes; a dose fica só na prescrição (calculadora pediátrica que dependia
+ *  da concentração aqui fica pendente, resolve depois). Nasce com `incompleto = true` —
+ *  gestação/lactação/pediatria/contraindicações/concentração não foram preenchidas aqui de
+ *  propósito, isso é revisão clínica, não cabe num cadastro rápido. */
 export function CadastrarMedicamentoModal({
   aberto,
   nomeInicial,
@@ -41,10 +32,8 @@ export function CadastrarMedicamentoModal({
   const [nome, setNome] = useState(nomeInicial)
   const [nomeComercial, setNomeComercial] = useState('')
   const [forma, setForma] = useState('')
-  const [campos, setCampos] = useState<DadosCamposForma>(CAMPOS_VAZIOS)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
-  const [tentouSalvar, setTentouSalvar] = useState(false)
 
   // O modal é montado uma vez e só alterna visibilidade (`aberto`), não remonta — sem isto
   // o `useState(nomeInicial)` acima só pegaria o valor da primeira vez que o item foi
@@ -56,15 +45,11 @@ export function CadastrarMedicamentoModal({
 
   if (!aberto) return null
 
-  const faltando = camposFaltando(forma, campos)
-
   function resetar() {
     setNome(nomeInicial)
     setNomeComercial('')
     setForma('')
-    setCampos(CAMPOS_VAZIOS)
     setErro(null)
-    setTentouSalvar(false)
   }
 
   function fechar() {
@@ -79,11 +64,6 @@ export function CadastrarMedicamentoModal({
     }
     if (!forma.trim()) {
       setErro('Escolha uma forma.')
-      return
-    }
-    setTentouSalvar(true)
-    if (faltando.length > 0) {
-      setErro(`Falta preencher: ${faltando.map((c) => c.label).join(', ')}.`)
       return
     }
     setSalvando(true)
@@ -104,7 +84,17 @@ export function CadastrarMedicamentoModal({
         ped_obs: null,
         incompleto: true,
       })
-      const apresentacao = await onCriarApresentacao(medicamento.id, { forma: forma.trim(), ...campos })
+      const apresentacao = await onCriarApresentacao(medicamento.id, {
+        forma: forma.trim(),
+        concentracao: null,
+        unidade: null,
+        por_volume: null,
+        por_volume_unidade: null,
+        gotas_por_ml: null,
+        volume_ampola: null,
+        concentracao_percentual: null,
+        peso_tubo: null,
+      })
       onCriado(medicamento, apresentacao)
       resetar()
     } catch (e) {
@@ -124,8 +114,8 @@ export function CadastrarMedicamentoModal({
           </button>
         </div>
         <p className="text-xs text-text-dim mb-4">
-          Só o essencial pra usar agora — gestação, lactação, pediatria e contraindicações ficam pendentes
-          e entram na fila de Revisão até alguém completar no catálogo.
+          Só o essencial pra usar agora — concentração, gestação, lactação, pediatria e contraindicações ficam
+          pendentes e entram na fila de Revisão até alguém completar no catálogo. A dose fica só na prescrição.
         </p>
 
         <div className="flex flex-col gap-3">
@@ -143,10 +133,6 @@ export function CadastrarMedicamentoModal({
           />
 
           <FormaToggle valor={forma} onChange={(f: FormaFarmaceutica) => setForma(f)} />
-
-          {forma.trim() && (
-            <CamposFormaDinamicos forma={forma} dados={campos} onChange={(p) => setCampos({ ...campos, ...p })} destacarFaltando={tentouSalvar} />
-          )}
 
           {erro && <p className="text-xs text-danger">{erro}</p>}
 
