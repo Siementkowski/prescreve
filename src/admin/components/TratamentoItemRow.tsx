@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { Trash2, Pencil, Calculator } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
 import type { Medicamento, MedicamentoInput, Apresentacao, ModoTratamento, TratamentoItem } from '../types'
 import { gerarTextoReceita, gerarTextoPadrao, estaUsandoCustom } from '../../core/receita'
-import { calcularDose, formatarDoseCalculada } from '../../core/dose'
 import { MedicamentoPicker } from './MedicamentoPicker'
 import { ApresentacaoPicker, type NovaApresentacaoDados } from './ApresentacaoPicker'
 import { CadastrarMedicamentoModal } from './CadastrarMedicamentoModal'
@@ -62,16 +61,6 @@ export function TratamentoItemRow({
   const textoPadrao = gerarTextoPadrao({ ...dadosReceita, receitaCustom: null })
   const textoFinal = gerarTextoReceita({ ...dadosReceita, receitaCustom: item.receita_custom })
   const usandoCustom = estaUsandoCustom(item.receita_custom)
-
-  // Dose derivada de quantidade × concentração — não digitada. Se o valor guardado em
-  // `dose` bate com o calculado, é automático; se diverge (a pessoa digitou algo diferente
-  // por cima), fica marcado como override, sem esconder o que foi calculado.
-  const doseCalculada = apresentacaoSelecionada ? calcularDose(apresentacaoSelecionada, item.quantidade) : null
-  const doseCalculadaTexto = doseCalculada ? formatarDoseCalculada(doseCalculada) : null
-  // Só conta como "override" quando existe um valor calculado sendo sobrescrito — dose
-  // digitada sem nenhum cálculo possível (sem concentração cadastrada, por ex.) é apenas
-  // texto manual, não uma divergência de nada.
-  const doseEhOverride = !!doseCalculadaTexto && !!item.dose?.trim() && item.dose.trim() !== doseCalculadaTexto
 
   return (
     <>
@@ -136,30 +125,12 @@ export function TratamentoItemRow({
       )}
 
       <div className={`grid gap-3 ${modoTratamento !== 'ambulatorial' ? 'grid-cols-5' : 'grid-cols-4'}`}>
-        <label className="flex flex-col gap-1.5">
-          <span className="flex items-center gap-1 text-[11px] font-medium text-text-dim uppercase tracking-wide">
-            Dose
-            {doseEhOverride ? (
-              <Pencil className="w-3 h-3 text-warn" />
-            ) : doseCalculada ? (
-              <Calculator className="w-3 h-3 text-text-faint" />
-            ) : null}
-          </span>
-          <input
-            value={item.dose ?? ''}
-            onChange={(e) => onChange({ dose: e.target.value })}
-            placeholder={doseCalculadaTexto ?? '100 mg'}
-            className={`bg-surface-2 border rounded-lg px-3 py-2 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent/40 transition-colors w-full ${
-              doseEhOverride ? 'border-warn/60 text-warn' : 'border-border text-text'
-            }`}
-          />
-          {doseCalculada && !item.dose?.trim() && (
-            <span className="text-xs text-text-dim/80">Calculado: {doseCalculadaTexto} — digite pra sobrescrever</span>
-          )}
-          {doseEhOverride && doseCalculadaTexto && (
-            <span className="text-xs text-warn/80">Digitado — o cálculo daria {doseCalculadaTexto}</span>
-          )}
-        </label>
+        <TextField
+          label="Dose"
+          value={item.dose ?? ''}
+          onChange={(e) => onChange({ dose: e.target.value })}
+          placeholder="100 mg"
+        />
         <TextField
           label="Via"
           value={item.via ?? ''}
