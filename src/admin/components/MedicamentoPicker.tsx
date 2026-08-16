@@ -60,19 +60,7 @@ export function MedicamentoPicker({
           />
           <div className="max-h-52 overflow-y-auto">
             {filtrados.length === 0 ? (
-              <div className="px-3 py-2.5 flex flex-col gap-2">
-                <p className="text-xs text-text-dim">Nenhum medicamento encontrado no catálogo.</p>
-                {onAbrirCadastro && (
-                  <button
-                    type="button"
-                    onClick={abrirCadastro}
-                    className="flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    {filtro.trim() ? `Cadastrar "${filtro.trim()}" como novo medicamento` : 'Cadastrar medicamento'}
-                  </button>
-                )}
-              </div>
+              <p className="text-xs text-text-dim px-3 py-2.5">Nenhum medicamento encontrado no catálogo.</p>
             ) : (
               filtrados.map((m) => (
                 <button
@@ -91,6 +79,19 @@ export function MedicamentoPicker({
               ))
             )}
           </div>
+
+          {/* Sempre visível, não só quando a busca não acha nada — não devia exigir limpar
+              a busca primeiro pra achar essa opção. */}
+          {onAbrirCadastro && (
+            <button
+              type="button"
+              onClick={abrirCadastro}
+              className="w-full flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 px-3 py-2 border-t border-border transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {filtro.trim() ? `Cadastrar "${filtro.trim()}" como novo medicamento` : 'Cadastrar novo medicamento'}
+            </button>
+          )}
         </div>
       )}
     </div>

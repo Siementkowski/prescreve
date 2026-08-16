@@ -42,10 +42,6 @@ export function TratamentoItemRow({
   const [modalAberto, setModalAberto] = useState(false)
   const [nomeSugerido, setNomeSugerido] = useState('')
 
-  // Item recém-criado (os dois nulos) cai em "Cadastro" por padrão; assim que um dos dois
-  // modos é usado (medicamento_id ou nome_livre preenchidos), o estado real decide sozinho.
-  const modoAtual: 'cadastro' | 'livre' = item.medicamento_id ? 'cadastro' : item.nome_livre ? 'livre' : 'cadastro'
-
   const nomeResolvido = resolveNome(item, medicamentos)
   const apresentacoesDoMedicamento = apresentacoes.filter((a) => a.medicamento_id === item.medicamento_id)
   const apresentacaoSelecionada = apresentacoesDoMedicamento.find((a) => a.id === item.apresentacao_id) ?? null
@@ -83,46 +79,20 @@ export function TratamentoItemRow({
       }`}
     >
       <div className="flex items-center gap-2">
-        <div className="flex rounded-md overflow-hidden border border-border text-xs shrink-0">
-          <button
-            type="button"
-            onClick={() => onChange({ nome_livre: null, apresentacao_livre: null })}
-            className={`px-2 py-1 transition-colors ${modoAtual === 'cadastro' ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
-          >
-            Cadastro
-          </button>
-          <button
-            type="button"
-            onClick={() => onChange({ medicamento_id: null, apresentacao_id: null, nome_livre: item.nome_livre ?? '' })}
-            className={`px-2 py-1 transition-colors ${modoAtual === 'livre' ? 'bg-accent text-accent-text' : 'text-text-dim hover:text-text'}`}
-          >
-            Nome livre
-          </button>
-        </div>
-
         <div className="flex-1">
-          {modoAtual === 'cadastro' ? (
-            <MedicamentoPicker
-              medicamentos={medicamentos}
-              valorId={item.medicamento_id}
-              onSelecionar={(id) => onChange({ medicamento_id: id, apresentacao_id: null })}
-              onAbrirCadastro={
-                onCriarMedicamento && onCriarApresentacao
-                  ? (nome) => {
-                      setNomeSugerido(nome)
-                      setModalAberto(true)
-                    }
-                  : undefined
-              }
-            />
-          ) : (
-            <input
-              value={item.nome_livre ?? ''}
-              onChange={(e) => onChange({ nome_livre: e.target.value })}
-              placeholder='Ex: "SF 0,9%"'
-              className="w-full bg-surface-2 border border-border rounded-md px-3 py-2 text-sm text-text outline-none focus:border-accent transition-colors"
-            />
-          )}
+          <MedicamentoPicker
+            medicamentos={medicamentos}
+            valorId={item.medicamento_id}
+            onSelecionar={(id) => onChange({ medicamento_id: id, apresentacao_id: null })}
+            onAbrirCadastro={
+              onCriarMedicamento && onCriarApresentacao
+                ? (nome) => {
+                    setNomeSugerido(nome)
+                    setModalAberto(true)
+                  }
+                : undefined
+            }
+          />
         </div>
 
         <button
@@ -135,7 +105,7 @@ export function TratamentoItemRow({
         </button>
       </div>
 
-      {modoAtual === 'cadastro' && item.medicamento_id && (
+      {item.medicamento_id && (
         <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
           <label className="flex flex-col gap-1.5">
             <span className="text-[11px] font-medium text-text-dim uppercase tracking-wide">Apresentação</span>
@@ -158,27 +128,6 @@ export function TratamentoItemRow({
             placeholder="1 a 2"
             className="w-28"
             disabled={!item.apresentacao_id}
-          />
-        </div>
-      )}
-
-      {modoAtual === 'livre' && (
-        <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
-          <TextField
-            label="Apresentação"
-            hint="Texto livre — sem medicamento cadastrado não há apresentações pra escolher"
-            value={item.apresentacao_livre ?? ''}
-            onChange={(e) => onChange({ apresentacao_livre: e.target.value })}
-            placeholder='Ex: "bolsa 500ml"'
-          />
-          <TextField
-            label="Quantidade"
-            hint="Aceita faixa"
-            value={item.quantidade ?? ''}
-            onChange={(e) => onChange({ quantidade: e.target.value })}
-            placeholder="1 a 2"
-            className="w-28"
-            disabled={!item.apresentacao_livre?.trim()}
           />
         </div>
       )}
