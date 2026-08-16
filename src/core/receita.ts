@@ -5,7 +5,7 @@
 //
 // Formato de duas linhas, como uma receita de verdade:
 //   Nitrofurantoína 100 mg
-//   Tomar 1 comprimido 6/6h, por 5 dias
+//   Tomar 1 comprimido de 6/6h, por 5 dias
 //
 // Montagem por segmentos: cada pedaço da frase só entra na lista se tiver conteúdo, e o
 // texto final é a junção dos segmentos presentes — nunca uma concatenação de strings com
@@ -38,6 +38,13 @@ interface Segmento {
   virgulaAntes: boolean
 }
 
+/** Posologia em formato de intervalo numérico ("6/6h", "12/12h", "8/8 h") — é o único caso
+ *  em que "de" antes dela soa certo ("1 comprimido de 6/6h"). Frequência por extenso ("1x
+ *  ao dia", "uma vez ao dia", "2 vezes ao dia") não leva "de". */
+function ehIntervaloNumerico(posologia: string): boolean {
+  return /^\d+\s*\/\s*\d+\s*h?s?$/i.test(posologia.trim())
+}
+
 /** Junta os segmentos presentes — nunca produz espaço duplo, vírgula dupla ou pontuação
  *  solta no início/fim, porque só entra na lista quem já tem conteúdo. */
 function juntarSegmentos(segmentos: Segmento[]): string {
@@ -67,11 +74,12 @@ function montarLinha1(dados: DadosItemReceita): string {
   return juntarSegmentos(segmentos)
 }
 
-/** Linha 2 — como tomar: "Tomar 1 comprimido 6/6h, por 5 dias". A sigla da via vira o
- *  verbo correspondente (verboDaVia/textoDaVia, em core/via.ts); via não mapeada mantém a
- *  sigla como está. Vírgula antes de "por duração" é fixa — só entra quando o campo
- *  correspondente tem conteúdo, como todo o resto aqui. Sem "de" antes da posologia: soa
- *  errado tanto pra formato de intervalo ("6/6h") quanto de frequência ("1x ao dia"). */
+/** Linha 2 — como tomar: "Tomar 1 comprimido de 6/6h, por 5 dias" ou "Tomar 1 comprimido
+ *  1x ao dia, por 5 dias". A sigla da via vira o verbo correspondente (verboDaVia/textoDaVia,
+ *  em core/via.ts); via não mapeada mantém a sigla como está. "de" antes da posologia só
+ *  entra pra formato de intervalo numérico ("de 6/6h") — frequência por extenso ("1x ao
+ *  dia") não leva. Vírgula antes de "por duração" é fixa — só entra quando o campo
+ *  correspondente tem conteúdo, como todo o resto aqui. */
 function montarLinha2(dados: DadosItemReceita): string {
   const segmentos: Segmento[] = []
 
@@ -85,7 +93,10 @@ function montarLinha2(dados: DadosItemReceita): string {
   }
 
   const posologia = dados.posologia?.trim()
-  if (posologia) segmentos.push({ texto: posologia, virgulaAntes: false })
+  if (posologia) {
+    const texto = ehIntervaloNumerico(posologia) ? `de ${posologia}` : posologia
+    segmentos.push({ texto, virgulaAntes: false })
+  }
 
   const duracao = dados.duracao?.trim()
   if (duracao) segmentos.push({ texto: `por ${duracao}`, virgulaAntes: true })
