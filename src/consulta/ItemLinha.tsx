@@ -3,7 +3,7 @@ import { textoReceitaDoItem } from '../core/receita'
 import { formatarApresentacao } from '../core/apresentacao'
 import { CopyButton } from './components/CopyButton'
 import { AlertaGestacao } from './components/AlertaGestacao'
-import { AlertTriangle, Clock } from 'lucide-react'
+import { AlertTriangle, Clock, Info } from 'lucide-react'
 
 export function ItemLinha({
   item,
@@ -85,8 +85,13 @@ export function ItemLinha({
         </dl>
       )}
 
+      {/* Observação do item — destaque próprio em amarelo, não some no meio dos detalhes
+          neutros (é aviso de quem prescreve pra quem lê, não só mais um dado). */}
       {item.observacoes && (
-        <p className="text-sm text-text-dim leading-relaxed">{item.observacoes}</p>
+        <div className="flex items-start gap-2 text-sm font-medium text-warn bg-warn/10 border border-warn/30 rounded-md px-3 py-2">
+          <Info className="w-4 h-4 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">{item.observacoes}</span>
+        </div>
       )}
 
       {medicamento?.contraindicacoes && (
