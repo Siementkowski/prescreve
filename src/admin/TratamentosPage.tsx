@@ -175,6 +175,14 @@ export function TratamentosPage() {
     return criada
   }
 
+  /** Exclui direto do seletor do item — mesma exclusão de sempre (some do catálogo
+   *  inteiro, não só desmarca aqui). Item que usava essa apresentação em outra prescrição
+   *  fica sem ela selecionada, igual já acontecia ao excluir em Medicamentos. */
+  async function excluirApresentacao(id: number) {
+    await apresentacoesApi.remove(id)
+    setApresentacoes((prev) => prev.filter((a) => a.id !== id))
+  }
+
   if (areas.length === 0) {
     return <p className="text-sm text-text-dim">Cadastre uma área e uma patologia primeiro.</p>
   }
@@ -298,6 +306,7 @@ export function TratamentosPage() {
             onSalvo={aoSalvarEsquema}
             onCriarMedicamento={criarMedicamentoRapido}
             onCriarApresentacao={criarApresentacaoRapida}
+            onExcluirApresentacao={excluirApresentacao}
             onExcluir={tratamentoSelecionado ? () => setParaExcluir(tratamentoSelecionado) : undefined}
           />
         </div>

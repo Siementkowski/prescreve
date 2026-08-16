@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, Plus } from 'lucide-react'
+import { ChevronDown, Plus, X } from 'lucide-react'
 import type { Apresentacao } from '../types'
 import { formatarApresentacao } from '../../core/apresentacao'
 import { camposFaltando, type DadosCamposForma, type FormaFarmaceutica } from '../../core/formas'
@@ -33,21 +33,42 @@ export function ApresentacaoPicker({
   valorId,
   onSelecionar,
   onCriar,
+  onExcluir,
 }: {
   apresentacoes: Apresentacao[]
   valorId: number | null
   onSelecionar: (id: number | null) => void
   onCriar?: (dados: NovaApresentacaoDados) => Promise<Apresentacao>
+  /** Remove a apresentação do catálogo (não só desmarca aqui) — some de todo lugar que a
+   *  usa. Se for a que está selecionada neste item, também desmarca pra não sobrar um id
+   *  que não existe mais. */
+  onExcluir?: (id: number) => Promise<void> | void
 }) {
   const [aberto, setAberto] = useState(false)
   const [criando, setCriando] = useState(false)
   const [salvando, setSalvando] = useState(false)
+  const [excluindoId, setExcluindoId] = useState<number | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [tentouSalvar, setTentouSalvar] = useState(false)
   const [novo, setNovo] = useState<NovaApresentacaoDados>(NOVO_VAZIO)
 
   const selecionada = apresentacoes.find((a) => a.id === valorId) ?? null
   const faltando = camposFaltando(novo.forma, novo)
+
+  async function excluir(a: Apresentacao, e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!onExcluir) return
+    setExcluindoId(a.id)
+    setErro(null)
+    try {
+      await onExcluir(a.id)
+      if (valorId === a.id) onSelecionar(null)
+    } catch (err) {
+      setErro((err as Error).message)
+    } finally {
+      setExcluindoId(null)
+    }
+  }
 
   function fechar() {
     setAberto(false)
@@ -113,20 +134,33 @@ export function ApresentacaoPicker({
                   <p className="text-xs text-text-dim px-3 py-2">Nenhuma apresentação cadastrada ainda.</p>
                 ) : (
                   apresentacoes.map((a) => (
-                    <button
-                      key={a.id}
-                      type="button"
-                      onClick={() => {
-                        onSelecionar(a.id)
-                        fechar()
-                      }}
-                      className="w-full text-left px-3 py-1.5 text-sm text-text hover:bg-surface-2 transition-colors"
-                    >
-                      {formatarApresentacao(a)}
-                    </button>
+                    <div key={a.id} className="flex items-center hover:bg-surface-2 transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelecionar(a.id)
+                          fechar()
+                        }}
+                        className="flex-1 min-w-0 text-left px-3 py-1.5 text-sm text-text truncate"
+                      >
+                        {formatarApresentacao(a)}
+                      </button>
+                      {onExcluir && (
+                        <button
+                          type="button"
+                          onClick={(e) => excluir(a, e)}
+                          disabled={excluindoId === a.id}
+                          title="Excluir apresentação"
+                          className="shrink-0 text-text-dim hover:text-danger disabled:opacity-50 transition-colors p-1.5 mr-1"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   ))
                 )}
               </div>
+              {erro && <p className="text-xs text-danger px-3 py-1.5">{erro}</p>}
               {onCriar && (
                 <button
                   type="button"

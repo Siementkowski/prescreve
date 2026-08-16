@@ -175,6 +175,11 @@ export function PatologiasPage() {
     return criada
   }
 
+  async function excluirApresentacao(id: number) {
+    await apresentacoesApi.remove(id)
+    setApresentacoes((prev) => prev.filter((a) => a.id !== id))
+  }
+
   function aoSalvarEsquema(tratamentoSalvo: Tratamento, itensSalvos: TratamentoItem[]) {
     setEsquemas((prev) => {
       const existe = prev.some((t) => t.id === tratamentoSalvo.id)
@@ -382,6 +387,7 @@ export function PatologiasPage() {
                           onSalvo={aoSalvarEsquema}
                           onCriarMedicamento={criarMedicamentoRapido}
                           onCriarApresentacao={criarApresentacaoRapida}
+                          onExcluirApresentacao={excluirApresentacao}
                           onExcluir={esquemaAberto ? () => excluirEsquema(esquemaAberto) : undefined}
                         />
                       </>

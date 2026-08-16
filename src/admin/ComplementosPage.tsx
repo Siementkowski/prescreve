@@ -141,6 +141,11 @@ export function ComplementosPage() {
     return criada
   }
 
+  async function excluirApresentacao(id: number) {
+    await apresentacoesApi.remove(id)
+    setApresentacoes((prev) => prev.filter((a) => a.id !== id))
+  }
+
   const complementoSelecionado = complementos.find((c) => c.id === selecionadoId) ?? null
 
   return (
@@ -224,6 +229,7 @@ export function ComplementosPage() {
             onSalvo={aoSalvarEsquema}
             onCriarMedicamento={criarMedicamentoRapido}
             onCriarApresentacao={criarApresentacaoRapida}
+            onExcluirApresentacao={excluirApresentacao}
             onExcluir={complementoSelecionado ? () => pedirExclusao(complementoSelecionado) : undefined}
             extraTopo={
               selecionadoId && (

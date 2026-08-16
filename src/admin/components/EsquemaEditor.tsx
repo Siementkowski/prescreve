@@ -79,6 +79,7 @@ export function EsquemaEditor({
   onSalvo,
   onCriarMedicamento,
   onCriarApresentacao,
+  onExcluirApresentacao,
   onExcluir,
   extraTopo,
 }: {
@@ -91,6 +92,7 @@ export function EsquemaEditor({
   onSalvo: (tratamento: Tratamento, itens: TratamentoItem[]) => void
   onCriarMedicamento: (input: MedicamentoInput) => Promise<Medicamento>
   onCriarApresentacao: (medicamentoId: number, dados: NovaApresentacaoDados) => Promise<Apresentacao>
+  onExcluirApresentacao?: (id: number) => Promise<void>
   onExcluir?: () => void
   /** Slot pro que cada tela quer mostrar acima do cabeçalho (ex: "usado em N patologias"
    *  no Complementos) — o editor em si não sabe nada sobre isso. */
@@ -316,6 +318,7 @@ export function EsquemaEditor({
                 onExcluir={() => removerItem(item.id)}
                 onCriarMedicamento={onCriarMedicamento}
                 onCriarApresentacao={onCriarApresentacao}
+                onExcluirApresentacao={onExcluirApresentacao}
               />
             )}
           />

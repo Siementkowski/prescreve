@@ -28,6 +28,7 @@ export function TratamentoItemRow({
   onExcluir,
   onCriarMedicamento,
   onCriarApresentacao,
+  onExcluirApresentacao,
 }: {
   item: TratamentoItem
   medicamentos: Medicamento[]
@@ -38,6 +39,7 @@ export function TratamentoItemRow({
   onExcluir: () => void
   onCriarMedicamento?: (input: MedicamentoInput) => Promise<Medicamento>
   onCriarApresentacao?: (medicamentoId: number, dados: NovaApresentacaoDados) => Promise<Apresentacao>
+  onExcluirApresentacao?: (id: number) => Promise<void>
 }) {
   const [modalAberto, setModalAberto] = useState(false)
   const [nomeSugerido, setNomeSugerido] = useState('')
@@ -118,6 +120,7 @@ export function TratamentoItemRow({
                   ? (dados) => onCriarApresentacao(item.medicamento_id!, dados)
                   : undefined
               }
+              onExcluir={onExcluirApresentacao}
             />
           </label>
           <TextField
