@@ -4,7 +4,7 @@
 // guiada pelo descritor FORMAS_CONFIG — aqui só adapta pro formato que a receita e o restante
 // do app já conhecem.
 
-import { gerarRotuloApresentacao, type DadosCamposForma } from './formas'
+import { gerarRotuloApresentacao, FORMAS_CONFIG, type DadosCamposForma, type FormaFarmaceutica } from './formas'
 
 export interface DadosApresentacao extends DadosCamposForma {
   forma: string | null | undefined
@@ -32,10 +32,21 @@ export function formatarConcentracao(a: DadosApresentacao): string | null {
 /** Rótulo completo pra listas/seletores: "Comprimido 500 mg", "Ampola 500 mg/mL, 10 mL".
  *  Usa a descrição manual quando cadastrada (cobre apresentações que não cabem no padrão
  *  forma+concentração); senão delega a montagem pro descritor de formas (core/formas.ts) —
- *  nenhuma regra de forma específica mora aqui. */
-export function formatarApresentacao(a: DadosApresentacao): string {
+ *  nenhuma regra de forma específica mora aqui.
+ *
+ *  `comConcentracao: false` (usado no seletor de apresentação do item da prescrição) mostra
+ *  só a forma ("Comprimido") — a força que entra na receita vem da Dose digitada ali, não
+ *  da concentração cadastrada, e mostrar as duas juntas confundia mais do que ajudava. O
+ *  cadastro no catálogo (onde precisa distinguir "Comprimido 3 mg" de "Comprimido 5 mg")
+ *  continua com o padrão (true). */
+export function formatarApresentacao(a: DadosApresentacao, opts?: { comConcentracao?: boolean }): string {
   if (a.descricao?.trim()) return a.descricao.trim()
   if (!a.forma?.trim()) return ''
+  if (opts?.comConcentracao === false) {
+    const forma = a.forma.trim()
+    const rotulo = FORMAS_CONFIG[forma as FormaFarmaceutica]?.rotulo
+    return rotulo ?? forma.charAt(0).toUpperCase() + forma.slice(1)
+  }
   return gerarRotuloApresentacao(a.forma.trim(), a)
 }
 

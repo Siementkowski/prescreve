@@ -110,7 +110,7 @@ export function ApresentacaoPicker({
         className="w-full flex items-center justify-between bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-text outline-none focus:border-accent transition-colors"
       >
         <span className={selecionada ? 'text-text' : 'text-text-dim'}>
-          {selecionada ? formatarApresentacao(selecionada) : '— nenhuma —'}
+          {selecionada ? formatarApresentacao(selecionada, { comConcentracao: false }) : '— nenhuma —'}
         </span>
         <ChevronDown className="w-4 h-4 text-text-dim shrink-0" />
       </button>
@@ -143,7 +143,7 @@ export function ApresentacaoPicker({
                         }}
                         className="flex-1 min-w-0 text-left px-3 py-1.5 text-sm text-text truncate"
                       >
-                        {formatarApresentacao(a)}
+                        {formatarApresentacao(a, { comConcentracao: false })}
                       </button>
                       {onExcluir && (
                         <button

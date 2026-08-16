@@ -47,9 +47,11 @@ function juntarSegmentos(segmentos: Segmento[]): string {
   }, '')
 }
 
-/** Linha 1 — identificação: "Dipirona 500 mg". A concentração vem da apresentação
- *  escolhida; sem cadastro, a apresentação em texto livre faz esse papel; sem nenhuma das
- *  duas, a dose livre (campo legado) é o último fallback. */
+/** Linha 1 — identificação: "Dipirona 500 mg". A dose digitada na prescrição manda —
+ *  é o número que a pessoa escolheu pra esse paciente, não a concentração do comprimido em
+ *  si (mesma apresentação serve pra doses diferentes conforme fracionamento/posologia). Sem
+ *  dose preenchida, cai pra concentração da apresentação, depois a apresentação em texto
+ *  livre, sempre com alguma coisa antes de desistir. */
 function montarLinha1(dados: DadosItemReceita): string {
   const segmentos: Segmento[] = []
 
@@ -57,7 +59,9 @@ function montarLinha1(dados: DadosItemReceita): string {
   if (nome) segmentos.push({ texto: nome, virgulaAntes: false })
 
   const concentracao = dados.apresentacao ? formatarConcentracao(dados.apresentacao) : null
-  const forca = concentracao ?? dados.apresentacaoLivre?.trim() ?? dados.dose?.trim() ?? null
+  // || de propósito, não ?? — dose costuma nascer '' (string vazia) num item novo, e isso
+  // não pode "vencer" a concentração real só por não ser null/undefined.
+  const forca = dados.dose?.trim() || concentracao || dados.apresentacaoLivre?.trim() || null
   if (forca) segmentos.push({ texto: forca, virgulaAntes: false })
 
   return juntarSegmentos(segmentos)
