@@ -79,12 +79,18 @@ function montarLinha2(dados: DadosItemReceita): string {
 
   const quantidade = dados.quantidade?.trim()
   const forma = dados.apresentacao?.forma?.trim() ?? dados.apresentacaoLivre?.trim()
-  if (quantidade && forma) {
+  const temQuantidadeForma = !!(quantidade && forma)
+  if (temQuantidadeForma) {
     segmentos.push({ texto: `${quantidade} ${formaComQuantidade(forma, quantidade)}`, virgulaAntes: false })
   }
 
+  // "de" só faz sentido encaixado depois de "1 comprimido" ("...comprimido de 6/6h") — sem
+  // quantidade+forma antes, vira "Tomar de 6/6h", que soa errado. Sem esse segmento, a
+  // posologia entra sozinha ("Tomar 6/6h").
   const posologia = dados.posologia?.trim()
-  if (posologia) segmentos.push({ texto: `de ${posologia}`, virgulaAntes: false })
+  if (posologia) {
+    segmentos.push({ texto: temQuantidadeForma ? `de ${posologia}` : posologia, virgulaAntes: false })
+  }
 
   const duracao = dados.duracao?.trim()
   if (duracao) segmentos.push({ texto: `por ${duracao}`, virgulaAntes: true })
