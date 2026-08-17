@@ -20,6 +20,7 @@ export type FormaFarmaceutica =
   | 'ampola'
   | 'sache'
   | 'pomada'
+  | 'jato'
   | 'frasco'
 
 export type GrupoForma = 'solidos' | 'liquidos' | 'parenterais' | 'outros'
@@ -93,6 +94,14 @@ export const FORMAS_CONFIG: Record<FormaFarmaceutica, FormaConfig> = {
     grupo: 'outros',
     campos: ['concentracao_percentual', 'peso_tubo'],
     unidadeAdministracao: 'aplicações',
+  },
+  jato: {
+    // Valor no banco é 'jato' (não 'spray') de propósito — pluraliza certo sozinho na
+    // receita ("2 jatos"), termo que já é o usado na prática (salbutamol, ipratrópio).
+    rotulo: 'Spray/jato',
+    grupo: 'outros',
+    campos: ['concentracao'],
+    unidadeAdministracao: 'jatos',
   },
   frasco: {
     rotulo: 'Frasco',
