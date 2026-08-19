@@ -127,7 +127,14 @@ export function PatologiasPage() {
           observacoes,
           ordem,
         })
-        setPatologias((prev) => prev.map((p) => (p.id === selecionadaId ? atualizada : p)))
+        if (area_id !== areaSelecionada) {
+          // Mudou de área — some da lista da área atual (o filtro é por área). Os esquemas
+          // vão junto sozinhos, porque eles só apontam pra patologia_id, nunca pra área.
+          setPatologias((prev) => prev.filter((p) => p.id !== selecionadaId))
+          novo()
+        } else {
+          setPatologias((prev) => prev.map((p) => (p.id === selecionadaId ? atualizada : p)))
+        }
       } else {
         const criada = await patologiasApi.insert(form)
         setPatologias((prev) => [...prev, criada])
@@ -275,6 +282,20 @@ export function PatologiasPage() {
                     onChange={(e) => setForm({ ...form, nome: e.target.value })}
                     placeholder="Ex: ITU não complicada"
                   />
+                  {selecionadaId && (
+                    <SelectField
+                      label="Área"
+                      hint="Move a patologia (e os esquemas dela junto) pra outra área — ela some da lista da área atual e passa a aparecer na nova."
+                      value={form.area_id}
+                      onChange={(e) => setForm({ ...form, area_id: Number(e.target.value) })}
+                    >
+                      {areas.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.nome}
+                        </option>
+                      ))}
+                    </SelectField>
+                  )}
                   <TextField
                     label="Sinônimos"
                     hint="Separados por vírgula — usados na busca da tela de consulta."
