@@ -20,7 +20,6 @@ export function Topbar({
       </Link>
 
       <div className="flex items-center gap-2.5 min-w-0">
-        {children}
         <button
           type="button"
           onClick={onAlternarTema}
@@ -30,6 +29,7 @@ export function Topbar({
         >
           <Icon name={tema === 'dark' ? 'sun' : 'moon'} size={18} />
         </button>
+        {children}
       </div>
     </header>
   )

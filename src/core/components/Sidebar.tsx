@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import type { ComponentType } from 'react'
 import { Icon, type NomeIconeEditorial } from '../../admin/components/editorial/Icon'
@@ -23,7 +24,15 @@ export type ItemNav = {
  *  grupos rotulados ("Navegação"/"Painel") e NavItem com estado ativo em bloco sólido
  *  (bg-text). Usa NavLink de verdade (rotas reais), diferente do sandbox do kit que só
  *  troca de "page" em memória. */
-export function Sidebar({ principal, painel }: { principal: ItemNav[]; painel: ItemNav[] }) {
+export function Sidebar({
+  principal,
+  painel,
+  rodape,
+}: {
+  principal: ItemNav[]
+  painel: ItemNav[]
+  rodape?: ReactNode
+}) {
   const [recolhida, setRecolhida] = useState(recolhidaSalva)
 
   function alternar() {
@@ -55,9 +64,12 @@ export function Sidebar({ principal, painel }: { principal: ItemNav[]; painel: I
         />
       </button>
 
-      <div className={`h-full overflow-y-auto transition-[padding] duration-200 ${recolhida ? 'px-3 py-7' : 'px-4.5 py-7'}`}>
-        <GrupoNav titulo="Navegação" itens={principal} recolhida={recolhida} />
-        {painel.length > 0 && <GrupoNav titulo="Painel" itens={painel} recolhida={recolhida} className="mt-6" />}
+      <div className={`h-full flex flex-col transition-[padding] duration-200 ${recolhida ? 'px-3 py-7' : 'px-4.5 py-7'}`}>
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <GrupoNav titulo="Navegação" itens={principal} recolhida={recolhida} />
+          {painel.length > 0 && <GrupoNav titulo="Painel" itens={painel} recolhida={recolhida} className="mt-6" />}
+        </div>
+        {rodape && !recolhida && <div className="shrink-0 pt-4 mt-2 border-t border-border">{rodape}</div>}
       </div>
     </aside>
   )

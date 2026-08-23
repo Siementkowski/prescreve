@@ -42,11 +42,11 @@ export function InstallPrompt() {
   return (
     <button
       onClick={instalar}
-      className="flex items-center gap-1.5 text-xs font-medium text-text-dim hover:text-text border border-border rounded-md px-2.5 py-1.5 transition-colors shrink-0"
+      className="flex items-center gap-1.5 text-[11px] font-medium text-text-dim hover:text-text border border-border rounded-[var(--radius-nav,10px)] px-2.5 py-2 bg-surface transition-colors"
       title="Instalar o Prescreve como app"
     >
-      <Download className="w-3.5 h-3.5" />
-      <span className="hidden lg:inline">Instalar</span>
+      <Download className="w-3.5 h-3.5 shrink-0" />
+      <span>Instalar</span>
     </button>
   )
 }

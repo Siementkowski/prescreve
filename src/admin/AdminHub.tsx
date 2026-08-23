@@ -161,7 +161,7 @@ export function AdminHub() {
           {areas.map((a) => (
             <Link
               key={a.id}
-              to="/painel/areas"
+              to={`/painel/patologias?area=${a.id}`}
               className="group border border-border hover:border-text bg-surface rounded-[var(--radius-card,14px)] min-h-[74px] p-3.5 grid grid-cols-[34px_1fr_auto] items-center gap-2.5 transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-area,3px_3px_0_var(--color-text))]"
             >
               <span

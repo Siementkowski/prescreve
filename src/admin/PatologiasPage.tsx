@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Check, ChevronLeft, Plus, Trash2 } from 'lucide-react'
 import { areasApi, patologiasApi, tratamentosApi, tratamentoItensApi, medicamentosApi, apresentacoesApi } from './api'
 import type { Area, Patologia, PatologiaInput, Medicamento, Apresentacao, Tratamento, MedicamentoInput, TratamentoItem } from './types'
@@ -23,8 +24,12 @@ function vazio(areaId: number, ordem: number): PatologiaInput {
  *  reordena (ComplementoSeletor); editar a posologia de um complemento é sempre em
  *  Painel → Complementos, porque é N:N e mudaria em todas as patologias que o usam. */
 export function PatologiasPage() {
+  // Área pode chegar via link (?area=<id>) — o card de área do Início manda pra cá já
+  // filtrado, em vez de cair na tela de gerenciar áreas.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const areaDaUrl = Number(searchParams.get('area')) || null
   const [areas, setAreas] = useState<Area[]>([])
-  const [areaSelecionada, setAreaSelecionada] = useState<number | null>(null)
+  const [areaSelecionada, setAreaSelecionada] = useState<number | null>(areaDaUrl)
   const [patologias, setPatologias] = useState<Patologia[]>([])
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([])
   const [apresentacoes, setApresentacoes] = useState<Apresentacao[]>([])
@@ -49,10 +54,15 @@ export function PatologiasPage() {
     areasApi.list().then((lista) => {
       const ordenada = [...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
       setAreas(ordenada)
-      if (ordenada.length > 0) setAreaSelecionada(ordenada[0].id)
+      // Se veio uma área pela URL e ela existe, mantém — senão cai pra primeira da lista.
+      const valida = areaDaUrl != null && ordenada.some((a) => a.id === areaDaUrl)
+      if (!valida && ordenada.length > 0) setAreaSelecionada(ordenada[0].id)
     })
     medicamentosApi.list().then(setMedicamentos)
     apresentacoesApi.list().then(setApresentacoes)
+    // areaDaUrl só deve valer na carga inicial (é o valor da URL no primeiro render) —
+    // não queremos re-rodar isso toda vez que o usuário troca de área pelo select.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -252,7 +262,11 @@ export function PatologiasPage() {
           <SelectField
             label="Área"
             value={areaSelecionada ?? ''}
-            onChange={(e) => setAreaSelecionada(Number(e.target.value))}
+            onChange={(e) => {
+              const id = Number(e.target.value)
+              setAreaSelecionada(id)
+              setSearchParams({ area: String(id) }, { replace: true })
+            }}
           >
             {areas.map((a) => (
               <option key={a.id} value={a.id}>

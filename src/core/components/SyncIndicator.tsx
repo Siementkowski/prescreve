@@ -19,9 +19,12 @@ export function SyncIndicator() {
   }, [])
 
   return (
-    <div className="flex items-center gap-1.5 text-xs text-text-dim shrink-0" title={online ? 'Online' : 'Offline'}>
-      {online ? <Wifi className="w-3.5 h-3.5 text-ok" /> : <WifiOff className="w-3.5 h-3.5 text-danger" />}
-      <span className="hidden md:inline">
+    <div
+      className="flex items-center gap-1.5 text-[11px] text-text-dim rounded-[var(--radius-nav,10px)] px-2.5 py-2 border border-border bg-surface"
+      title={online ? 'Online' : 'Offline'}
+    >
+      {online ? <Wifi className="w-3.5 h-3.5 text-ok shrink-0" /> : <WifiOff className="w-3.5 h-3.5 text-danger shrink-0" />}
+      <span className="min-w-0 leading-tight">
         {online ? 'Online' : 'Offline'}
         {ultimaSincronizacao && ` · sincronizado ${tempoRelativo(ultimaSincronizacao)}`}
         {!ultimaSincronizacao && ' · nunca sincronizado'}
@@ -30,7 +33,7 @@ export function SyncIndicator() {
         onClick={() => sincronizar({ forcar: true })}
         disabled={!online || sincronizando}
         title="Forçar sincronização"
-        className="text-text-dim hover:text-text disabled:opacity-40 disabled:cursor-not-allowed transition-colors p-1"
+        className="ml-auto shrink-0 text-text-dim hover:text-text disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
         <RefreshCw className={`w-3.5 h-3.5 ${sincronizando ? 'animate-spin' : ''}`} />
       </button>

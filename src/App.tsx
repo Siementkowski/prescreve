@@ -72,8 +72,10 @@ function App() {
   }
 
   // Painel inclui todas as sub-telas de cadastro (/painel/*) — o item da sidebar fica
-  // marcado como ativo em qualquer uma delas, não só na raiz exata.
-  const painelAtivo = location.pathname.startsWith('/painel')
+  // marcado como ativo em qualquer uma delas, não só na raiz exata. Medicamentos ganha
+  // atalho próprio (como no kit), então fica de fora do "ativo" genérico do Painel.
+  const medicamentosAtivo = location.pathname.startsWith('/painel/medicamentos')
+  const painelAtivo = location.pathname.startsWith('/painel') && !medicamentosAtivo
 
   const navPrincipal: ItemNav[] = [
     { to: '/', label: 'Início', sprite: 'grid', end: true },
@@ -82,19 +84,15 @@ function App() {
     { to: '/anamnese', label: 'Anamnese', lucide: FileText },
   ]
   const navPainel: ItemNav[] = isEditor
-    ? [{ to: '/painel', label: 'Painel', sprite: 'settings', ativo: painelAtivo }]
+    ? [
+        { to: '/painel/medicamentos', label: 'Medicamentos', sprite: 'pill', ativo: medicamentosAtivo },
+        { to: '/painel', label: 'Painel', sprite: 'settings', ativo: painelAtivo },
+      ]
     : []
 
   return (
     <div className="tema-editorial h-screen w-full bg-bg text-text flex flex-col" data-theme={tema}>
       <Topbar tema={tema} onAlternarTema={() => setTema((t) => (t === 'dark' ? 'light' : 'dark'))}>
-        {!isEditor && (
-          <span className="hidden md:inline text-warn text-xs bg-warn-dim border border-warn/30 rounded-full px-2.5 py-1 shrink-0">
-            Modo leitura
-          </span>
-        )}
-        <SyncIndicator />
-        <InstallPrompt />
         <button
           onClick={signOut}
           className="flex items-center justify-center w-9 h-9 rounded-full font-display font-semibold text-xs shrink-0 text-white"
@@ -109,7 +107,21 @@ function App() {
       <AtualizacaoDisponivelBanner />
 
       <div className="flex-1 min-h-0 flex overflow-hidden">
-        <Sidebar principal={navPrincipal} painel={navPainel} />
+        <Sidebar
+          principal={navPrincipal}
+          painel={navPainel}
+          rodape={
+            <div className="flex flex-col gap-2">
+              {!isEditor && (
+                <span className="text-warn text-[11px] bg-warn-dim border border-warn/30 rounded-full px-2.5 py-1 text-center">
+                  Modo leitura
+                </span>
+              )}
+              <SyncIndicator />
+              <InstallPrompt />
+            </div>
+          }
+        />
 
         <main className="flex-1 min-w-0 min-h-0">
           <Routes>
