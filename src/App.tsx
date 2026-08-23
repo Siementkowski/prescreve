@@ -13,7 +13,8 @@ import { PediatriaPage } from './pediatria/PediatriaPage'
 import { AnamnesePage } from './anamnese/AnamnesePage'
 import { AdminLayout } from './admin/AdminLayout'
 import { AreasPage } from './admin/AreasPage'
-import { PatologiasPage } from './admin/PatologiasPage'
+import { PatologiasPage as PatologiasAdminPage } from './admin/PatologiasPage'
+import { PatologiasPage } from './patologias/PatologiasPage'
 import { MedicamentosPage } from './admin/MedicamentosPage'
 import { ComplementosPage } from './admin/ComplementosPage'
 import { TratamentosPage } from './admin/TratamentosPage'
@@ -134,6 +135,7 @@ function App() {
             <Route path="/painel" element={<AdminLayout />}>
               <Route index element={<Navigate to="areas" replace />} />
               <Route path="areas" element={<AreasPage />} />
+              <Route path="patologias" element={<PatologiasAdminPage />} />
               <Route path="medicamentos" element={<MedicamentosPage />} />
               <Route path="complementos" element={<ComplementosPage />} />
               <Route path="tratamentos" element={<TratamentosPage />} />
