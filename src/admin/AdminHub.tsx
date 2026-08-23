@@ -1,24 +1,26 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapPinned, FolderHeart, Pill, ListChecks, ArrowRight, Baby, Search } from 'lucide-react'
+import { FolderHeart, Pill, ListChecks, Baby, Search } from 'lucide-react'
 import { areasApi, patologiasApi, medicamentosApi } from './api'
-import type { Patologia, Medicamento } from './types'
+import type { Area, Patologia, Medicamento } from './types'
 import { useAuth } from '../core/auth/AuthProvider'
+import { IconePorNome } from './components/IconPicker'
 
-/** Página Inicial — em vez de abas no topo, um painel com cards. Cada card é uma
- *  porta de entrada pra uma parte da base (que vive em /painel). Revisão fica de fora
- *  daqui de propósito: é manutenção interna, não o que alguém vem procurar ao abrir a
- *  página inicial — continua a um clique de distância pela faixa de atalhos do Painel. */
+/** Início — mesmo espírito da "Visão geral" do kit (overview-screen.jsx): cabeçalho com
+ *  saudação + busca, grade de acesso rápido às áreas clínicas, atalhos de conteúdo e um
+ *  destaque grande pra calculadora pediátrica. Revisão fica de fora daqui de propósito:
+ *  é manutenção interna, não o que alguém vem procurar ao abrir a página inicial —
+ *  continua a um clique pela faixa de seções do Painel. */
 export function AdminHub() {
-  const { perfil } = useAuth()
+  const { perfil, isEditor } = useAuth()
   const navigate = useNavigate()
-  const [contagemAreas, setContagemAreas] = useState(0)
+  const [areas, setAreas] = useState<Area[]>([])
   const [patologias, setPatologias] = useState<Patologia[]>([])
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([])
   const [busca, setBusca] = useState('')
 
   useEffect(() => {
-    areasApi.list().then((areas) => setContagemAreas(areas.length))
+    areasApi.list().then(setAreas)
     patologiasApi.list().then(setPatologias)
     medicamentosApi.list().then(setMedicamentos)
   }, [])
@@ -38,189 +40,228 @@ export function AdminHub() {
   }, [medicamentos, busca])
 
   const buscando = busca.trim().length > 0
+  const semResultados = buscando && resultadosPatologias.length === 0 && resultadosMedicamentos.length === 0
 
   return (
-    <div className="h-full overflow-y-auto p-6">
-    <div className="max-w-5xl mx-auto px-2 pb-16">
-      {/* saudação */}
-      <div className="text-center pt-6 pb-2 relative">
-        <span
-          className="inline-flex items-center gap-1.5 bg-surface border border-border rounded-full px-4 py-1.5 text-xs font-semibold text-text-dim shadow-sm"
-          style={{ transform: 'rotate(-2deg)' }}
-        >
-          ✨ Base viva, atualizada por você
-        </span>
-        <h1 className="font-display text-4xl font-semibold mt-5 leading-tight">
-          Oi, {primeiroNome}! 👋
-          <br />
-          vamos cuidar da sua base?
-        </h1>
-        <p className="text-text-dim mt-3 max-w-md mx-auto">
-          Cadastre áreas, patologias e medicamentos, monte as prescrições — tudo por aqui, num só lugar.
-        </p>
-      </div>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-5xl mx-auto px-6 sm:px-9 pt-11 pb-20">
+        {/* cabeçalho — mesmo padrão do PageHead do kit: eyebrow, título grande, descrição,
+            ações à direita */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8 mb-11">
+          <div className="min-w-0">
+            <span className="ed-pill inline-flex items-center gap-1.5 border border-[var(--line-strong)] bg-surface px-2.5 py-1.5 text-[11px] font-semibold">
+              <span className="ed-eyebrow-dot bg-cat-areas" aria-hidden="true" />
+              Prescreve
+            </span>
+            <h1 className="font-display text-[clamp(30px,4.2vw,48px)] leading-[0.98] tracking-[-.045em] mt-4 mb-3">
+              Oi, {primeiroNome} — vamos cuidar da sua base?
+            </h1>
+            <p className="max-w-md text-text-dim text-[15px] leading-relaxed">
+              Cadastre áreas, patologias e medicamentos, monte as prescrições — tudo por aqui, num só lugar.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to="/consulta"
+              className="text-sm font-semibold border border-border hover:border-text-dim text-text rounded-[var(--radius-pill,999px)] px-4 py-2.5 transition-colors"
+            >
+              Ir para Consulta
+            </Link>
+            {isEditor && (
+              <Link
+                to="/painel/tratamentos"
+                className="text-sm font-semibold bg-text hover:opacity-90 text-bg rounded-[var(--radius-pill,999px)] px-4 py-2.5 transition-opacity"
+              >
+                Nova prescrição →
+              </Link>
+            )}
+          </div>
+        </div>
 
-      {/* busca rápida */}
-      <div className="max-w-lg mx-auto mt-8 relative">
-        <div className="flex items-center gap-2.5 bg-surface border border-border rounded-full px-5 py-3 shadow-sm">
-          <Search className="w-4 h-4 text-text-dim shrink-0" />
-          <input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar patologia ou medicamento na base…"
-            className="flex-1 bg-transparent outline-none text-sm text-text placeholder:text-text-dim"
+        {/* busca rápida */}
+        <div className="relative mb-1">
+          <div className="flex items-center gap-2.5 bg-surface border border-border rounded-[var(--radius-control,12px)] px-3.5 py-3">
+            <Search className="w-4 h-4 text-text-dim shrink-0" />
+            <input
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Pesquisar patologia ou medicamento…"
+              className="flex-1 bg-transparent outline-none text-sm text-text placeholder:text-text-dim"
+            />
+          </div>
+
+          {buscando && (
+            <div className="absolute z-20 top-full mt-1.5 w-full bg-surface border border-border rounded-[var(--radius-card,14px)] shadow-[var(--shadow-popover,0_14px_32px_rgba(0,0,0,.2))] overflow-hidden">
+              <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border">
+                <span className="text-[10px] uppercase tracking-[1px] text-text-dim font-semibold">Resultados</span>
+                <button
+                  onClick={() => setBusca('')}
+                  className="text-[10px] border border-border rounded-[var(--radius-xs,6px)] px-1.5 py-0.5 text-text-dim hover:text-text transition-colors"
+                >
+                  Esc
+                </button>
+              </div>
+              {semResultados ? (
+                <p className="text-sm text-text-dim px-4 py-5 text-center">Nada encontrado.</p>
+              ) : (
+                <>
+                  {resultadosPatologias.map((p) => (
+                    <button
+                      key={`p-${p.id}`}
+                      onClick={() => navigate('/painel/patologias')}
+                      className="w-full grid grid-cols-[30px_1fr_auto] items-center gap-2.5 text-left px-3.5 py-2.5 border-b border-border last:border-b-0 hover:bg-surface-2 transition-colors"
+                    >
+                      <span className="w-[30px] h-[30px] rounded-[var(--radius-sm,8px)] flex items-center justify-center bg-[var(--tint-green-bg)] text-[var(--tint-green-fg)]">
+                        <FolderHeart className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[13px] text-text truncate">{p.nome}</span>
+                        <span className="block text-[11px] text-text-dim">Patologia</span>
+                      </span>
+                      <span className="text-text-dim opacity-45">↗</span>
+                    </button>
+                  ))}
+                  {resultadosMedicamentos.map((m) => (
+                    <button
+                      key={`m-${m.id}`}
+                      onClick={() => navigate('/painel/medicamentos')}
+                      className="w-full grid grid-cols-[30px_1fr_auto] items-center gap-2.5 text-left px-3.5 py-2.5 border-b border-border last:border-b-0 hover:bg-surface-2 transition-colors"
+                    >
+                      <span className="w-[30px] h-[30px] rounded-[var(--radius-sm,8px)] flex items-center justify-center bg-[var(--tint-blue-bg)] text-[var(--tint-blue-fg)]">
+                        <Pill className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[13px] text-text truncate">{m.nome}</span>
+                        <span className="block text-[11px] text-text-dim">Medicamento</span>
+                      </span>
+                      <span className="text-text-dim opacity-45">↗</span>
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* acesso rápido — áreas clínicas */}
+        <div className="flex items-end justify-between gap-4 mt-14 mb-4.5">
+          <div>
+            <span className="ed-pill inline-flex items-center gap-1.5 border border-[var(--line-strong)] bg-surface px-2.5 py-1.5 text-[11px] font-semibold">
+              <span className="ed-eyebrow-dot bg-accent" aria-hidden="true" />
+              Acesso rápido
+            </span>
+            <h2 className="font-display text-[28px] tracking-[-1px] mt-3">Áreas clínicas</h2>
+          </div>
+          <span className="text-xs text-text-dim shrink-0 pb-1">
+            {areas.length} área{areas.length === 1 ? '' : 's'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          {areas.map((a) => (
+            <Link
+              key={a.id}
+              to="/painel/areas"
+              className="group border border-border hover:border-text bg-surface rounded-[var(--radius-card,14px)] min-h-[74px] p-3.5 grid grid-cols-[34px_1fr_auto] items-center gap-2.5 transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-area,3px_3px_0_var(--color-text))]"
+            >
+              <span
+                className="w-9 h-9 rounded-[var(--radius-nav,10px)] flex items-center justify-center shrink-0"
+                style={{ backgroundColor: (a.cor ?? '#2dd4e8') + '22', color: a.cor ?? '#2dd4e8' }}
+              >
+                <IconePorNome nome={a.icone} className="w-[18px] h-[18px]" />
+              </span>
+              <span className="min-w-0">
+                <strong className="block text-sm font-semibold text-text truncate">{a.nome}</strong>
+                <small className="block text-[11px] text-text-dim mt-0.5">Conteúdo clínico</small>
+              </span>
+              <span className="text-sm text-text-dim opacity-40 group-hover:opacity-70 transition-opacity">↗</span>
+            </Link>
+          ))}
+          {areas.length === 0 && (
+            <p className="col-span-full text-sm text-text-dim py-6 text-center">Nenhuma área cadastrada ainda.</p>
+          )}
+        </div>
+
+        {/* atalhos de conteúdo */}
+        <div className="flex items-end justify-between gap-4 mt-14 mb-4.5">
+          <h2 className="font-display text-[24px] tracking-[-.8px]">Atalhos de conteúdo</h2>
+          <span className="text-xs text-text-dim shrink-0 pb-1">sem excesso de informação</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <CompactAction
+            to="/painel/medicamentos"
+            glyph="+"
+            titulo="Medicamentos"
+            nota={`${medicamentos.length} cadastrado${medicamentos.length === 1 ? '' : 's'}`}
+          />
+          <CompactAction
+            to="/painel/tratamentos"
+            glyph="≡"
+            titulo="Prescrições"
+            nota="Montar e revisar receitas"
+          />
+          <CompactAction
+            to="/painel/patologias"
+            glyph="◇"
+            titulo="Patologias"
+            nota={`${patologias.length} cadastrada${patologias.length === 1 ? '' : 's'}`}
           />
         </div>
 
-        {buscando && (
-          <div className="absolute z-10 top-full mt-2 w-full bg-surface border border-border rounded-2xl shadow-lg overflow-hidden">
-            {resultadosPatologias.length === 0 && resultadosMedicamentos.length === 0 ? (
-              <p className="text-sm text-text-dim px-5 py-4 text-center">Nada encontrado.</p>
-            ) : (
-              <>
-                {resultadosPatologias.map((p) => (
-                  <button
-                    key={`p-${p.id}`}
-                    onClick={() => navigate('/painel/patologias')}
-                    className="w-full flex items-center gap-2.5 text-left px-5 py-2.5 hover:bg-surface-2 transition-colors"
-                  >
-                    <FolderHeart className="w-4 h-4 text-cat-patologias shrink-0" />
-                    <span className="text-sm">{p.nome}</span>
-                    <span className="text-xs text-text-dim ml-auto">Patologia</span>
-                  </button>
-                ))}
-                {resultadosMedicamentos.map((m) => (
-                  <button
-                    key={`m-${m.id}`}
-                    onClick={() => navigate('/painel/medicamentos')}
-                    className="w-full flex items-center gap-2.5 text-left px-5 py-2.5 hover:bg-surface-2 transition-colors"
-                  >
-                    <Pill className="w-4 h-4 text-cat-medicamentos shrink-0" />
-                    <span className="text-sm">{m.nome}</span>
-                    <span className="text-xs text-text-dim ml-auto">Medicamento</span>
-                  </button>
-                ))}
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* hub de cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
-        <HubCard
-          to="/painel/areas"
-          icone={MapPinned}
-          corTexto="var(--color-cat-areas)"
-          corFundo="var(--color-cat-areas-bg)"
-          titulo="Áreas"
-          descricao="As grandes especialidades. O primeiro nível da sua base."
-          contador={`${contagemAreas} cadastrada${contagemAreas === 1 ? '' : 's'}`}
-        />
-        <HubCard
-          to="/painel/patologias"
-          icone={FolderHeart}
-          corTexto="var(--color-cat-patologias)"
-          corFundo="var(--color-cat-patologias-bg)"
-          titulo="Patologias"
-          descricao="Sinônimos e orientações que alimentam a busca da consulta."
-          contador={`${patologias.length} cadastrada${patologias.length === 1 ? '' : 's'}`}
-        />
-        <HubCard
-          to="/painel/medicamentos"
-          icone={Pill}
-          corTexto="var(--color-cat-medicamentos)"
-          corFundo="var(--color-cat-medicamentos-bg)"
-          titulo="Medicamentos"
-          descricao="O catálogo — gestação, lactação e dose pediátrica num cadastro só."
-          contador={`${medicamentos.length} cadastrado${medicamentos.length === 1 ? '' : 's'}`}
-        />
-
+        {/* destaque — calculadora pediátrica */}
         <Link
-          to="/painel/tratamentos"
-          className="sm:col-span-2 lg:col-span-3 bg-surface border border-border rounded-3xl p-6 flex items-center gap-5 hover:-translate-y-0.5 transition-transform"
+          to="/pediatria"
+          className="mt-11 flex items-center justify-between gap-6 rounded-[var(--radius-panel,18px)] px-8 py-7 bg-text text-bg overflow-hidden relative transition-opacity hover:opacity-95"
         >
-          <span
-            className="w-16 h-16 rounded-[20px] flex items-center justify-center shrink-0"
-            style={{ background: 'var(--color-cat-tratamentos-bg)', color: 'var(--color-cat-tratamentos)' }}
-          >
-            <ListChecks className="w-8 h-8" />
-          </span>
-          <span className="flex-1 min-w-0">
-            <span className="font-display text-lg font-semibold block">Prescrições</span>
-            <span className="text-sm text-text-dim block mt-0.5">
-              Onde a receita ganha forma — cabeçalho + itens com dose, via e posologia.
+          <span className="min-w-0">
+            <span className="font-display text-xl sm:text-2xl font-semibold block max-w-xs">
+              Calculadora de dose pediátrica
+            </span>
+            <span className="text-sm block mt-2 max-w-xs opacity-70">
+              Fórmula transparente, com aviso de dose-teto — pronta pra usar na consulta.
             </span>
           </span>
-          <ArrowRight className="w-5 h-5 text-text-dim shrink-0" />
+          <span className="flex items-center gap-2 font-display font-semibold text-sm px-5 py-3 rounded-[var(--radius-pill,999px)] shrink-0 bg-bg text-text">
+            <Baby className="w-4 h-4" />
+            Abrir calculadora
+          </span>
         </Link>
-      </div>
 
-      {/* cta */}
-      <Link
-        to="/pediatria"
-        className="mt-10 flex items-center justify-between gap-6 rounded-3xl px-9 py-8 text-white overflow-hidden relative"
-        style={{ background: '#201F2E' }}
-      >
-        <span>
-          <span className="font-display text-2xl font-semibold block max-w-xs">
-            Calculadora de dose pediátrica
-          </span>
-          <span className="text-sm block mt-2 max-w-xs" style={{ color: '#B9B6CC' }}>
-            Fórmula transparente, com aviso de dose-teto — pronta pra usar na consulta.
-          </span>
-        </span>
-        <span
-          className="flex items-center gap-2 font-display font-semibold text-sm px-5 py-3 rounded-full shrink-0"
-          style={{ background: 'var(--color-cat-areas-bg)', color: 'var(--color-cat-areas)' }}
-        >
-          <Baby className="w-4 h-4" />
-          Abrir calculadora
-        </span>
-      </Link>
-    </div>
+        {isEditor && (
+          <Link
+            to="/painel/areas"
+            className="mt-2.5 flex items-center gap-3 rounded-[var(--radius-card,14px)] px-6 py-5 border border-border bg-surface hover:border-text transition-colors"
+          >
+            <span className="w-10 h-10 rounded-[var(--radius-nav,10px)] flex items-center justify-center bg-[var(--tint-slate-bg)] text-[var(--tint-slate-fg)] shrink-0">
+              <ListChecks className="w-5 h-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="font-display text-[15px] font-semibold block">Gerenciar áreas</span>
+              <span className="text-[13px] text-text-dim block mt-0.5">
+                As grandes especialidades — o primeiro nível da base.
+              </span>
+            </span>
+          </Link>
+        )}
+      </div>
     </div>
   )
 }
 
-function HubCard({
-  to,
-  icone: Icone,
-  corTexto,
-  corFundo,
-  titulo,
-  descricao,
-  contador,
-}: {
-  to: string
-  icone: typeof MapPinned
-  corTexto: string
-  corFundo: string
-  titulo: string
-  descricao: string
-  contador: string
-}) {
+function CompactAction({ to, glyph, titulo, nota }: { to: string; glyph: string; titulo: string; nota: string }) {
   return (
     <Link
       to={to}
-      className="bg-surface border border-border rounded-3xl p-6 flex flex-col gap-4 hover:-translate-y-0.5 transition-transform"
+      className="group border border-border hover:border-text bg-surface rounded-[var(--radius-card,14px)] p-3.5 grid grid-cols-[34px_1fr_auto] items-center gap-2.5 transition-transform duration-150 hover:-translate-y-0.5"
     >
-      <span
-        className="w-12 h-12 rounded-2xl flex items-center justify-center"
-        style={{ background: corFundo, color: corTexto }}
-      >
-        <Icone className="w-6 h-6" />
+      <span className="w-[34px] h-[34px] rounded-[var(--radius-input,9px)] bg-text text-bg flex items-center justify-center font-bold shrink-0">
+        {glyph}
       </span>
-      <span className="flex-1">
-        <span className="font-display text-lg font-semibold block">{titulo}</span>
-        <span className="text-sm text-text-dim block mt-1 leading-relaxed">{descricao}</span>
+      <span className="min-w-0">
+        <strong className="block text-[13px] font-semibold text-text truncate">{titulo}</strong>
+        <small className="block text-[11px] text-text-dim mt-0.5">{nota}</small>
       </span>
-      <span className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-text-dim">{contador}</span>
-        <span className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center">
-          <ArrowRight className="w-4 h-4" />
-        </span>
-      </span>
+      <span className="text-base text-text-dim opacity-45 group-hover:opacity-75 transition-opacity">→</span>
     </Link>
   )
 }

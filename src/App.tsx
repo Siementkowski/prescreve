@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Stethoscope, Settings, Baby, Home, FileText } from 'lucide-react'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Stethoscope, Baby, FileText } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
 import { LoginPage } from './core/auth/LoginPage'
 import { useSyncStore } from './core/sync'
@@ -21,13 +21,9 @@ import { GeradoresPage } from './admin/GeradoresPage'
 import { RevisaoPage } from './admin/RevisaoPage'
 import { AdminHub } from './admin/AdminHub'
 import { AvisoUsoProfissional } from './core/components/AvisoUsoProfissional'
-import { Icon } from './admin/components/editorial/Icon'
+import { Topbar } from './core/components/Topbar'
+import { Sidebar, type ItemNav } from './core/components/Sidebar'
 import './admin/painel-editorial.css'
-
-const navPillClass = ({ isActive }: { isActive: boolean }) =>
-  `flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-    isActive ? 'bg-text text-bg' : 'text-text-dim hover:bg-surface-2 hover:text-text'
-  }`
 
 type TemaApp = 'light' | 'dark'
 const CHAVE_TEMA_APP = 'prescreve-painel-tema'
@@ -75,102 +71,66 @@ function App() {
     )
   }
 
-  // Painel inclui todas as sub-telas de cadastro (/painel/*) — a pílula fica marcada
-  // como ativa em qualquer uma delas, não só na raiz exata.
+  // Painel inclui todas as sub-telas de cadastro (/painel/*) — o item da sidebar fica
+  // marcado como ativo em qualquer uma delas, não só na raiz exata.
   const painelAtivo = location.pathname.startsWith('/painel')
+
+  const navPrincipal: ItemNav[] = [
+    { to: '/', label: 'Início', sprite: 'grid', end: true },
+    { to: '/consulta', label: 'Consulta', lucide: Stethoscope },
+    { to: '/pediatria', label: 'Pediatria', lucide: Baby },
+    { to: '/anamnese', label: 'Anamnese', lucide: FileText },
+  ]
+  const navPainel: ItemNav[] = isEditor
+    ? [{ to: '/painel', label: 'Painel', sprite: 'settings', ativo: painelAtivo }]
+    : []
 
   return (
     <div className="tema-editorial h-screen w-full bg-bg text-text flex flex-col" data-theme={tema}>
-      <div className="shrink-0 px-4 sm:px-6 pt-4">
-        <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-surface border border-border rounded-full pl-5 pr-2.5 py-2.5 shadow-[var(--shadow-float,0_10px_30px_-14px_rgba(17,17,17,.15))]">
-          {/* Três colunas de largura equilibrada (1fr/auto/1fr) — a nav fica no centro
-              real do header, não só no meio do espaço que sobra entre logo e avatar. */}
-          <div className="flex items-center min-w-0 justify-self-start">
-            <NavLink
-              to="/"
-              className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight shrink-0"
-            >
-              <span className="w-2 h-2 rounded-full bg-cat-areas" aria-hidden="true" />
-              Prescreve
-            </NavLink>
-          </div>
-
-          <nav className="flex items-center gap-1 justify-self-center">
-            <NavLink to="/" end className={navPillClass}>
-              <Home className="w-4 h-4" />
-              <span className="hidden sm:inline">Página Inicial</span>
-            </NavLink>
-            <NavLink to="/consulta" className={navPillClass}>
-              <Stethoscope className="w-4 h-4" />
-              <span className="hidden sm:inline">Consulta</span>
-            </NavLink>
-            <NavLink to="/pediatria" className={navPillClass}>
-              <Baby className="w-4 h-4" />
-              <span className="hidden sm:inline">Pediatria</span>
-            </NavLink>
-            <NavLink to="/anamnese" className={navPillClass}>
-              <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline">Anamnese</span>
-            </NavLink>
-            {isEditor && (
-              <NavLink to="/painel" className={() => navPillClass({ isActive: painelAtivo })}>
-                <Settings className="w-4 h-4" />
-                <span className="hidden sm:inline">Painel</span>
-              </NavLink>
-            )}
-          </nav>
-
-          <div className="flex items-center gap-2.5 text-sm text-text-dim min-w-0 justify-self-end">
-            {!isEditor && (
-              <span className="hidden md:inline text-warn text-xs bg-warn-dim border border-warn/30 rounded-full px-2.5 py-1 shrink-0">
-                Modo leitura
-              </span>
-            )}
-            <SyncIndicator />
-            <InstallPrompt />
-            <button
-              type="button"
-              onClick={() => setTema((t) => (t === 'dark' ? 'light' : 'dark'))}
-              title={tema === 'dark' ? 'Tema claro' : 'Tema escuro'}
-              aria-label="Alternar tema"
-              className="shrink-0 w-9 h-9 rounded-full border border-border bg-surface text-text-dim hover:text-text hover:border-text-dim transition-colors flex items-center justify-center"
-            >
-              <Icon name={tema === 'dark' ? 'sun' : 'moon'} size={16} />
-            </button>
-            <button
-              onClick={signOut}
-              className="flex items-center justify-center w-9 h-9 rounded-full font-display font-semibold text-xs shrink-0 text-white"
-              style={{ background: 'linear-gradient(135deg, var(--color-accent), var(--color-text))' }}
-              title={`${perfil?.nome || session.user.email} · ${perfil?.papel ?? '—'} — clique para sair`}
-            >
-              {(perfil?.nome || session.user.email || '?').slice(0, 2).toUpperCase()}
-            </button>
-          </div>
-        </header>
-      </div>
+      <Topbar tema={tema} onAlternarTema={() => setTema((t) => (t === 'dark' ? 'light' : 'dark'))}>
+        {!isEditor && (
+          <span className="hidden md:inline text-warn text-xs bg-warn-dim border border-warn/30 rounded-full px-2.5 py-1 shrink-0">
+            Modo leitura
+          </span>
+        )}
+        <SyncIndicator />
+        <InstallPrompt />
+        <button
+          onClick={signOut}
+          className="flex items-center justify-center w-9 h-9 rounded-full font-display font-semibold text-xs shrink-0 text-white"
+          style={{ background: 'linear-gradient(135deg, var(--color-accent), var(--color-text))' }}
+          title={`${perfil?.nome || session.user.email} · ${perfil?.papel ?? '—'} — clique para sair`}
+        >
+          {(perfil?.nome || session.user.email || '?').slice(0, 2).toUpperCase()}
+        </button>
+      </Topbar>
 
       <PwaUpdatePrompt />
       <AtualizacaoDisponivelBanner />
 
-      <main className="flex-1 min-h-0">
-        <Routes>
-          <Route path="/" element={<AdminHub />} />
-          <Route path="/consulta" element={<ConsultaPage />} />
-          <Route path="/pediatria" element={<PediatriaPage />} />
-          <Route path="/anamnese" element={<AnamnesePage />} />
-          <Route path="/painel" element={<AdminLayout />}>
-            <Route index element={<Navigate to="areas" replace />} />
-            <Route path="areas" element={<AreasPage />} />
-            <Route path="patologias" element={<PatologiasPage />} />
-            <Route path="medicamentos" element={<MedicamentosPage />} />
-            <Route path="complementos" element={<ComplementosPage />} />
-            <Route path="tratamentos" element={<TratamentosPage />} />
-            <Route path="geradores" element={<GeradoresPage />} />
-            <Route path="revisao" element={<RevisaoPage />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+      <div className="flex-1 min-h-0 flex overflow-hidden">
+        <Sidebar principal={navPrincipal} painel={navPainel} />
+
+        <main className="flex-1 min-w-0 min-h-0">
+          <Routes>
+            <Route path="/" element={<AdminHub />} />
+            <Route path="/consulta" element={<ConsultaPage />} />
+            <Route path="/pediatria" element={<PediatriaPage />} />
+            <Route path="/anamnese" element={<AnamnesePage />} />
+            <Route path="/painel" element={<AdminLayout />}>
+              <Route index element={<Navigate to="areas" replace />} />
+              <Route path="areas" element={<AreasPage />} />
+              <Route path="patologias" element={<PatologiasPage />} />
+              <Route path="medicamentos" element={<MedicamentosPage />} />
+              <Route path="complementos" element={<ComplementosPage />} />
+              <Route path="tratamentos" element={<TratamentosPage />} />
+              <Route path="geradores" element={<GeradoresPage />} />
+              <Route path="revisao" element={<RevisaoPage />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
 
       <AvisoUsoProfissional />
     </div>
