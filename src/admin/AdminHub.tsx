@@ -20,7 +20,7 @@ export function AdminHub() {
   const [busca, setBusca] = useState('')
 
   useEffect(() => {
-    areasApi.list().then(setAreas)
+    areasApi.list().then((lista) => setAreas([...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))))
     patologiasApi.list().then(setPatologias)
     medicamentosApi.list().then(setMedicamentos)
   }, [])
@@ -162,7 +162,7 @@ export function AdminHub() {
             <Link
               key={a.id}
               to={`/patologias?area=${a.id}`}
-              className="group border border-border hover:border-text bg-surface rounded-[var(--radius-card,14px)] min-h-[74px] p-3.5 grid grid-cols-[34px_1fr_auto] items-center gap-2.5 transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-area,3px_3px_0_var(--color-text))]"
+              className="group border border-border hover:border-text bg-surface rounded-[var(--radius-card,14px)] min-h-[74px] p-3.5 grid grid-cols-[34px_1fr] items-center gap-2.5 transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-area,3px_3px_0_var(--color-text))]"
             >
               <span
                 className="w-9 h-9 rounded-[var(--radius-nav,10px)] flex items-center justify-center shrink-0"
@@ -174,7 +174,6 @@ export function AdminHub() {
                 <strong className="block text-sm font-semibold text-text truncate">{a.nome}</strong>
                 <small className="block text-[11px] text-text-dim mt-0.5">Conteúdo clínico</small>
               </span>
-              <span className="text-sm text-text-dim opacity-40 group-hover:opacity-70 transition-opacity">↗</span>
             </Link>
           ))}
           {areas.length === 0 && (
