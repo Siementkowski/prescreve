@@ -237,21 +237,7 @@ export function PatologiasPage() {
     esquemaAbertoId === 'novo' ? null : esquemaAbertoId != null ? esquemas.find((t) => t.id === esquemaAbertoId) ?? null : null
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
-      <div className="shrink-0">
-        <span className="ed-eyebrow">
-          <span className="ed-eyebrow-dot" style={{ background: 'var(--blue)' }} />
-          Contexto / Patologias
-        </span>
-        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
-          Da patologia à receita final.
-        </h1>
-        <p className="text-text-dim text-base leading-relaxed max-w-lg">
-          Identidade, orientações, esquemas e complementos — tudo numa tela só.
-        </p>
-      </div>
-
-      <div className="flex-1 min-h-0">
+    <div className="h-full min-h-0">
       <AdminPageShell
         busca={busca}
         onBuscaChange={setBusca}
@@ -487,7 +473,6 @@ export function PatologiasPage() {
           )
         }
       />
-      </div>
 
       <ConfirmDialog
         aberto={!!paraExcluir}

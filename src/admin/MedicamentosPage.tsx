@@ -158,22 +158,8 @@ export function MedicamentosPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
-      <div className="shrink-0">
-        <span className="ed-eyebrow">
-          <span className="ed-eyebrow-dot" style={{ background: 'var(--tint-pink-fg,#dc5b96)' }} />
-          Catálogo / Medicamentos
-        </span>
-        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
-          Medicamentos, sem perder o contexto.
-        </h1>
-        <p className="text-text-dim text-base leading-relaxed max-w-lg">
-          Gestação, lactação e dose pediátrica num cadastro só — o uso na receita (dose, via, posologia) fica em
-          Prescrições → item.
-        </p>
-      </div>
-
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[315px_1fr] border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
+    <div className="h-full min-h-0">
+      <div className="h-full min-h-0 grid grid-cols-1 lg:grid-cols-[315px_1fr] border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
         <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5">
           <div className="flex gap-2">
             <div className="flex-1">

@@ -106,21 +106,7 @@ export function GeradoresPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
-      <div className="shrink-0">
-        <span className="ed-eyebrow">
-          <span className="ed-eyebrow-dot" style={{ background: 'var(--tint-cyan-fg,#0083a0)' }} />
-          Sistema / Geradores
-        </span>
-        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
-          Anamnese pronta, sem sair da consulta.
-        </h1>
-        <p className="text-text-dim text-base leading-relaxed max-w-lg">
-          HTML colado, executado isolado — nunca no DOM da aplicação.
-        </p>
-      </div>
-
-      <div className="flex-1 min-h-0">
+    <div className="h-full min-h-0">
       <AdminPageShell
         busca={busca}
         onBuscaChange={setBusca}
@@ -266,7 +252,6 @@ export function GeradoresPage() {
           </div>
         }
       />
-      </div>
 
       <ConfirmDialog
         aberto={!!paraExcluir}

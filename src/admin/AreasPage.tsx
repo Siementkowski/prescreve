@@ -98,23 +98,8 @@ export function AreasPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
-      {/* PageHead — eyebrow + título editorial (frase, não rótulo) + descrição */}
-      <div className="shrink-0">
-        <span className="ed-eyebrow">
-          <span className="ed-eyebrow-dot" style={{ background: 'var(--mint)' }} />
-          Estrutura / Áreas
-        </span>
-        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
-          Áreas clínicas.
-        </h1>
-        <p className="text-text-dim text-base leading-relaxed max-w-lg">
-          Organize o conteúdo do Prescreve por contexto clínico.
-        </p>
-      </div>
-
-      <div className="flex-1 min-h-0">
-        <AdminPageShell
+    <div className="h-full min-h-0">
+      <AdminPageShell
           busca={busca}
           onBuscaChange={setBusca}
           buscaPlaceholder="Buscar área…"
@@ -216,7 +201,6 @@ export function AreasPage() {
             </div>
           }
         />
-      </div>
 
       <ConfirmDialog
         aberto={!!paraExcluir}

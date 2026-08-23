@@ -195,21 +195,8 @@ export function TratamentosPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
-      <div className="shrink-0">
-        <span className="ed-eyebrow">
-          <span className="ed-eyebrow-dot" style={{ background: 'var(--red)' }} />
-          Conteúdo / Prescrições
-        </span>
-        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
-          Contexto clínico antes da prescrição.
-        </h1>
-        <p className="text-text-dim text-base leading-relaxed max-w-lg">
-          Área → patologia → esquema — cabeçalho e itens numa tela só, um único "Salvar esquema".
-        </p>
-      </div>
-
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[315px_1fr] border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
+    <div className="h-full min-h-0">
+      <div className="h-full min-h-0 grid grid-cols-1 lg:grid-cols-[315px_1fr] border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
         <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5">
           <div className="grid grid-cols-2 gap-2">
             <SelectField
