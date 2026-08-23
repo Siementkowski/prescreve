@@ -106,7 +106,7 @@ export function PainelTratamentos() {
   }
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col lg:flex-row lg:items-start px-4 pt-4 pb-10 lg:px-6 lg:pt-5 lg:pb-14 gap-5 lg:gap-6">
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col lg:flex-row lg:items-start px-4 pt-4 pb-10 lg:px-8 lg:pt-5 lg:pb-14 gap-5 lg:gap-[26px]">
       {/* coluna principal — orientações e as duas seções numeradas. Rola junto com o card
           de receita, no MESMO scroll — sem overflow-y-auto próprio, senão vira uma segunda
           barra de rolagem colada na primeira. */}
@@ -249,8 +249,8 @@ export function PainelTratamentos() {
       {/* coluna direita — preview da receita. Sem borda/scroll próprios: acompanha o
           mesmo scroll da coluna principal, só gruda (sticky) perto do topo enquanto o
           card cabe na tela — igual ao kit, sem divisória nem segunda barra de rolagem. */}
-      <aside className="w-full lg:w-[320px] xl:w-[360px] shrink-0 lg:sticky lg:top-5">
-        <div className="flex flex-col gap-4 border-2 border-text rounded-[var(--radius-card,14px)] bg-surface p-6">
+      <aside className="w-full lg:w-[372px] shrink-0 lg:sticky lg:top-5">
+        <div className="flex flex-col gap-4 border border-text rounded-[var(--radius-panel,18px)] bg-surface p-6">
           <span className="text-[11px] font-bold text-text-dim uppercase tracking-[0.8px]">Receita</span>
 
           <div>

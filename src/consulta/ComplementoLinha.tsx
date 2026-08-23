@@ -41,14 +41,20 @@ export function ComplementoLinha({
     <button
       type="button"
       onClick={onToggle}
-      className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-colors ${
+      className={`w-full flex items-center gap-3 px-[15px] py-[13px] text-left transition-colors ${
         selecionado ? 'bg-accent-dim' : 'hover:bg-surface-2'
       } ${esmaecido ? 'opacity-60 hover:opacity-100' : ''}`}
     >
       <Icone className={`w-4 h-4 shrink-0 ${selecionado ? 'text-accent' : 'text-text-faint'}`} />
       {esmaecido && <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-danger" />}
-      <span className={`text-sm truncate ${esmaecido ? 'text-danger' : 'text-text'}`}>{linha1 || '—'}</span>
-      {linha2 && <span className="tabular text-xs text-text-dim font-mono truncate ml-auto shrink-0">{linha2}</span>}
+      <span
+        className={`text-[13px] truncate ${selecionado ? 'font-bold' : 'font-semibold'} ${
+          esmaecido ? 'text-danger' : 'text-text'
+        }`}
+      >
+        {linha1 || '—'}
+      </span>
+      {linha2 && <span className="text-xs text-text-dim truncate ml-auto shrink-0">{linha2}</span>}
     </button>
   )
 }
