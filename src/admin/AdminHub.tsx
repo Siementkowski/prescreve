@@ -108,7 +108,7 @@ export function AdminHub() {
                   {resultadosPatologias.map((p) => (
                     <button
                       key={`p-${p.id}`}
-                      onClick={() => navigate('/painel/patologias')}
+                      onClick={() => navigate('/patologias')}
                       className="w-full grid grid-cols-[30px_1fr_auto] items-center gap-2.5 text-left px-3.5 py-2.5 border-b border-border last:border-b-0 hover:bg-surface-2 transition-colors"
                     >
                       <span className="w-[30px] h-[30px] rounded-[var(--radius-sm,8px)] flex items-center justify-center bg-[var(--tint-green-bg)] text-[var(--tint-green-fg)]">
@@ -161,7 +161,7 @@ export function AdminHub() {
           {areas.map((a) => (
             <Link
               key={a.id}
-              to={`/painel/patologias?area=${a.id}`}
+              to={`/patologias?area=${a.id}`}
               className="group border border-border hover:border-text bg-surface rounded-[var(--radius-card,14px)] min-h-[74px] p-3.5 grid grid-cols-[34px_1fr_auto] items-center gap-2.5 transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-area,3px_3px_0_var(--color-text))]"
             >
               <span
@@ -201,7 +201,7 @@ export function AdminHub() {
             nota="Montar e revisar receitas"
           />
           <CompactAction
-            to="/painel/patologias"
+            to="/patologias"
             glyph="◇"
             titulo="Patologias"
             nota={`${patologias.length} cadastrada${patologias.length === 1 ? '' : 's'}`}

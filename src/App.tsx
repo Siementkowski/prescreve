@@ -82,6 +82,7 @@ function App() {
     { to: '/consulta', label: 'Consulta', lucide: Stethoscope },
     { to: '/pediatria', label: 'Pediatria', lucide: Baby },
     { to: '/anamnese', label: 'Anamnese', lucide: FileText },
+    { to: '/patologias', label: 'Patologias', sprite: 'path' },
   ]
   const navPainel: ItemNav[] = isEditor
     ? [
@@ -129,10 +130,10 @@ function App() {
             <Route path="/consulta" element={<ConsultaPage />} />
             <Route path="/pediatria" element={<PediatriaPage />} />
             <Route path="/anamnese" element={<AnamnesePage />} />
+            <Route path="/patologias" element={<PatologiasPage />} />
             <Route path="/painel" element={<AdminLayout />}>
               <Route index element={<Navigate to="areas" replace />} />
               <Route path="areas" element={<AreasPage />} />
-              <Route path="patologias" element={<PatologiasPage />} />
               <Route path="medicamentos" element={<MedicamentosPage />} />
               <Route path="complementos" element={<ComplementosPage />} />
               <Route path="tratamentos" element={<TratamentosPage />} />

@@ -13,7 +13,6 @@ import { Icon, type NomeIconeEditorial } from './components/editorial/Icon'
 // não abandono do sprite.
 const SECOES: { to: string; label: string; sprite?: NomeIconeEditorial; lucide?: ComponentType<{ className?: string }> }[] = [
   { to: '/painel/areas', label: 'Áreas', sprite: 'layers' },
-  { to: '/painel/patologias', label: 'Patologias', sprite: 'path' },
   { to: '/painel/medicamentos', label: 'Medicamentos', sprite: 'pill' },
   { to: '/painel/complementos', label: 'Complementos', sprite: 'spark' },
   { to: '/painel/tratamentos', label: 'Prescrições', sprite: 'rx' },
