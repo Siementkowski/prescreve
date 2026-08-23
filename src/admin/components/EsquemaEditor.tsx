@@ -217,7 +217,7 @@ export function EsquemaEditor({
   }
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-6 flex flex-col gap-5">
+    <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-6 flex flex-col gap-5">
       {extraTopo}
 
       <div className="flex flex-col gap-4">
@@ -287,11 +287,11 @@ export function EsquemaEditor({
 
       <div className="flex flex-col gap-3 pt-2 border-t border-border">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-text">Itens</h3>
+          <h3 className="font-display text-[18px] tracking-[-.4px] text-text">Itens</h3>
           <button
             type="button"
             onClick={adicionarItem}
-            className="flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium text-accent hover:opacity-80 transition-opacity"
           >
             <Plus className="w-4 h-4" />
             Adicionar item
@@ -327,9 +327,9 @@ export function EsquemaEditor({
 
       {itens.length > 0 && (
         <div className="flex flex-col gap-3 pt-2 border-t border-border">
-          <h3 className="text-sm font-semibold text-text">
+          <h3 className="font-display text-[18px] tracking-[-.4px] text-text">
             Preview do esquema completo
-            <span className="ml-2 text-xs font-normal text-text-dim">— exatamente o que a Consulta mostra e copia</span>
+            <span className="ml-2 text-xs font-normal font-sans text-text-dim tracking-normal">— exatamente o que a Consulta mostra e copia</span>
           </h3>
           <div className="flex flex-col gap-2.5">
             {itens.map((item) => (
@@ -354,7 +354,7 @@ export function EsquemaEditor({
         {onExcluir ? (
           <button
             onClick={onExcluir}
-            className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium text-danger hover:opacity-80 transition-opacity"
           >
             <Trash2 className="w-4 h-4" />
             Excluir {papel === 'complemento' ? 'complemento' : 'esquema'}
@@ -365,7 +365,7 @@ export function EsquemaEditor({
         <button
           onClick={salvarEsquema}
           disabled={salvando}
-          className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
+          className="bg-text hover:opacity-90 disabled:opacity-50 text-bg text-sm font-semibold rounded-[var(--radius-pill,999px)] px-5 py-3 transition-opacity"
         >
           {salvando ? 'Salvando…' : 'Salvar esquema'}
         </button>

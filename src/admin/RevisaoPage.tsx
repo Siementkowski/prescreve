@@ -85,16 +85,22 @@ export function RevisaoPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 h-full min-h-0">
-      <div className="flex items-center justify-between gap-3 flex-wrap shrink-0">
+    <div className="flex flex-col gap-6 h-full min-h-0">
+      <div className="flex items-end justify-between gap-6 flex-wrap shrink-0">
         <div>
-          <h2 className="font-display text-lg font-semibold text-text">Pendências de revisão</h2>
-          <p className="text-xs text-text-dim mt-0.5">
+          <span className="ed-eyebrow">
+            <span className="ed-eyebrow-dot" style={{ background: 'var(--on-soft-orange,#a54e12)' }} />
+            Manutenção / Revisão
+          </span>
+          <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-1 text-text">
+            O que precisa de outro olhar.
+          </h1>
+          <p className="text-text-dim text-sm">
             {pendentes.length} prescriç{pendentes.length !== 1 ? 'ões' : 'ão'} pendente
             {pendentes.length !== 1 ? 's' : ''}, do mais antigo pro mais recente.
           </p>
         </div>
-        <label className="flex items-center gap-2 text-xs text-text-dim">
+        <label className="flex items-center gap-2 text-xs text-text-dim shrink-0 mb-1">
           <Settings2 className="w-3.5 h-3.5" />
           Revisar a cada
           <input
@@ -102,7 +108,7 @@ export function RevisaoPage() {
             min={1}
             value={mesesAteRevisar}
             onChange={(e) => setMesesAteRevisar(Number(e.target.value) || 1)}
-            className="tabular w-14 bg-surface-2 border border-border rounded-lg px-2 py-1 text-sm text-text outline-none focus:border-accent"
+            className="tabular w-14 bg-surface border border-border rounded-[var(--radius-input,9px)] px-2 py-1.5 text-sm text-text outline-none focus:border-text"
           />
           meses
         </label>
@@ -115,7 +121,7 @@ export function RevisaoPage() {
       )}
 
       {medicamentosIncompletos.length > 0 && (
-        <div className="shrink-0 border border-warn/40 bg-warn/10 rounded-xl p-4 flex flex-col gap-2.5">
+        <div className="shrink-0 border border-warn/40 bg-warn/10 rounded-[var(--radius-card,14px)] p-4 flex flex-col gap-2.5">
           <div className="flex items-center gap-1.5">
             <FlaskConical className="w-4 h-4 text-warn shrink-0" />
             <h3 className="text-sm font-semibold text-text">
@@ -136,7 +142,7 @@ export function RevisaoPage() {
                 <button
                   onClick={() => marcarMedicamentoCompleto(m.id)}
                   disabled={marcandoMedicamento === m.id}
-                  className="flex items-center gap-1.5 text-xs font-medium bg-ok hover:bg-ok/90 disabled:opacity-50 text-white rounded-md px-3 py-1.5 transition-colors shrink-0"
+                  className="flex items-center gap-1.5 text-xs font-medium bg-ok hover:opacity-90 disabled:opacity-50 text-white rounded-[var(--radius-pill,999px)] px-4 py-2 transition-opacity shrink-0"
                 >
                   <Check className="w-3.5 h-3.5" />
                   {marcandoMedicamento === m.id ? 'Marcando…' : 'Marcar como revisado'}
@@ -162,7 +168,7 @@ export function RevisaoPage() {
             return (
               <div
                 key={t.id}
-                className="flex items-center justify-between gap-3 border border-border rounded-xl bg-surface px-4 py-3"
+                className="flex items-center justify-between gap-3 border border-border rounded-[var(--radius-card,14px)] bg-surface px-4 py-3.5"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -202,7 +208,7 @@ export function RevisaoPage() {
                 <button
                   onClick={() => marcar(t.id)}
                   disabled={marcando === t.id}
-                  className="flex items-center gap-1.5 text-xs font-medium bg-ok hover:bg-ok/90 disabled:opacity-50 text-white rounded-md px-3 py-1.5 transition-colors shrink-0"
+                  className="flex items-center gap-1.5 text-xs font-medium bg-ok hover:opacity-90 disabled:opacity-50 text-white rounded-[var(--radius-pill,999px)] px-4 py-2 transition-opacity shrink-0"
                 >
                   <Check className="w-3.5 h-3.5" />
                   {marcando === t.id ? 'Marcando…' : 'Marcar como revisado'}

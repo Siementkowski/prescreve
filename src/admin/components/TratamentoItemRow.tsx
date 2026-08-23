@@ -65,7 +65,7 @@ export function TratamentoItemRow({
   return (
     <>
     <div
-      className={`bg-surface border rounded-md p-3 flex flex-col gap-3 ${
+      className={`bg-surface border rounded-[var(--radius-item,11px)] p-4 flex flex-col gap-3 ${
         arrastando ? 'border-accent' : 'border-border'
       }`}
     >
@@ -175,7 +175,7 @@ export function TratamentoItemRow({
       />
 
       {/* Preview da receita — derivada, não digitada */}
-      <div className="rounded-md border border-border bg-surface-2 p-3 flex flex-col gap-1.5">
+      <div className="rounded-[var(--radius-item,11px)] border border-border bg-surface-2 p-3 flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-text-dim">Preview da receita</span>
           {usandoCustom && (

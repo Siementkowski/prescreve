@@ -158,20 +158,30 @@ export function MedicamentosPage() {
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 h-full min-h-0">
-        <div className="flex flex-col gap-3 min-h-0">
-          <p className="text-xs text-text-dim leading-relaxed -mt-1">
-            Catálogo — cadastre cada remédio uma vez aqui, com os dados dele (gestação, pediatria).
-            O uso na receita (dose, via, posologia) fica em <span className="text-text-dim/90">Prescrições → item</span>.
-          </p>
+    <div className="flex flex-col gap-6 h-full min-h-0">
+      <div className="shrink-0">
+        <span className="ed-eyebrow">
+          <span className="ed-eyebrow-dot" style={{ background: 'var(--tint-pink-fg,#dc5b96)' }} />
+          Catálogo / Medicamentos
+        </span>
+        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
+          Medicamentos, sem perder o contexto.
+        </h1>
+        <p className="text-text-dim text-base leading-relaxed max-w-lg">
+          Gestação, lactação e dose pediátrica num cadastro só — o uso na receita (dose, via, posologia) fica em
+          Prescrições → item.
+        </p>
+      </div>
+
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[315px_1fr] border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
+        <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5">
           <div className="flex gap-2">
             <div className="flex-1">
               <SearchInput value={busca} onChange={setBusca} placeholder="Buscar medicamento…" />
             </div>
             <button
               onClick={novo}
-              className="shrink-0 flex items-center gap-1.5 bg-accent hover:bg-accent/90 text-accent-text text-sm font-semibold rounded-lg px-3 py-2 transition-colors"
+              className="shrink-0 flex items-center gap-1.5 bg-text hover:opacity-90 text-bg text-sm font-semibold rounded-[var(--radius-pill,999px)] px-4 py-2.5 transition-opacity"
             >
               <Plus className="w-4 h-4" />
               Novo
@@ -188,19 +198,19 @@ export function MedicamentosPage() {
                 <button
                   key={m.id}
                   onClick={() => selecionar(m)}
-                  className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-[var(--radius-item,11px)] border transition-colors ${
                     selecionadoId === m.id
-                      ? 'bg-accent-dim border-accent'
-                      : 'bg-surface border-border hover:border-text-dim'
+                      ? 'bg-surface border-text shadow-[var(--shadow-selected)]'
+                      : 'bg-surface border-transparent hover:border-border'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-display text-[15px] text-text truncate">{m.nome}</span>
+                    <span className="text-[14px] font-semibold text-text truncate">{m.nome}</span>
                     <StatusRiscoBadge status={m.gestacao_status} />
                   </div>
                   <div className="flex items-center gap-1.5">
                     {m.nome_comercial && (
-                      <span className="block text-xs text-text-dim truncate">{m.nome_comercial}</span>
+                      <span className="block text-[11px] text-text-dim truncate">{m.nome_comercial}</span>
                     )}
                     {m.incompleto && (
                       <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full border text-warn border-warn/40 bg-warn/10 shrink-0">
@@ -214,9 +224,9 @@ export function MedicamentosPage() {
           </div>
         </div>
 
-        <div className="min-h-0 overflow-y-auto">
-          <div className="bg-surface border border-border rounded-lg p-6 max-w-2xl">
-            <h2 className="font-display text-lg font-semibold text-text mb-4">
+        <div className="min-h-0 overflow-y-auto p-7">
+          <div className="max-w-2xl">
+            <h2 className="font-display text-[22px] tracking-[-.8px] text-text mb-5">
               {selecionadoId ? 'Editar medicamento' : 'Novo medicamento'}
             </h2>
 
@@ -375,11 +385,11 @@ export function MedicamentosPage() {
                 </p>
               )}
 
-              <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center justify-between mt-2 pt-4 border-t border-border">
                 {selecionadoId ? (
                   <button
                     onClick={() => setParaExcluir(medicamentos.find((m) => m.id === selecionadoId) ?? null)}
-                    className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition-colors"
+                    className="flex items-center gap-1.5 text-sm font-medium text-danger hover:opacity-80 transition-opacity"
                   >
                     <Trash2 className="w-4 h-4" />
                     Excluir
@@ -390,7 +400,7 @@ export function MedicamentosPage() {
                 <button
                   onClick={salvar}
                   disabled={salvando}
-                  className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
+                  className="bg-text hover:opacity-90 disabled:opacity-50 text-bg text-sm font-semibold rounded-[var(--radius-pill,999px)] px-5 py-3 transition-opacity"
                 >
                   {salvando ? 'Salvando…' : 'Salvar'}
                 </button>
@@ -407,6 +417,6 @@ export function MedicamentosPage() {
         onConfirmar={() => paraExcluir && excluir(paraExcluir)}
         onCancelar={() => setParaExcluir(null)}
       />
-    </>
+    </div>
   )
 }

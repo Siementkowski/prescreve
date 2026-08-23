@@ -227,7 +227,21 @@ export function PatologiasPage() {
     esquemaAbertoId === 'novo' ? null : esquemaAbertoId != null ? esquemas.find((t) => t.id === esquemaAbertoId) ?? null : null
 
   return (
-    <>
+    <div className="flex flex-col gap-6 h-full min-h-0">
+      <div className="shrink-0">
+        <span className="ed-eyebrow">
+          <span className="ed-eyebrow-dot" style={{ background: 'var(--blue)' }} />
+          Contexto / Patologias
+        </span>
+        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
+          Da patologia à receita final.
+        </h1>
+        <p className="text-text-dim text-base leading-relaxed max-w-lg">
+          Identidade, orientações, esquemas e complementos — tudo numa tela só.
+        </p>
+      </div>
+
+      <div className="flex-1 min-h-0">
       <AdminPageShell
         busca={busca}
         onBuscaChange={setBusca}
@@ -257,12 +271,14 @@ export function PatologiasPage() {
               <button
                 key={p.id}
                 onClick={() => selecionar(p)}
-                className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
-                  selecionadaId === p.id ? 'bg-accent-dim border-accent' : 'bg-surface border-border hover:border-text-dim'
+                className={`w-full text-left px-3 py-2.5 rounded-[var(--radius-item,11px)] border transition-colors ${
+                  selecionadaId === p.id
+                    ? 'bg-surface border-text shadow-[var(--shadow-selected)]'
+                    : 'bg-surface border-transparent hover:border-border'
                 }`}
               >
-                <span className="block font-display text-[15px] text-text truncate">{p.nome}</span>
-                {p.sinonimos && <span className="block text-xs text-text-dim truncate">{p.sinonimos}</span>}
+                <span className="block text-[14px] font-semibold text-text truncate">{p.nome}</span>
+                {p.sinonimos && <span className="block text-[11px] text-text-dim truncate mt-0.5">{p.sinonimos}</span>}
               </button>
             ))
           )
@@ -271,8 +287,8 @@ export function PatologiasPage() {
           form && (
             <div className="flex flex-col gap-5 max-w-3xl">
               {/* Identidade e sinônimos */}
-              <div className="bg-surface border border-border rounded-lg p-6">
-                <h2 className="font-display text-lg font-semibold text-text mb-4">
+              <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-6">
+                <h2 className="font-display text-[20px] tracking-[-.6px] text-text mb-4">
                   {selecionadaId ? 'Editar patologia' : 'Nova patologia'}
                 </h2>
                 <div className="flex flex-col gap-4">
@@ -338,7 +354,7 @@ export function PatologiasPage() {
                     <button
                       onClick={salvar}
                       disabled={salvando}
-                      className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
+                      className="bg-text hover:opacity-90 disabled:opacity-50 text-bg text-sm font-semibold rounded-[var(--radius-pill,999px)] px-5 py-3 transition-opacity"
                     >
                       {salvando ? 'Salvando…' : 'Salvar'}
                     </button>
@@ -349,11 +365,11 @@ export function PatologiasPage() {
               {selecionadaId && (
                 <>
                   {/* Esquemas — lista ou editor da Fase 3 embutido */}
-                  <div className="bg-surface border border-border rounded-lg p-6">
+                  <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-6">
                     {esquemaAbertoId == null ? (
                       <>
                         <div className="flex items-center justify-between mb-3">
-                          <h2 className="font-display text-lg font-semibold text-text">Esquemas</h2>
+                          <h2 className="font-display text-[20px] tracking-[-.6px] text-text">Esquemas</h2>
                           <button
                             onClick={() => setEsquemaAbertoId('novo')}
                             className="flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 transition-colors"
@@ -417,14 +433,14 @@ export function PatologiasPage() {
 
                   {/* Complementos vinculados — só vincular/desvincular/reordenar, nunca editar
                       conteúdo (é N:N; editar aqui mudaria em todas as patologias que usam). */}
-                  <div className="bg-surface border border-border rounded-lg p-6">
+                  <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-6">
                     <ComplementoSeletor patologiaId={selecionadaId} medicamentos={medicamentos} />
                   </div>
 
                   {/* Revisão — só os esquemas desta patologia, contextual (a fila completa
                       continua em Painel → Revisão). */}
-                  <div className="bg-surface border border-border rounded-lg p-6">
-                    <h2 className="font-display text-lg font-semibold text-text mb-3">Revisão</h2>
+                  <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-6">
+                    <h2 className="font-display text-[20px] tracking-[-.6px] text-text mb-3">Revisão</h2>
                     {esquemasPendentes.length === 0 ? (
                       <p className="text-sm text-text-dim">Todos os esquemas desta patologia estão revisados dentro do prazo.</p>
                     ) : (
@@ -457,6 +473,7 @@ export function PatologiasPage() {
           )
         }
       />
+      </div>
 
       <ConfirmDialog
         aberto={!!paraExcluir}
@@ -465,6 +482,6 @@ export function PatologiasPage() {
         onConfirmar={() => paraExcluir && excluir(paraExcluir)}
         onCancelar={() => setParaExcluir(null)}
       />
-    </>
+    </div>
   )
 }

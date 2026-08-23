@@ -106,7 +106,21 @@ export function GeradoresPage() {
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-6 h-full min-h-0">
+      <div className="shrink-0">
+        <span className="ed-eyebrow">
+          <span className="ed-eyebrow-dot" style={{ background: 'var(--tint-cyan-fg,#0083a0)' }} />
+          Sistema / Geradores
+        </span>
+        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
+          Anamnese pronta, sem sair da consulta.
+        </h1>
+        <p className="text-text-dim text-base leading-relaxed max-w-lg">
+          HTML colado, executado isolado — nunca no DOM da aplicação.
+        </p>
+      </div>
+
+      <div className="flex-1 min-h-0">
       <AdminPageShell
         busca={busca}
         onBuscaChange={setBusca}
@@ -123,14 +137,14 @@ export function GeradoresPage() {
               <button
                 key={g.id}
                 onClick={() => selecionar(g)}
-                className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
+                className={`w-full text-left px-3 py-2.5 rounded-[var(--radius-item,11px)] border transition-colors ${
                   selecionadoId === g.id
-                    ? 'bg-accent-dim border-accent'
-                    : 'bg-surface border-border hover:border-text-dim'
+                    ? 'bg-surface border-text shadow-[var(--shadow-selected)]'
+                    : 'bg-surface border-transparent hover:border-border'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-display text-[15px] text-text truncate">{g.nome}</span>
+                  <span className="text-[14px] font-semibold text-text truncate">{g.nome}</span>
                   <span
                     className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full border shrink-0 ${
                       g.ativo ? 'text-ok border-ok/40 bg-ok/10' : 'text-text-dim border-border bg-surface-2'
@@ -139,15 +153,15 @@ export function GeradoresPage() {
                     {g.ativo ? 'Ativo' : 'Inativo'}
                   </span>
                 </div>
-                {g.descricao && <span className="block text-xs text-text-dim truncate mt-0.5">{g.descricao}</span>}
+                {g.descricao && <span className="block text-[11px] text-text-dim truncate mt-0.5">{g.descricao}</span>}
                 <span className="block text-[11px] text-text-faint mt-1">Atualizado em {formatarData(g.atualizado_em)}</span>
               </button>
             ))
           )
         }
         formulario={
-          <div className="bg-surface border border-border rounded-lg p-6 max-w-3xl flex flex-col gap-5">
-            <h2 className="font-display text-lg font-semibold text-text">
+          <div className="max-w-3xl flex flex-col gap-5">
+            <h2 className="font-display text-[22px] tracking-[-.8px] text-text">
               {selecionadoId ? 'Editar gerador' : 'Novo gerador'}
             </h2>
 
@@ -213,11 +227,11 @@ export function GeradoresPage() {
                 </p>
               )}
 
-              <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center justify-between mt-2 pt-4 border-t border-border">
                 {selecionadoId ? (
                   <button
                     onClick={() => setParaExcluir(geradores.find((g) => g.id === selecionadoId) ?? null)}
-                    className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition-colors"
+                    className="flex items-center gap-1.5 text-sm font-medium text-danger hover:opacity-80 transition-opacity"
                   >
                     <Trash2 className="w-4 h-4" />
                     Excluir
@@ -228,7 +242,7 @@ export function GeradoresPage() {
                 <button
                   onClick={salvar}
                   disabled={salvando}
-                  className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
+                  className="bg-text hover:opacity-90 disabled:opacity-50 text-bg text-sm font-semibold rounded-[var(--radius-pill,999px)] px-5 py-3 transition-opacity"
                 >
                   {salvando ? 'Salvando…' : 'Salvar'}
                 </button>
@@ -252,6 +266,7 @@ export function GeradoresPage() {
           </div>
         }
       />
+      </div>
 
       <ConfirmDialog
         aberto={!!paraExcluir}
@@ -260,6 +275,6 @@ export function GeradoresPage() {
         onConfirmar={() => paraExcluir && excluir(paraExcluir)}
         onCancelar={() => setParaExcluir(null)}
       />
-    </>
+    </div>
   )
 }
