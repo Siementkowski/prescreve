@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { FileCode2, Pill, ClipboardList } from 'lucide-react'
+import { FileCode2, Pill, Microscope } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { OfflineBanner } from './components/OfflineBanner'
 import { useRevisaoStore } from './revisaoStore'
@@ -13,7 +13,7 @@ import { Icon, type NomeIconeEditorial } from './components/editorial/Icon'
 // não abandono do sprite.
 const SECOES: { to: string; label: string; sprite?: NomeIconeEditorial; lucide?: ComponentType<{ className?: string }> }[] = [
   { to: '/painel/areas', label: 'Áreas', sprite: 'layers' },
-  { to: '/painel/patologias', label: 'Patologias', lucide: ClipboardList },
+  { to: '/painel/patologias', label: 'Patologias', lucide: Microscope },
   { to: '/painel/medicamentos', label: 'Medicamentos', lucide: Pill },
   { to: '/painel/complementos', label: 'Complementos', sprite: 'spark' },
   { to: '/painel/tratamentos', label: 'Prescrições', sprite: 'rx' },
