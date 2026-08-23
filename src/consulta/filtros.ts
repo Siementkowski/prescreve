@@ -14,7 +14,7 @@ import { textoReceitaDoItem } from '../core/receita'
 export function areasVisiveis(areas: Area[], modo: ModoTratamento): Area[] {
   return areas
     .filter((a) => a.modo === modo || a.modo === 'ambos')
-    .sort((a, b) => a.ordem - b.ordem)
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
 }
 
 function patologiaTemTratamentoNoModo(
