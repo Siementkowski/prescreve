@@ -247,11 +247,11 @@ export function PainelTratamentos() {
       {/* coluna direita — preview da receita, sempre visível, some no mobile (a barra de
           copiar continua acessível pela seção acima em telas pequenas via scroll). */}
       <aside className="shrink-0 border-t lg:border-t-0 lg:border-l border-border p-4 lg:p-5 lg:w-[320px] xl:w-[360px] lg:overflow-y-auto">
-        <div className="lg:sticky lg:top-0 flex flex-col gap-4 border-2 border-text rounded-[var(--radius-card,14px)] bg-surface p-5">
+        <div className="lg:sticky lg:top-0 flex flex-col gap-4 border-2 border-text rounded-[var(--radius-card,14px)] bg-surface p-6">
           <span className="text-[11px] font-bold text-text-dim uppercase tracking-[0.8px]">Receita</span>
 
           <div>
-            <h3 className="font-display text-[22px] leading-tight tracking-[-.6px] text-text">{patologia.nome}</h3>
+            <h3 className="font-display text-[24px] leading-tight tracking-[-.6px] text-text">{patologia.nome}</h3>
             {patologia.sinonimos && (
               <p className="text-xs text-text-dim mt-1">Também conhecida como: {patologia.sinonimos}</p>
             )}
@@ -282,7 +282,7 @@ export function PainelTratamentos() {
             texto={textoPrescricao}
             label="Copiar receita"
             variant="solid"
-            className={`w-full justify-center text-sm py-3 rounded-[var(--radius-control,12px)] ${
+            className={`w-full justify-center text-sm py-3.5 rounded-full ${
               nadaSelecionado ? 'opacity-50 pointer-events-none' : ''
             }`}
           />

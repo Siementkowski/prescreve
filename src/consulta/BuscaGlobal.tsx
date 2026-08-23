@@ -81,11 +81,11 @@ export function BuscaGlobal() {
     <>
       <button
         onClick={() => setAberta(true)}
-        className="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-text-dim hover:text-text hover:border-text-dim transition-colors w-full max-w-xs"
+        className="flex items-center gap-2 bg-surface border border-border rounded-[var(--radius-pill,999px)] px-4 py-2.5 text-sm text-text-dim hover:text-text hover:border-text-dim transition-colors w-full flex-1"
       >
         <Search className="w-4 h-4 shrink-0" />
-        <span className="flex-1 text-left">Buscar patologia ou medicamento…</span>
-        <kbd className="hidden lg:inline text-[10px] border border-border rounded px-1.5 py-0.5 text-text-dim">
+        <span className="flex-1 text-left truncate">Buscar patologia ou medicamento…</span>
+        <kbd className="hidden lg:inline text-[10px] border border-border rounded px-1.5 py-0.5 text-text-dim shrink-0">
           Ctrl K
         </kbd>
       </button>
