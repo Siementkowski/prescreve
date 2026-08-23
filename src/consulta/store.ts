@@ -31,6 +31,7 @@ interface ConsultaState {
   complementosSelecionadosIds: number[]
   selecionarPrincipal: (id: number | null) => void
   toggleComplemento: (id: number) => void
+  limparSelecao: () => void
 
   // "Escolha um esquema" recolhe sozinho ao escolher, reabre ao trocar de patologia ou
   // clicar de novo no cabeçalho — nunca persiste, é do estado da consulta atual.
@@ -100,6 +101,7 @@ export const useConsultaStore = create<ConsultaState>()(
             ? s.complementosSelecionadosIds.filter((x) => x !== id)
             : [...s.complementosSelecionadosIds, id],
         })),
+      limparSelecao: () => set({ principalSelecionadoId: null, complementosSelecionadosIds: [], secaoEsquemaAberta: true }),
 
       secaoEsquemaAberta: true,
       toggleSecaoEsquema: () => set((s) => ({ secaoEsquemaAberta: !s.secaoEsquemaAberta })),

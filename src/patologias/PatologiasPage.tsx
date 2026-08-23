@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { ChevronDown } from 'lucide-react'
 import { useSyncStore } from '../core/sync'
-import type { ModoTratamento } from '../admin/types'
+import type { Area, ModoTratamento } from '../admin/types'
 import { SearchInput } from '../admin/components/SearchInput'
-import { SelectField } from '../admin/components/Field'
 import { TratamentoCard } from '../consulta/TratamentoCard'
 import { CopyButton } from '../consulta/components/CopyButton'
 import { principaisVisiveis } from '../consulta/filtros'
@@ -92,33 +92,10 @@ export function PatologiasPage() {
 
   return (
     <div className="h-full flex flex-col min-h-0">
-      <div className="px-6 pt-6 pb-5 border-b border-border shrink-0">
-        <span className="ed-eyebrow">
-          <span className="ed-eyebrow-dot" style={{ background: 'var(--orange)' }} />
-          Conteúdo / Patologias
-        </span>
-        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
-          Contexto clínico antes da prescrição.
-        </h1>
-        <p className="text-text-dim text-base leading-relaxed max-w-lg">
-          Orientações, sinônimos e os esquemas já publicados — conteúdo mantido pelo Painel.
-        </p>
-      </div>
-
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
         {/* painel esquerdo — área, busca e lista (só leitura) */}
         <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5 lg:w-[320px] xl:w-[360px] shrink-0">
-          <SelectField
-            label="Área"
-            value={areaSelecionada ?? ''}
-            onChange={(e) => selecionarArea(Number(e.target.value))}
-          >
-            {areasOrdenadas.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.nome}
-              </option>
-            ))}
-          </SelectField>
+          <AreaDropdown areas={areasOrdenadas} value={areaSelecionada} onChange={selecionarArea} />
           <SearchInput value={busca} onChange={setBusca} placeholder="Buscar patologia…" />
           <div className="flex-1 overflow-y-auto flex flex-col gap-1.5 pr-1">
             {filtradas.length === 0 ? (
@@ -233,6 +210,69 @@ function ModoSwitch({ value, onChange }: { value: ModoTratamento; onChange: (m: 
           {o.label}
         </button>
       ))}
+    </div>
+  )
+}
+
+/** Dropdown próprio pra "Área" — o <select> nativo decide sozinho (pelo navegador) se abre
+ *  pra cima ou pra baixo conforme o espaço na tela, e numa sidebar que já nasce perto do
+ *  topo isso vira o menu abrindo pra cima sem aviso. Com um painel nosso, sempre abre a
+ *  partir da borda inferior do botão (top-full), igual ao breadcrumb da Consulta. */
+function AreaDropdown({
+  areas,
+  value,
+  onChange,
+}: {
+  areas: Area[]
+  value: number | null
+  onChange: (id: number) => void
+}) {
+  const [aberto, setAberto] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!aberto) return
+    function onClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setAberto(false)
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [aberto])
+
+  const area = areas.find((a) => a.id === value) ?? null
+
+  return (
+    <div className="relative shrink-0" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setAberto((v) => !v)}
+        className={`flex items-center justify-between gap-2 w-full rounded-[var(--radius-input,9px)] border px-3.5 py-3 text-sm font-medium transition-colors ${
+          aberto ? 'border-text bg-surface' : 'border-border bg-surface text-text hover:border-text-dim'
+        }`}
+      >
+        <span className="truncate">{area ? area.nome : 'Selecione a área'}</span>
+        <ChevronDown className={`w-3.5 h-3.5 text-text-dim shrink-0 transition-transform ${aberto ? 'rotate-180' : ''}`} />
+      </button>
+
+      {aberto && (
+        <div className="absolute z-20 top-full mt-1.5 left-0 right-0 max-h-72 overflow-y-auto bg-surface border border-border rounded-xl shadow-lg py-1.5">
+          {areas.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => {
+                onChange(a.id)
+                setAberto(false)
+              }}
+              className={`w-full text-left px-3.5 py-2 text-sm transition-colors ${
+                value === a.id ? 'bg-accent-dim text-accent font-medium' : 'hover:bg-surface-2 text-text'
+              }`}
+            >
+              {a.nome}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
