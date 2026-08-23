@@ -106,7 +106,7 @@ export function PainelTratamentos() {
   }
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col lg:flex-row lg:items-start px-4 py-4 lg:px-6 lg:py-5 gap-5 lg:gap-6">
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col lg:flex-row lg:items-start px-4 pt-4 pb-10 lg:px-6 lg:pt-5 lg:pb-14 gap-5 lg:gap-6">
       {/* coluna principal — orientações e as duas seções numeradas. Rola junto com o card
           de receita, no MESMO scroll — sem overflow-y-auto próprio, senão vira uma segunda
           barra de rolagem colada na primeira. */}
