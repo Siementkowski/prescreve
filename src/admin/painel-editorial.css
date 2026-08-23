@@ -114,9 +114,71 @@
   --font-display: var(--font-display-editorial);
   --font-mono: var(--font-body-editorial); /* o kit não usa mono — números tabulares ficam em DM Sans */
 
-  background: var(--color-bg);
-  color: var(--color-text);
   font-family: var(--font-sans);
+  transition: background .25s ease, color .25s ease;
+  position: relative;
+}
+
+/* Tema escuro — segunda paleta completa, ligada por [data-theme="dark"] no mesmo elemento
+   que carrega .tema-editorial (o toggle no AdminLayout escreve esse atributo ali, só dentro
+   do Painel — nunca em <html>, pra não vazar pra Consulta). Estados invertidos trocam de
+   direção sozinhos porque tudo deriva de --ink/--paper: nav ativo vira paper-on-ink, sombra
+   dura de #111 pra #f5f2eb, sem precisar redefinir cada regra que os usa. */
+.tema-editorial[data-theme='dark'] {
+  --paper: #0d0d0b;
+  --surface: #151512;
+  --surface-2: #1b1b17;
+  --surface-3: #24231f;
+  --ink: #f5f2eb;
+  --muted: #aaa69c;
+  --muted-2: #8e8a80;
+  --text-secondary: #aaa69c;
+  --on-ink: #111111;
+  --line: #2d2c28;
+  --line-strong: #3a3832;
+
+  --soft-blue: #152650;
+  --soft-mint: #103b31;
+  --soft-orange: #432716;
+  --soft-red: #3e1b1a;
+  --on-soft-blue: #79a4ff;
+  --on-soft-mint: #7edfc4;
+  --on-soft-orange: #ffb77e;
+  --on-soft-red: #ff9d94;
+  --status-gray-bg: #2a2924;
+  --on-status-gray: #c6c2b8;
+
+  --shadow-soft: rgba(0, 0, 0, .42);
+
+  --tint-blue-bg: #152650;    --tint-blue-fg: #79a4ff;
+  --tint-red-bg: #451d1c;     --tint-red-fg: #ff9d94;
+  --tint-green-bg: #103b31;   --tint-green-fg: #7edfc4;
+  --tint-gray-bg: #292822;    --tint-gray-fg: #c6c2b8;
+  --tint-purple-bg: #30234d;  --tint-purple-fg: #c0aaff;
+  --tint-cyan-bg: #12323a;    --tint-cyan-fg: #72d6e8;
+  --tint-orange-bg: #4a2b16;  --tint-orange-fg: #ffb77e;
+  --tint-lime-bg: #2c3919;    --tint-lime-fg: #b6e57a;
+  --tint-slate-bg: #252a2e;   --tint-slate-fg: #a9b5bf;
+  --tint-indigo-bg: #292b4c;  --tint-indigo-fg: #a9abff;
+  --tint-magenta-bg: #3c253d; --tint-magenta-fg: #ec9deb;
+  --tint-pink-bg: #422536;    --tint-pink-fg: #ff9ac4;
+  --tint-peach-bg: #48301e;   --tint-peach-fg: #f2b886;
+  --tint-yellow-bg: #463c1b;  --tint-yellow-fg: #f0d36b;
+  --tint-aqua-bg: #163a37;    --tint-aqua-fg: #79dbd2;
+  --tint-coral-bg: #482522;   --tint-coral-fg: #ffaca6;
+}
+
+/* Duas gradientes bem fracas no topo — o único lugar do sistema que usa gradiente, e só
+   no escuro (fonte: guideline do kit). */
+.tema-editorial[data-theme='dark']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(600px 400px at 0% 0%, rgba(24, 87, 209, .08), transparent 60%),
+    radial-gradient(600px 400px at 100% 0%, rgba(0, 185, 137, .04), transparent 60%);
 }
 
 /* Utilidades novas do editorial que não têm equivalente pronto no Tailwind já configurado —

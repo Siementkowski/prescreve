@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { ArrowLeft, FileCode2 } from 'lucide-react'
 import type { ComponentType } from 'react'
@@ -22,17 +22,32 @@ const SECOES: { to: string; label: string; sprite?: NomeIconeEditorial; lucide?:
   { to: '/painel/revisao', label: 'Revisão', sprite: 'check' },
 ]
 
+type TemaPainel = 'light' | 'dark'
+const CHAVE_TEMA_PAINEL = 'prescreve-painel-tema'
+
+function temaSalvo(): TemaPainel {
+  if (typeof window === 'undefined') return 'light'
+  return window.localStorage.getItem(CHAVE_TEMA_PAINEL) === 'dark' ? 'dark' : 'light'
+}
+
 /** Casca do Painel Editorial (/painel/*) — reskin completo a partir do design system
  *  entregue (ver painel-editorial.css pro escopo de tokens). Só essa árvore de rotas muda
- *  de identidade visual; Consulta/Pediatria/Anamnese/Página inicial continuam como estavam. */
+ *  de identidade visual; Consulta/Pediatria/Anamnese/Página inicial continuam como estavam.
+ *  Claro/escuro é preferência só do Painel — `data-theme` fica no wrapper `.tema-editorial`
+ *  aqui embaixo, nunca em `<html>`, então não vaza pra nenhuma tela fora do admin. */
 export function AdminLayout() {
   const tratamentos = useRevisaoStore((s) => s.tratamentos)
   const carregar = useRevisaoStore((s) => s.carregar)
   const mesesAteRevisar = useConfiguracoesStore((s) => s.mesesAteRevisar)
+  const [tema, setTema] = useState<TemaPainel>(temaSalvo)
 
   useEffect(() => {
     carregar()
   }, [carregar])
+
+  useEffect(() => {
+    window.localStorage.setItem(CHAVE_TEMA_PAINEL, tema)
+  }, [tema])
 
   const pendentes = useMemo(
     () =>
@@ -43,12 +58,12 @@ export function AdminLayout() {
   )
 
   return (
-    <div className="tema-editorial flex flex-col h-full min-h-0">
+    <div className="tema-editorial flex flex-col h-full min-h-0" data-theme={tema}>
       <OfflineBanner />
 
       {/* Faixa fina de atalho — volta pra página inicial ou pula lateralmente entre
           seções, sem precisar passar pelo hub toda vez. */}
-      <div className="flex items-center gap-3 px-6 py-3 border-b border-border shrink-0 overflow-x-auto bg-surface">
+      <div className="relative z-10 flex items-center gap-3 px-6 py-3 border-b border-border shrink-0 overflow-x-auto bg-surface">
         <Link
           to="/"
           className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors shrink-0"
@@ -78,9 +93,19 @@ export function AdminLayout() {
             </NavLink>
           ))}
         </div>
+
+        <button
+          type="button"
+          onClick={() => setTema((t) => (t === 'dark' ? 'light' : 'dark'))}
+          title={tema === 'dark' ? 'Tema claro' : 'Tema escuro'}
+          aria-label="Alternar tema do painel"
+          className="ml-auto shrink-0 w-9 h-9 rounded-full border border-border bg-surface text-text-dim hover:text-text hover:border-text-dim transition-colors flex items-center justify-center"
+        >
+          <Icon name={tema === 'dark' ? 'sun' : 'moon'} size={16} />
+        </button>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-hidden p-6 bg-bg">
+      <div className="relative z-10 flex-1 min-h-0 overflow-hidden p-6 bg-bg">
         <Outlet />
       </div>
     </div>
