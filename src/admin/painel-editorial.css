@@ -1,8 +1,7 @@
-/* Painel Editorial — reskin do admin (/painel/*) a partir do design system entregue em
+/* Painel Editorial — reskin do app inteiro a partir do design system entregue em
    "Prescreve Design System-handoff.zip". Escopado numa classe (.tema-editorial), aplicada
-   só na raiz do AdminLayout — a Consulta/Pediatria/Anamnese e a Página Inicial continuam
-   com a identidade lavanda de sempre, porque o kit entregue cobre só o painel interno
-   ("Painel Editorial"), não o produto que o médico usa na consulta.
+   na raiz do App (ver src/App.tsx) — cobre Consulta/Pediatria/Anamnese/Página Inicial/Login
+   e o Painel (/painel/*), todos com a mesma identidade visual e o mesmo claro/escuro.
 
    Estratégia: como o app inteiro já usa Tailwind v4 com tokens semânticos (--color-surface,
    --color-text, --font-display etc. — ver src/index.css), redefinir esses MESMOS nomes

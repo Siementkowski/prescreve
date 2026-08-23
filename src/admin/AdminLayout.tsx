@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { ArrowLeft, FileCode2 } from 'lucide-react'
 import type { ComponentType } from 'react'
@@ -7,7 +7,6 @@ import { useRevisaoStore } from './revisaoStore'
 import { useConfiguracoesStore } from '../core/configuracoes'
 import { precisaRevisar } from '../core/revisao'
 import { Icon, type NomeIconeEditorial } from './components/editorial/Icon'
-import './painel-editorial.css'
 
 // Sprite do Painel Editorial cobre a maior parte da nav; "Geradores" não tem símbolo no kit
 // (33 ícones, nenhum de "código"), então continua em lucide-react ali — mistura pontual,
@@ -22,32 +21,17 @@ const SECOES: { to: string; label: string; sprite?: NomeIconeEditorial; lucide?:
   { to: '/painel/revisao', label: 'Revisão', sprite: 'check' },
 ]
 
-type TemaPainel = 'light' | 'dark'
-const CHAVE_TEMA_PAINEL = 'prescreve-painel-tema'
-
-function temaSalvo(): TemaPainel {
-  if (typeof window === 'undefined') return 'light'
-  return window.localStorage.getItem(CHAVE_TEMA_PAINEL) === 'dark' ? 'dark' : 'light'
-}
-
-/** Casca do Painel Editorial (/painel/*) — reskin completo a partir do design system
- *  entregue (ver painel-editorial.css pro escopo de tokens). Só essa árvore de rotas muda
- *  de identidade visual; Consulta/Pediatria/Anamnese/Página inicial continuam como estavam.
- *  Claro/escuro é preferência só do Painel — `data-theme` fica no wrapper `.tema-editorial`
- *  aqui embaixo, nunca em `<html>`, então não vaza pra nenhuma tela fora do admin. */
+/** Casca do Painel (/painel/*) — nav interna de seções do admin. O reskin "Painel
+ *  Editorial" em si (tokens, fonte, claro/escuro) agora é aplicado na raiz do app
+ *  (ver App.tsx), não mais só aqui — cobre o app inteiro, não só essa árvore de rotas. */
 export function AdminLayout() {
   const tratamentos = useRevisaoStore((s) => s.tratamentos)
   const carregar = useRevisaoStore((s) => s.carregar)
   const mesesAteRevisar = useConfiguracoesStore((s) => s.mesesAteRevisar)
-  const [tema, setTema] = useState<TemaPainel>(temaSalvo)
 
   useEffect(() => {
     carregar()
   }, [carregar])
-
-  useEffect(() => {
-    window.localStorage.setItem(CHAVE_TEMA_PAINEL, tema)
-  }, [tema])
 
   const pendentes = useMemo(
     () =>
@@ -58,7 +42,7 @@ export function AdminLayout() {
   )
 
   return (
-    <div className="tema-editorial flex flex-col h-full min-h-0" data-theme={tema}>
+    <div className="flex flex-col h-full min-h-0">
       <OfflineBanner />
 
       {/* Faixa fina de atalho — volta pra página inicial ou pula lateralmente entre
@@ -93,16 +77,6 @@ export function AdminLayout() {
             </NavLink>
           ))}
         </div>
-
-        <button
-          type="button"
-          onClick={() => setTema((t) => (t === 'dark' ? 'light' : 'dark'))}
-          title={tema === 'dark' ? 'Tema claro' : 'Tema escuro'}
-          aria-label="Alternar tema do painel"
-          className="ml-auto shrink-0 w-9 h-9 rounded-full border border-border bg-surface text-text-dim hover:text-text hover:border-text-dim transition-colors flex items-center justify-center"
-        >
-          <Icon name={tema === 'dark' ? 'sun' : 'moon'} size={16} />
-        </button>
       </div>
 
       <div className="relative z-10 flex-1 min-h-0 overflow-hidden p-6 bg-bg">

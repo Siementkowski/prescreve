@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Stethoscope, Settings, Baby, Home, FileText } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
@@ -21,40 +21,57 @@ import { GeradoresPage } from './admin/GeradoresPage'
 import { RevisaoPage } from './admin/RevisaoPage'
 import { AdminHub } from './admin/AdminHub'
 import { AvisoUsoProfissional } from './core/components/AvisoUsoProfissional'
+import { Icon } from './admin/components/editorial/Icon'
+import './admin/painel-editorial.css'
 
 const navPillClass = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-    isActive ? 'bg-[#201F2E] text-white' : 'text-text-dim hover:bg-surface-2 hover:text-text'
+    isActive ? 'bg-text text-bg' : 'text-text-dim hover:bg-surface-2 hover:text-text'
   }`
+
+type TemaApp = 'light' | 'dark'
+const CHAVE_TEMA_APP = 'prescreve-painel-tema'
+
+function temaSalvo(): TemaApp {
+  if (typeof window === 'undefined') return 'light'
+  return window.localStorage.getItem(CHAVE_TEMA_APP) === 'dark' ? 'dark' : 'light'
+}
 
 function App() {
   const { session, loading, perfil, isEditor, signOut } = useAuth()
   const inicializarSync = useSyncStore((s) => s.inicializar)
   const location = useLocation()
+  const [tema, setTema] = useState<TemaApp>(temaSalvo)
 
   useEffect(() => {
     if (session) inicializarSync()
   }, [session, inicializarSync])
 
+  useEffect(() => {
+    window.localStorage.setItem(CHAVE_TEMA_APP, tema)
+  }, [tema])
+
   // Registra o service worker (e escuta o prompt de instalação) mesmo sem sessão — a
-  // instalabilidade do PWA não pode depender de já estar logado.
+  // instalabilidade do PWA não pode depender de já estar logado. Reusa a mesma chave de
+  // tema do Painel — agora é o app inteiro que usa o design system "Painel Editorial",
+  // não só /painel/*, então claro/escuro é uma preferência única, global.
   if (loading) {
     return (
-      <>
+      <div className="tema-editorial" data-theme={tema}>
         <PwaUpdatePrompt />
         <div className="min-h-screen w-full flex items-center justify-center bg-bg">
           <p className="text-sm text-text-dim">Carregando…</p>
         </div>
-      </>
+      </div>
     )
   }
 
   if (!session) {
     return (
-      <>
+      <div className="tema-editorial" data-theme={tema}>
         <PwaUpdatePrompt />
         <LoginPage />
-      </>
+      </div>
     )
   }
 
@@ -63,9 +80,9 @@ function App() {
   const painelAtivo = location.pathname.startsWith('/painel')
 
   return (
-    <div className="h-screen w-full bg-bg text-text flex flex-col">
+    <div className="tema-editorial h-screen w-full bg-bg text-text flex flex-col" data-theme={tema}>
       <div className="shrink-0 px-4 sm:px-6 pt-4">
-        <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-surface border border-border rounded-full pl-5 pr-2.5 py-2.5 shadow-[0_10px_30px_-14px_rgba(32,31,46,0.25)]">
+        <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-surface border border-border rounded-full pl-5 pr-2.5 py-2.5 shadow-[var(--shadow-float,0_10px_30px_-14px_rgba(17,17,17,.15))]">
           {/* Três colunas de largura equilibrada (1fr/auto/1fr) — a nav fica no centro
               real do header, não só no meio do espaço que sobra entre logo e avatar. */}
           <div className="flex items-center min-w-0 justify-self-start">
@@ -112,9 +129,18 @@ function App() {
             <SyncIndicator />
             <InstallPrompt />
             <button
+              type="button"
+              onClick={() => setTema((t) => (t === 'dark' ? 'light' : 'dark'))}
+              title={tema === 'dark' ? 'Tema claro' : 'Tema escuro'}
+              aria-label="Alternar tema"
+              className="shrink-0 w-9 h-9 rounded-full border border-border bg-surface text-text-dim hover:text-text hover:border-text-dim transition-colors flex items-center justify-center"
+            >
+              <Icon name={tema === 'dark' ? 'sun' : 'moon'} size={16} />
+            </button>
+            <button
               onClick={signOut}
               className="flex items-center justify-center w-9 h-9 rounded-full font-display font-semibold text-xs shrink-0 text-white"
-              style={{ background: 'linear-gradient(135deg, var(--color-cat-patologias-bg), var(--color-accent))' }}
+              style={{ background: 'linear-gradient(135deg, var(--color-accent), var(--color-text))' }}
               title={`${perfil?.nome || session.user.email} · ${perfil?.papel ?? '—'} — clique para sair`}
             >
               {(perfil?.nome || session.user.email || '?').slice(0, 2).toUpperCase()}
