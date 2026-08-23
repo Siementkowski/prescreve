@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import type { ComponentType } from 'react'
+import { ChevronsLeft } from 'lucide-react'
 import { Icon, type NomeIconeEditorial } from '../../admin/components/editorial/Icon'
 
 const CHAVE_SIDEBAR_RECOLHIDA = 'prescreve-sidebar-recolhida'
@@ -45,26 +46,25 @@ export function Sidebar({
 
   return (
     <aside
-      className={`relative shrink-0 border-r border-border h-full overflow-visible transition-[width] duration-200 ease-out ${
+      className={`relative shrink-0 border-r border-border h-full transition-[width] duration-200 ease-out ${
         recolhida ? 'w-[78px]' : 'w-[248px]'
       }`}
     >
-      <button
-        type="button"
-        onClick={alternar}
-        title={recolhida ? 'Expandir navegação' : 'Recolher navegação'}
-        aria-label="Alternar navegação"
-        className="absolute -right-[13px] top-4 z-10 w-[26px] h-[26px] rounded-full border border-border bg-surface text-text-dim hover:text-text flex items-center justify-center shadow-[var(--shadow-float,0_4px_14px_rgba(17,17,17,.08))] transition-colors"
-      >
-        <Icon
-          name="chevron"
-          size={14}
-          strokeWidth={1.8}
-          className={`transition-transform duration-200 ${recolhida ? 'rotate-180' : ''}`}
-        />
-      </button>
+      <div className={`h-full flex flex-col transition-[padding] duration-200 ${recolhida ? 'px-3 py-5' : 'px-4.5 py-5'}`}>
+        <div className={`shrink-0 flex mb-5 ${recolhida ? 'justify-center' : 'justify-end'}`}>
+          <button
+            type="button"
+            onClick={alternar}
+            title={recolhida ? 'Expandir navegação' : 'Recolher navegação'}
+            aria-label="Alternar navegação"
+            className="w-[30px] h-[30px] rounded-full border border-border bg-surface text-text-dim hover:text-text hover:border-text-dim flex items-center justify-center transition-colors"
+          >
+            <ChevronsLeft
+              className={`w-4 h-4 transition-transform duration-200 ${recolhida ? 'rotate-180' : ''}`}
+            />
+          </button>
+        </div>
 
-      <div className={`h-full flex flex-col transition-[padding] duration-200 ${recolhida ? 'px-3 py-7' : 'px-4.5 py-7'}`}>
         <div className="flex-1 min-h-0 overflow-y-auto">
           <GrupoNav titulo="Navegação" itens={principal} recolhida={recolhida} />
           {painel.length > 0 && <GrupoNav titulo="Painel" itens={painel} recolhida={recolhida} className="mt-6" />}

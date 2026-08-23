@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
-import { ArrowLeft, FileCode2, Pill } from 'lucide-react'
+import { NavLink, Outlet } from 'react-router-dom'
+import { FileCode2, Pill, ClipboardList } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { OfflineBanner } from './components/OfflineBanner'
 import { useRevisaoStore } from './revisaoStore'
@@ -13,7 +13,7 @@ import { Icon, type NomeIconeEditorial } from './components/editorial/Icon'
 // não abandono do sprite.
 const SECOES: { to: string; label: string; sprite?: NomeIconeEditorial; lucide?: ComponentType<{ className?: string }> }[] = [
   { to: '/painel/areas', label: 'Áreas', sprite: 'layers' },
-  { to: '/painel/patologias', label: 'Patologias', sprite: 'path' },
+  { to: '/painel/patologias', label: 'Patologias', lucide: ClipboardList },
   { to: '/painel/medicamentos', label: 'Medicamentos', lucide: Pill },
   { to: '/painel/complementos', label: 'Complementos', sprite: 'spark' },
   { to: '/painel/tratamentos', label: 'Prescrições', sprite: 'rx' },
@@ -45,17 +45,10 @@ export function AdminLayout() {
     <div className="flex flex-col h-full min-h-0">
       <OfflineBanner />
 
-      {/* Faixa fina de atalho — volta pra página inicial ou pula lateralmente entre
-          seções, sem precisar passar pelo hub toda vez. */}
-      <div className="relative z-10 flex items-center gap-3 px-6 py-3 border-b border-border shrink-0 overflow-x-auto bg-surface">
-        <Link
-          to="/"
-          className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors shrink-0"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Página inicial
-        </Link>
-        <span className="w-px h-4 bg-border shrink-0" />
+      {/* Faixa fina de atalho — pula lateralmente entre seções do Painel, sem precisar
+          passar pelo hub toda vez. Voltar pra página inicial já é a Sidebar do shell
+          (item "Início"), não precisa duplicar aqui. */}
+      <div className="relative z-10 flex items-center justify-center px-6 py-3 border-b border-border shrink-0 overflow-x-auto bg-surface">
         <div className="flex items-center gap-1 shrink-0">
           {SECOES.map(({ to, label, sprite, lucide: Lucide }) => (
             <NavLink

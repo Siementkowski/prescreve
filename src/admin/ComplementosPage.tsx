@@ -150,7 +150,7 @@ export function ComplementosPage() {
 
   return (
     <div className="h-full min-h-0">
-      <div className="h-full min-h-0 grid grid-cols-1 lg:grid-cols-[315px_1fr] border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
+      <div className="h-full min-h-0 grid grid-cols-1 lg:grid-cols-[380px_1fr] border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
         <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5">
           <div className="flex gap-2">
             <div className="flex-1">

@@ -133,7 +133,7 @@ export function PatologiasPage() {
           {!patologia ? (
             <p className="text-sm text-text-dim">Selecione uma patologia.</p>
           ) : (
-            <div className="flex flex-col gap-6 max-w-4xl">
+            <div className="flex flex-col gap-6 max-w-4xl mx-auto">
               <div>
                 <h2 className="font-display text-[28px] tracking-[-.8px] text-text">{patologia.nome}</h2>
                 <p className="text-sm text-text-dim mt-1">{area?.nome}</p>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Stethoscope, Baby, FileText, User, Pill, Settings } from 'lucide-react'
+import { Stethoscope, Baby, FileText, User, Pill, Settings, ClipboardList } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
 import { LoginPage } from './core/auth/LoginPage'
 import { useSyncStore } from './core/sync'
@@ -83,7 +83,7 @@ function App() {
     { to: '/consulta', label: 'Consulta', lucide: Stethoscope },
     { to: '/pediatria', label: 'Pediatria', lucide: Baby },
     { to: '/anamnese', label: 'Anamnese', lucide: FileText },
-    { to: '/patologias', label: 'Patologias', sprite: 'path' },
+    { to: '/patologias', label: 'Patologias', lucide: ClipboardList },
   ]
   const navPainel: ItemNav[] = isEditor
     ? [
