@@ -91,112 +91,120 @@ export function PatologiasPage() {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="max-w-6xl mx-auto flex flex-col gap-6 h-full min-h-0">
-        <div className="shrink-0">
-          <span className="ed-eyebrow">
-            <span className="ed-eyebrow-dot" style={{ background: 'var(--orange)' }} />
-            Conteúdo / Patologias
-          </span>
-          <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
-            Contexto clínico antes da prescrição.
-          </h1>
-          <p className="text-text-dim text-base leading-relaxed max-w-lg">
-            Orientações, sinônimos e os esquemas já publicados — conteúdo mantido pelo Painel.
-          </p>
-        </div>
+    <div className="h-full flex flex-col min-h-0">
+      <div className="px-6 pt-6 pb-5 border-b border-border shrink-0">
+        <span className="ed-eyebrow">
+          <span className="ed-eyebrow-dot" style={{ background: 'var(--orange)' }} />
+          Conteúdo / Patologias
+        </span>
+        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
+          Contexto clínico antes da prescrição.
+        </h1>
+        <p className="text-text-dim text-base leading-relaxed max-w-lg">
+          Orientações, sinônimos e os esquemas já publicados — conteúdo mantido pelo Painel.
+        </p>
+      </div>
 
-        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[300px_1fr] border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
-          {/* painel esquerdo — área, busca e lista (só leitura) */}
-          <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5">
-            <SelectField
-              label="Área"
-              value={areaSelecionada ?? ''}
-              onChange={(e) => selecionarArea(Number(e.target.value))}
-            >
-              {areasOrdenadas.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.nome}
-                </option>
-              ))}
-            </SelectField>
-            <SearchInput value={busca} onChange={setBusca} placeholder="Buscar patologia…" />
-            <div className="flex-1 overflow-y-auto flex flex-col gap-1.5 pr-1">
-              {filtradas.length === 0 ? (
-                <p className="text-sm text-text-dim px-1">Nenhuma patologia nesta área.</p>
-              ) : (
-                filtradas.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setSelecionadaId(p.id)}
-                    className={`w-full text-left px-3 py-2.5 rounded-[var(--radius-item,11px)] border transition-colors ${
-                      selecionadaId === p.id
-                        ? 'bg-surface border-text shadow-[var(--shadow-selected)]'
-                        : 'bg-surface border-transparent hover:border-border'
-                    }`}
-                  >
-                    <span className="block text-[14px] font-semibold text-text truncate">{p.nome}</span>
-                    {p.sinonimos && (
-                      <span className="block text-[11px] text-text-dim truncate mt-0.5">{p.sinonimos}</span>
-                    )}
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* painel direito — detalhe, sem nenhuma ação de edição */}
-          <div className="min-h-0 overflow-y-auto p-7">
-            {!patologia ? (
-              <p className="text-sm text-text-dim">Selecione uma patologia.</p>
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
+        {/* painel esquerdo — área, busca e lista (só leitura) */}
+        <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5 lg:w-[320px] xl:w-[360px] shrink-0">
+          <SelectField
+            label="Área"
+            value={areaSelecionada ?? ''}
+            onChange={(e) => selecionarArea(Number(e.target.value))}
+          >
+            {areasOrdenadas.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.nome}
+              </option>
+            ))}
+          </SelectField>
+          <SearchInput value={busca} onChange={setBusca} placeholder="Buscar patologia…" />
+          <div className="flex-1 overflow-y-auto flex flex-col gap-1.5 pr-1">
+            {filtradas.length === 0 ? (
+              <p className="text-sm text-text-dim px-1">Nenhuma patologia nesta área.</p>
             ) : (
-              <div className="flex flex-col gap-5 max-w-3xl">
-                <div>
-                  <h2 className="font-display text-[26px] tracking-[-.8px] text-text">{patologia.nome}</h2>
-                  <p className="text-sm text-text-dim mt-1">{area?.nome}</p>
-                  {patologia.sinonimos && (
-                    <p className="text-xs text-text-dim mt-1">Também conhecida como: {patologia.sinonimos}</p>
+              filtradas.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setSelecionadaId(p.id)}
+                  className={`w-full text-left px-3 py-2.5 rounded-[var(--radius-item,11px)] border transition-colors ${
+                    selecionadaId === p.id
+                      ? 'bg-surface border-text shadow-[var(--shadow-selected)]'
+                      : 'bg-surface border-transparent hover:border-border'
+                  }`}
+                >
+                  <span className="block text-[14px] font-semibold text-text truncate">{p.nome}</span>
+                  {p.sinonimos && (
+                    <span className="block text-[11px] text-text-dim truncate mt-0.5">{p.sinonimos}</span>
                   )}
-                </div>
-
-                {patologia.orientacoes && (
-                  <div className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-4 flex flex-col gap-2">
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-sm font-semibold text-text">Orientações não medicamentosas</h3>
-                      <CopyButton texto={patologia.orientacoes} label="Copiar" />
-                    </div>
-                    <p className="text-sm text-text-dim whitespace-pre-wrap leading-relaxed">
-                      {patologia.orientacoes}
-                    </p>
-                  </div>
-                )}
-
-                {patologia.observacoes && <p className="text-sm text-text-dim">{patologia.observacoes}</p>}
-
-                <div className="flex items-center justify-between gap-3 mt-2">
-                  <h3 className="font-display text-[20px] tracking-[-.6px] text-text">Esquemas</h3>
-                  <ModoSwitch value={modo} onChange={setModo} />
-                </div>
-
-                {esquemas.length === 0 ? (
-                  <p className="text-sm text-text-dim">Nenhum esquema publicado pra esse modo ainda.</p>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    {esquemas.map((t) => (
-                      <TratamentoCard
-                        key={t.id}
-                        tratamento={t}
-                        itens={itens}
-                        medicamentos={medicamentos}
-                        apresentacoes={apresentacoes}
-                        gestante={false}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+                </button>
+              ))
             )}
           </div>
+        </div>
+
+        {/* painel direito — detalhe, sem nenhuma ação de edição */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-7 xl:p-10">
+          {!patologia ? (
+            <p className="text-sm text-text-dim">Selecione uma patologia.</p>
+          ) : (
+            <div className="flex flex-col gap-6 max-w-4xl">
+              <div>
+                <h2 className="font-display text-[28px] tracking-[-.8px] text-text">{patologia.nome}</h2>
+                <p className="text-sm text-text-dim mt-1">{area?.nome}</p>
+                {patologia.sinonimos && (
+                  <p className="text-xs text-text-dim mt-1">Também conhecida como: {patologia.sinonimos}</p>
+                )}
+              </div>
+
+              {(patologia.orientacoes || patologia.observacoes) && (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                  {patologia.orientacoes && (
+                    <div className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-4 flex flex-col gap-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <h3 className="text-sm font-semibold text-text">Orientações não medicamentosas</h3>
+                        <CopyButton texto={patologia.orientacoes} label="Copiar" />
+                      </div>
+                      <p className="text-sm text-text-dim whitespace-pre-wrap leading-relaxed">
+                        {patologia.orientacoes}
+                      </p>
+                    </div>
+                  )}
+                  {patologia.observacoes && (
+                    <div className="border border-dashed border-border rounded-[var(--radius-card,14px)] p-4 flex flex-col gap-2">
+                      <h3 className="text-sm font-semibold text-text">Observações</h3>
+                      <p className="text-sm text-text-dim whitespace-pre-wrap leading-relaxed">
+                        {patologia.observacoes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-3 mt-2">
+                <h3 className="font-display text-[20px] tracking-[-.6px] text-text">Esquemas</h3>
+                <ModoSwitch value={modo} onChange={setModo} />
+              </div>
+
+              {esquemas.length === 0 ? (
+                <p className="text-sm text-text-dim">Nenhum esquema publicado pra esse modo ainda.</p>
+              ) : (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+                  {esquemas.map((t) => (
+                    <TratamentoCard
+                      key={t.id}
+                      tratamento={t}
+                      itens={itens}
+                      medicamentos={medicamentos}
+                      apresentacoes={apresentacoes}
+                      gestante={false}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
