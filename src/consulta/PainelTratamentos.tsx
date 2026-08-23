@@ -106,9 +106,11 @@ export function PainelTratamentos() {
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
-      {/* coluna principal — orientações e as duas seções numeradas */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 lg:px-6 lg:py-5 flex flex-col gap-5">
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col lg:flex-row lg:items-start px-4 py-4 lg:px-6 lg:py-5 gap-5 lg:gap-6">
+      {/* coluna principal — orientações e as duas seções numeradas. Rola junto com o card
+          de receita, no MESMO scroll — sem overflow-y-auto próprio, senão vira uma segunda
+          barra de rolagem colada na primeira. */}
+      <div className="flex-1 min-w-0 flex flex-col gap-5">
         {patologia.orientacoes && (
           <div className="border border-border rounded-xl bg-surface p-4 flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
@@ -244,10 +246,11 @@ export function PainelTratamentos() {
         )}
       </div>
 
-      {/* coluna direita — preview da receita, sempre visível, some no mobile (a barra de
-          copiar continua acessível pela seção acima em telas pequenas via scroll). */}
-      <aside className="shrink-0 border-t lg:border-t-0 lg:border-l border-border p-4 lg:p-5 lg:w-[320px] xl:w-[360px] lg:overflow-y-auto">
-        <div className="lg:sticky lg:top-0 flex flex-col gap-4 border-2 border-text rounded-[var(--radius-card,14px)] bg-surface p-6">
+      {/* coluna direita — preview da receita. Sem borda/scroll próprios: acompanha o
+          mesmo scroll da coluna principal, só gruda (sticky) perto do topo enquanto o
+          card cabe na tela — igual ao kit, sem divisória nem segunda barra de rolagem. */}
+      <aside className="w-full lg:w-[320px] xl:w-[360px] shrink-0 lg:sticky lg:top-5">
+        <div className="flex flex-col gap-4 border-2 border-text rounded-[var(--radius-card,14px)] bg-surface p-6">
           <span className="text-[11px] font-bold text-text-dim uppercase tracking-[0.8px]">Receita</span>
 
           <div>
