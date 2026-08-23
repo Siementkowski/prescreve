@@ -41,7 +41,7 @@ export function MedicamentoPicker({
       <button
         type="button"
         onClick={() => setAberto((v) => !v)}
-        className="w-full flex items-center justify-between bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-text outline-none focus:border-accent transition-colors"
+        className="w-full flex items-center justify-between bg-surface-2 border border-border rounded-[var(--radius-input,9px)] px-3 py-2.5 text-sm text-text outline-none focus:border-text transition-colors"
       >
         <span className={selecionado ? 'text-text' : 'text-text-dim'}>
           {selecionado ? selecionado.nome : 'Selecionar do catálogo…'}
@@ -50,7 +50,7 @@ export function MedicamentoPicker({
       </button>
 
       {aberto && (
-        <div className="absolute z-20 mt-1 w-full bg-surface border border-border rounded-lg shadow-2xl shadow-black/40 overflow-hidden">
+        <div className="absolute z-20 mt-1 w-full bg-surface border border-border rounded-[var(--radius-card,14px)] shadow-[var(--shadow-popover,0_14px_32px_rgba(0,0,0,.2))] overflow-hidden">
           <input
             autoFocus
             value={filtro}

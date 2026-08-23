@@ -106,10 +106,10 @@ export function CadastrarMedicamentoModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-      <div className="w-full max-w-md bg-surface border border-border rounded-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-md bg-surface border border-border rounded-[var(--radius-card,14px)] p-6 shadow-[var(--shadow-popover,0_14px_32px_rgba(0,0,0,.2))] max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-1">
-          <h3 className="text-sm font-semibold text-text">Cadastrar medicamento</h3>
-          <button type="button" onClick={fechar} className="text-text-dim hover:text-text transition-colors p-1">
+          <h3 className="font-display text-[18px] tracking-[-.4px] text-text">Cadastrar medicamento</h3>
+          <button type="button" onClick={fechar} className="text-text-dim hover:text-text transition-colors p-1 rounded-full hover:bg-surface-2">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -136,15 +136,15 @@ export function CadastrarMedicamentoModal({
 
           {erro && <p className="text-xs text-danger">{erro}</p>}
 
-          <div className="flex justify-end gap-2 mt-2">
-            <button type="button" onClick={fechar} className="text-sm text-text-dim hover:text-text transition-colors px-3 py-1.5">
+          <div className="flex justify-end gap-2 mt-2 pt-3 border-t border-border">
+            <button type="button" onClick={fechar} className="text-sm font-medium text-text-dim hover:text-text transition-colors px-3 py-2">
               Cancelar
             </button>
             <button
               type="button"
               onClick={salvar}
               disabled={salvando}
-              className="text-sm bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text rounded-lg px-4 py-2 transition-colors"
+              className="text-sm font-semibold bg-text hover:opacity-90 disabled:opacity-50 text-bg rounded-[var(--radius-pill,999px)] px-5 py-2.5 transition-opacity"
             >
               {salvando ? 'Cadastrando…' : 'Cadastrar e usar'}
             </button>

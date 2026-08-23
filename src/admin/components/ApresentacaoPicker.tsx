@@ -107,7 +107,7 @@ export function ApresentacaoPicker({
       <button
         type="button"
         onClick={() => setAberto((v) => !v)}
-        className="w-full flex items-center justify-between bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-text outline-none focus:border-accent transition-colors"
+        className="w-full flex items-center justify-between bg-surface-2 border border-border rounded-[var(--radius-input,9px)] px-3 py-2.5 text-sm text-text outline-none focus:border-text transition-colors"
       >
         <span className={selecionada ? 'text-text' : 'text-text-dim'}>
           {selecionada ? formatarApresentacao(selecionada, { comConcentracao: false }) : '— nenhuma —'}
@@ -116,7 +116,7 @@ export function ApresentacaoPicker({
       </button>
 
       {aberto && (
-        <div className="absolute z-20 mt-1 w-80 bg-surface border border-border rounded-lg shadow-2xl shadow-black/40 overflow-hidden">
+        <div className="absolute z-20 mt-1 w-80 bg-surface border border-border rounded-[var(--radius-card,14px)] shadow-[var(--shadow-popover,0_14px_32px_rgba(0,0,0,.2))] overflow-hidden">
           {!criando ? (
             <>
               <div className="max-h-52 overflow-y-auto">
@@ -206,7 +206,7 @@ export function ApresentacaoPicker({
                   type="button"
                   onClick={salvarNova}
                   disabled={salvando}
-                  className="text-xs bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text rounded-lg px-3 py-1.5 transition-colors"
+                  className="text-xs font-semibold bg-text hover:opacity-90 disabled:opacity-50 text-bg rounded-[var(--radius-pill,999px)] px-3 py-1.5 transition-opacity"
                 >
                   {salvando ? 'Salvando…' : 'Salvar e usar'}
                 </button>
