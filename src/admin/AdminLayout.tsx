@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { ArrowLeft, FileCode2 } from 'lucide-react'
+import { ArrowLeft, FileCode2, Pill } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { OfflineBanner } from './components/OfflineBanner'
 import { useRevisaoStore } from './revisaoStore'
@@ -14,7 +14,7 @@ import { Icon, type NomeIconeEditorial } from './components/editorial/Icon'
 const SECOES: { to: string; label: string; sprite?: NomeIconeEditorial; lucide?: ComponentType<{ className?: string }> }[] = [
   { to: '/painel/areas', label: 'Áreas', sprite: 'layers' },
   { to: '/painel/patologias', label: 'Patologias', sprite: 'path' },
-  { to: '/painel/medicamentos', label: 'Medicamentos', sprite: 'pill' },
+  { to: '/painel/medicamentos', label: 'Medicamentos', lucide: Pill },
   { to: '/painel/complementos', label: 'Complementos', sprite: 'spark' },
   { to: '/painel/tratamentos', label: 'Prescrições', sprite: 'rx' },
   { to: '/painel/geradores', label: 'Geradores', lucide: FileCode2 },

@@ -158,9 +158,9 @@ export function MedicamentosPage() {
   }
 
   return (
-    <div className="h-full min-h-0">
-      <div className="h-full min-h-0 grid grid-cols-1 lg:grid-cols-[315px_1fr] border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
-        <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5">
+    <div className="h-full min-h-0 overflow-y-auto">
+      <div className="min-h-full grid grid-cols-1 lg:grid-cols-[380px_1fr] lg:items-start border border-border rounded-[var(--radius-panel,18px)] overflow-hidden bg-surface">
+        <div className="flex flex-col gap-3 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5 lg:sticky lg:top-0 lg:max-h-[calc(100vh-160px)]">
           <div className="flex gap-2">
             <div className="flex-1">
               <SearchInput value={busca} onChange={setBusca} placeholder="Buscar medicamento…" />
@@ -174,7 +174,7 @@ export function MedicamentosPage() {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto flex flex-col gap-1.5 pr-1">
+          <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1.5 pr-1">
             {carregando ? (
               <p className="text-sm text-text-dim px-1">Carregando…</p>
             ) : filtrados.length === 0 ? (
@@ -210,7 +210,7 @@ export function MedicamentosPage() {
           </div>
         </div>
 
-        <div className="min-h-0 overflow-y-auto p-7">
+        <div className="p-7 pb-16">
           <div className="max-w-2xl">
             <h2 className="font-display text-[22px] tracking-[-.8px] text-text mb-5">
               {selecionadoId ? 'Editar medicamento' : 'Novo medicamento'}

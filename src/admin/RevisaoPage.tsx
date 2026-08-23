@@ -85,7 +85,7 @@ export function RevisaoPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
+    <div className="flex flex-col gap-6 h-full min-h-0 overflow-y-auto pb-8">
       <div className="flex items-end justify-between gap-6 flex-wrap shrink-0">
         <div>
           <span className="ed-eyebrow">
@@ -157,7 +157,7 @@ export function RevisaoPage() {
         </div>
       )}
 
-      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         {carregando && tratamentos.length === 0 ? (
           <p className="text-sm text-text-dim px-1">Carregando…</p>
         ) : pendentes.length === 0 ? (
