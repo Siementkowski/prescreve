@@ -10,14 +10,15 @@ export function SearchInput({
   placeholder?: string
 }) {
   return (
-    <div className="relative">
-      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim" />
+    <div className="flex items-center gap-2 border border-border bg-surface rounded-[var(--radius-control,12px)] px-3 h-[var(--control-height,46px)] focus-within:border-text transition-colors">
+      <Search className="w-4 h-4 text-text-dim shrink-0" />
       <input
-        type="text"
+        type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-surface-2 border border-border rounded-lg pl-8 pr-3 py-2 text-sm text-text outline-none focus:border-accent focus:ring-1 focus:ring-accent/40 transition-colors"
+        autoComplete="off"
+        className="w-full bg-transparent outline-none text-sm text-text"
       />
     </div>
   )

@@ -98,109 +98,125 @@ export function AreasPage() {
   }
 
   return (
-    <>
-      <AdminPageShell
-        busca={busca}
-        onBuscaChange={setBusca}
-        buscaPlaceholder="Buscar área…"
-        onNovo={novo}
-        labelNovo="Nova área"
-        lista={
-          carregando ? (
-            <p className="text-sm text-text-dim px-1">Carregando…</p>
-          ) : filtradas.length === 0 ? (
-            <p className="text-sm text-text-dim px-1">Nenhuma área encontrada.</p>
-          ) : (
-            filtradas.map((area) => (
-              <button
-                key={area.id}
-                onClick={() => selecionar(area)}
-                className={`w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-lg border transition-colors ${
-                  selecionadaId === area.id
-                    ? 'bg-accent-dim border-accent'
-                    : 'bg-surface border-border hover:border-text-dim'
-                }`}
-              >
-                <span
-                  className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: (area.cor ?? '#2dd4e8') + '22', color: area.cor ?? '#2dd4e8' }}
-                >
-                  <IconePorNome nome={area.icone} className="w-3.5 h-3.5" />
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className="block font-display text-[15px] text-text truncate">{area.nome}</span>
-                  <span className="block text-xs text-text-dim">{LABEL_MODO_AREA[area.modo]}</span>
-                </span>
-              </button>
-            ))
-          )
-        }
-        formulario={
-          <div className="bg-surface border border-border rounded-lg p-6 max-w-xl">
-            <h2 className="font-display text-lg font-semibold text-text mb-4">
-              {selecionadaId ? 'Editar área' : 'Nova área'}
-            </h2>
+    <div className="flex flex-col gap-6 h-full min-h-0">
+      {/* PageHead — eyebrow + título editorial (frase, não rótulo) + descrição */}
+      <div className="shrink-0">
+        <span className="ed-eyebrow">
+          <span className="ed-eyebrow-dot" style={{ background: 'var(--mint)' }} />
+          Estrutura / Áreas
+        </span>
+        <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
+          Áreas clínicas.
+        </h1>
+        <p className="text-text-dim text-base leading-relaxed max-w-lg">
+          Organize o conteúdo do Prescreve por contexto clínico.
+        </p>
+      </div>
 
-            <div className="flex flex-col gap-4">
-              <TextField
-                label="Nome"
-                value={form.nome}
-                onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                placeholder="Ex: Infectologia"
-              />
-
-              <SelectField
-                label="Modo"
-                value={form.modo}
-                onChange={(e) => setForm({ ...form, modo: e.target.value as ModoArea })}
-              >
-                {Object.entries(LABEL_MODO_AREA).map(([v, l]) => (
-                  <option key={v} value={v}>
-                    {l}
-                  </option>
-                ))}
-              </SelectField>
-
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-text-dim">Ícone</span>
-                <IconPicker valor={form.icone} onChange={(nome) => setForm({ ...form, icone: nome })} />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-text-dim">Cor</span>
-                <ColorPicker valor={form.cor} onChange={(cor) => setForm({ ...form, cor })} />
-              </div>
-
-              {erro && (
-                <p className="text-sm text-danger bg-danger-dim border border-danger/30 rounded-lg px-3 py-2">
-                  {erro}
-                </p>
-              )}
-
-              <div className="flex items-center justify-between mt-2">
-                {selecionadaId ? (
-                  <button
-                    onClick={() => setParaExcluir(areas.find((a) => a.id === selecionadaId) ?? null)}
-                    className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Excluir
-                  </button>
-                ) : (
-                  <span />
-                )}
+      <div className="flex-1 min-h-0">
+        <AdminPageShell
+          busca={busca}
+          onBuscaChange={setBusca}
+          buscaPlaceholder="Buscar área…"
+          onNovo={novo}
+          labelNovo="Nova área"
+          lista={
+            carregando ? (
+              <p className="text-sm text-text-dim px-1">Carregando…</p>
+            ) : filtradas.length === 0 ? (
+              <p className="text-sm text-text-dim px-1">Nenhuma área encontrada.</p>
+            ) : (
+              filtradas.map((area) => (
                 <button
-                  onClick={salvar}
-                  disabled={salvando}
-                  className="bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-text text-sm font-semibold rounded-lg px-4 py-2 transition-colors"
+                  key={area.id}
+                  onClick={() => selecionar(area)}
+                  className={`w-full flex items-center gap-2.5 text-left px-3 py-2.5 rounded-[var(--radius-item,11px)] border transition-colors ${
+                    selecionadaId === area.id
+                      ? 'bg-surface border-text shadow-[var(--shadow-selected)]'
+                      : 'bg-surface border-transparent hover:border-border'
+                  }`}
                 >
-                  {salvando ? 'Salvando…' : 'Salvar'}
+                  <span
+                    className="w-9 h-9 rounded-[var(--radius-nav,10px)] flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: (area.cor ?? '#2dd4e8') + '22', color: area.cor ?? '#2dd4e8' }}
+                  >
+                    <IconePorNome nome={area.icone} className="w-4 h-4" />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-[14px] font-semibold text-text truncate">{area.nome}</span>
+                    <span className="block text-[11px] text-text-dim mt-0.5">{LABEL_MODO_AREA[area.modo]}</span>
+                  </span>
                 </button>
+              ))
+            )
+          }
+          formulario={
+            <div className="max-w-xl">
+              <h2 className="font-display text-[22px] tracking-[-.8px] text-text mb-5">
+                {selecionadaId ? 'Editar área' : 'Nova área'}
+              </h2>
+
+              <div className="flex flex-col gap-4">
+                <TextField
+                  label="Nome"
+                  value={form.nome}
+                  onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                  placeholder="Ex: Infectologia"
+                />
+
+                <SelectField
+                  label="Modo"
+                  value={form.modo}
+                  onChange={(e) => setForm({ ...form, modo: e.target.value as ModoArea })}
+                >
+                  {Object.entries(LABEL_MODO_AREA).map(([v, l]) => (
+                    <option key={v} value={v}>
+                      {l}
+                    </option>
+                  ))}
+                </SelectField>
+
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[11px] font-bold text-text-dim uppercase tracking-[0.8px]">Ícone</span>
+                  <IconPicker valor={form.icone} onChange={(nome) => setForm({ ...form, icone: nome })} />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[11px] font-bold text-text-dim uppercase tracking-[0.8px]">Cor</span>
+                  <ColorPicker valor={form.cor} onChange={(cor) => setForm({ ...form, cor })} />
+                </div>
+
+                {erro && (
+                  <p className="text-sm text-danger bg-danger-dim border border-danger/30 rounded-lg px-3 py-2">
+                    {erro}
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between mt-2 pt-4 border-t border-border">
+                  {selecionadaId ? (
+                    <button
+                      onClick={() => setParaExcluir(areas.find((a) => a.id === selecionadaId) ?? null)}
+                      className="flex items-center gap-1.5 text-sm font-medium text-danger hover:opacity-80 transition-opacity"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Excluir
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                  <button
+                    onClick={salvar}
+                    disabled={salvando}
+                    className="bg-text hover:opacity-90 disabled:opacity-50 text-bg text-sm font-semibold rounded-[var(--radius-pill,999px)] px-5 py-3 transition-opacity"
+                  >
+                    {salvando ? 'Salvando…' : 'Salvar'}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        }
-      />
+          }
+        />
+      </div>
 
       <ConfirmDialog
         aberto={!!paraExcluir}
@@ -209,6 +225,6 @@ export function AreasPage() {
         onConfirmar={() => paraExcluir && excluir(paraExcluir)}
         onCancelar={() => setParaExcluir(null)}
       />
-    </>
+    </div>
   )
 }

@@ -1,0 +1,150 @@
+/* Painel Editorial — reskin do admin (/painel/*) a partir do design system entregue em
+   "Prescreve Design System-handoff.zip". Escopado numa classe (.tema-editorial), aplicada
+   só na raiz do AdminLayout — a Consulta/Pediatria/Anamnese e a Página Inicial continuam
+   com a identidade lavanda de sempre, porque o kit entregue cobre só o painel interno
+   ("Painel Editorial"), não o produto que o médico usa na consulta.
+
+   Estratégia: como o app inteiro já usa Tailwind v4 com tokens semânticos (--color-surface,
+   --color-text, --font-display etc. — ver src/index.css), redefinir esses MESMOS nomes
+   dentro do escopo .tema-editorial re-tematiza toda classe utilitária (bg-surface,
+   text-text-dim, font-display...) já usada em cada componente do admin, sem precisar tocar
+   em nenhuma className. Os tokens "crus" do design system (--paper, --ink, --line,
+   --radius-*, --shadow-*, --space-*) também ficam disponíveis pra markup novo que precisa
+   dos construtos específicos do editorial (sombra dura, pill, grid ímpar de espaçamento). */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+.tema-editorial {
+  /* ---- Tokens crus do design system ---- */
+  --paper: #f5f2eb;
+  --surface: #fbfaf7;
+  --surface-2: #f0ede6;
+  --surface-3: #ebe7de;
+
+  --ink: #111111;
+  --muted: #706f69;
+  --muted-2: #726f66;
+  --text-secondary: #5f5d57;
+  --on-ink: #ffffff;
+
+  --line: #d9d6ce;
+  --line-strong: #c8c5bc;
+
+  --blue: #1857d1;
+  --mint: #00b989;
+  --orange: #ef6b17;
+  --red: #e9443d;
+  --yellow: #f2b51d;
+
+  --soft-blue: #e8eefc;
+  --soft-mint: #def5ee;
+  --soft-orange: #fcebdc;
+  --soft-red: #fae7e4;
+  --on-soft-blue: #1857d1;
+  --on-soft-mint: #087d62;
+  --on-soft-orange: #a54e12;
+  --on-soft-red: #ad342f;
+  --status-gray-bg: #e9e7e1;
+  --on-status-gray: #66635c;
+
+  --tint-blue-bg: #e8eefc;    --tint-blue-fg: #1857d1;
+  --tint-red-bg: #fae7e4;     --tint-red-fg: #d8433c;
+  --tint-green-bg: #e0f4ec;   --tint-green-fg: #0c8a68;
+  --tint-gray-bg: #ebe9e4;    --tint-gray-fg: #69675f;
+  --tint-purple-bg: #eee7fb;  --tint-purple-fg: #7654d6;
+  --tint-cyan-bg: #e2f3f7;    --tint-cyan-fg: #0083a0;
+  --tint-orange-bg: #fcebdc;  --tint-orange-fg: #c96016;
+  --tint-lime-bg: #eaf5dc;    --tint-lime-fg: #5c9b13;
+  --tint-slate-bg: #eceff1;   --tint-slate-fg: #59616a;
+  --tint-indigo-bg: #e8e8fb;  --tint-indigo-fg: #5a5cc8;
+  --tint-magenta-bg: #f7e4f7; --tint-magenta-fg: #aa4baa;
+  --tint-pink-bg: #f8e2eb;    --tint-pink-fg: #dc5b96;
+  --tint-peach-bg: #fdebdc;   --tint-peach-fg: #c9762b;
+  --tint-yellow-bg: #fbf2d6;  --tint-yellow-fg: #b58912;
+  --tint-aqua-bg: #e0f4f2;    --tint-aqua-fg: #148c86;
+  --tint-coral-bg: #fae2df;   --tint-coral-fg: #b94e4b;
+
+  --space-1: 2px; --space-2: 5px; --space-3: 7px; --space-4: 9px; --space-5: 11px;
+  --space-6: 14px; --space-7: 18px; --space-8: 22px; --space-9: 27px; --space-10: 38px;
+  --space-11: 46px; --space-12: 54px; --space-13: 72px;
+
+  --radius-xs: 6px; --radius-sm: 8px; --radius-input: 9px; --radius-nav: 10px;
+  --radius-item: 11px; --radius-control: 12px; --radius-card: 14px; --radius-stat: 15px;
+  --radius-panel: 18px; --radius-pill: 999px; --radius-round: 50%;
+
+  --shadow-soft: rgba(17, 17, 17, .08);
+  --shadow-hard: var(--ink);
+  --shadow-feature: 8px 8px 0 var(--shadow-hard);
+  --shadow-area: 5px 5px 0 var(--shadow-hard);
+  --shadow-selected: 3px 3px 0 var(--shadow-hard);
+  --shadow-float: 0 4px 14px var(--shadow-soft);
+  --shadow-popover: 0 14px 32px var(--shadow-soft);
+
+  --transition-control: background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
+  --lift-hover: translateY(-1px);
+  --lift-card: translateY(-2px);
+  --lift-feature: translateY(-3px);
+
+  --font-display-editorial: 'Space Grotesk', sans-serif;
+  --font-body-editorial: 'DM Sans', sans-serif;
+
+  /* ---- Remapeia os tokens que o Tailwind já usa em toda classe utilitária existente ---- */
+  --color-bg: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--line);
+  --color-border-strong: var(--line-strong);
+  --color-text: var(--ink);
+  --color-text-dim: var(--muted);
+  --color-text-faint: var(--muted-2);
+
+  --color-accent: var(--blue);
+  --color-accent-dim: var(--soft-blue);
+  --color-accent-text: #ffffff;
+
+  --color-danger: var(--on-soft-red);
+  --color-danger-dim: var(--soft-red);
+  --color-warn: var(--on-soft-orange);
+  --color-warn-dim: var(--soft-orange);
+  --color-ok: var(--on-soft-mint);
+  --color-ok-dim: var(--soft-mint);
+
+  --font-sans: var(--font-body-editorial);
+  --font-display: var(--font-display-editorial);
+  --font-mono: var(--font-body-editorial); /* o kit não usa mono — números tabulares ficam em DM Sans */
+
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+/* Utilidades novas do editorial que não têm equivalente pronto no Tailwind já configurado —
+   pill sempre, sombra dura no hover de card/feature, radius de painel. Prefixadas .ed- pra
+   não colidir com nada. */
+.tema-editorial .ed-pill { border-radius: var(--radius-pill); }
+.tema-editorial .ed-panel { border-radius: var(--radius-panel); }
+.tema-editorial .ed-hover-lift {
+  transition: var(--transition-control);
+}
+.tema-editorial .ed-hover-lift:hover {
+  border-color: var(--ink);
+  transform: var(--lift-card);
+  box-shadow: var(--shadow-area);
+}
+.tema-editorial .ed-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  padding: 7px 11px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface);
+}
+.tema-editorial .ed-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
