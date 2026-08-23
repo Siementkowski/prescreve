@@ -14,7 +14,7 @@ export function Topbar({
   children?: ReactNode
 }) {
   return (
-    <header className="h-[72px] shrink-0 border-b border-border flex items-center justify-between px-6 sm:px-9 sticky top-0 z-20 backdrop-blur-md bg-surface/90">
+    <header className="h-[72px] shrink-0 border-b border-border flex items-center justify-between px-6 sm:px-9 sticky top-0 z-20 backdrop-blur-md bg-bg/90">
       <Link to="/" className="font-display font-bold text-[22px] tracking-[-.8px] text-text shrink-0">
         prescreve<span className="font-medium">.</span>
       </Link>

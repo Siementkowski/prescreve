@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Stethoscope, Baby, FileText } from 'lucide-react'
+import { Stethoscope, Baby, FileText, User } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
 import { LoginPage } from './core/auth/LoginPage'
 import { useSyncStore } from './core/sync'
@@ -97,11 +97,10 @@ function App() {
       <Topbar tema={tema} onAlternarTema={() => setTema((t) => (t === 'dark' ? 'light' : 'dark'))}>
         <button
           onClick={signOut}
-          className="flex items-center justify-center w-9 h-9 rounded-full font-display font-semibold text-xs shrink-0 text-white"
-          style={{ background: 'linear-gradient(135deg, var(--color-accent), var(--color-text))' }}
+          className="flex items-center justify-center w-9 h-9 rounded-full bg-text text-bg shrink-0"
           title={`${perfil?.nome || session.user.email} · ${perfil?.papel ?? '—'} — clique para sair`}
         >
-          {(perfil?.nome || session.user.email || '?').slice(0, 2).toUpperCase()}
+          <User className="w-[18px] h-[18px]" strokeWidth={2.25} />
         </button>
       </Topbar>
 

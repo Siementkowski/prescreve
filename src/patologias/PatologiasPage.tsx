@@ -92,6 +92,13 @@ export function PatologiasPage() {
 
   return (
     <div className="h-full flex flex-col min-h-0">
+      {/* barra de contexto — só o modo (não é uma escolha de prescrição aqui, é filtro de
+          leitura), no mesmo lugar fixo que a Consulta usa pro seu ModoToggle. Antes ficava
+          solto no meio do painel de detalhe, encostado no título "Esquemas". */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
+        <ModoSwitch value={modo} onChange={setModo} />
+      </div>
+
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
         {/* painel esquerdo — área, busca e lista (só leitura) */}
         <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5 lg:w-[320px] xl:w-[360px] shrink-0">
@@ -159,10 +166,7 @@ export function PatologiasPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 mt-2">
-                <h3 className="font-display text-[20px] tracking-[-.6px] text-text">Esquemas</h3>
-                <ModoSwitch value={modo} onChange={setModo} />
-              </div>
+              <h3 className="font-display text-[20px] tracking-[-.6px] text-text mt-2">Esquemas</h3>
 
               {esquemas.length === 0 ? (
                 <p className="text-sm text-text-dim">Nenhum esquema publicado pra esse modo ainda.</p>
