@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { ExternalLink } from 'lucide-react'
 import { materiaisComplementaresApi } from '../admin/api'
 import type { MaterialComplementar } from '../admin/types'
 import { SearchInput } from '../admin/components/SearchInput'
@@ -92,15 +93,15 @@ export function MateriaisPage() {
               return (
                 <div
                   key={grupo.categoria}
-                  className="rounded-[var(--radius-card,14px)] border border-border overflow-hidden bg-surface"
+                  className="rounded-[var(--radius-card,14px)] border border-border overflow-hidden bg-surface shadow-[var(--shadow-float,0_4px_14px_rgba(17,17,17,.08))]"
                 >
                   <div
-                    className="px-4 py-3 text-center font-display font-semibold text-[15px] text-white"
+                    className="px-4 py-3 font-display font-semibold text-[15px] tracking-[-.2px] text-white"
                     style={{ background: cor }}
                   >
                     {grupo.categoria}
                   </div>
-                  <div className="p-4 flex flex-col gap-2.5">
+                  <div className="p-2 flex flex-col">
                     {grupo.itens.map((m) => (
                       <a
                         key={m.id}
@@ -108,9 +109,10 @@ export function MateriaisPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         title={m.descricao ?? undefined}
-                        className="text-sm text-center text-accent underline underline-offset-2 decoration-accent/40 hover:decoration-accent transition-colors"
+                        className="group flex items-center justify-between gap-2 px-2.5 py-2 rounded-[var(--radius-item,11px)] text-text text-sm hover:bg-surface-2 transition-colors"
                       >
-                        {m.titulo}
+                        <span className="truncate">{m.titulo}</span>
+                        <ExternalLink className="w-3.5 h-3.5 text-text-dim opacity-0 group-hover:opacity-100 shrink-0 transition-opacity" />
                       </a>
                     ))}
                   </div>
