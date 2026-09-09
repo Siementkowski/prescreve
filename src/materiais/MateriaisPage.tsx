@@ -101,7 +101,7 @@ export function MateriaisPage() {
                   >
                     {grupo.categoria}
                   </div>
-                  <div className="p-2 flex flex-col">
+                  <div className="p-2 flex flex-col gap-0.5">
                     {grupo.itens.map((m) => (
                       <a
                         key={m.id}
@@ -109,7 +109,7 @@ export function MateriaisPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         title={m.descricao ?? undefined}
-                        className="group flex items-center justify-between gap-2 px-2.5 py-2 rounded-[var(--radius-item,11px)] text-text text-sm hover:bg-surface-2 transition-colors"
+                        className="group flex items-center justify-between gap-2 px-2.5 py-2 rounded-[var(--radius-item,11px)] border border-transparent text-text text-sm bg-surface hover:bg-surface-2 hover:border-text hover:-translate-y-0.5 hover:shadow-[var(--shadow-selected,3px_3px_0_var(--color-text))] transition-[transform,box-shadow,border-color,background-color] duration-150"
                       >
                         <span className="truncate">{m.titulo}</span>
                         <ExternalLink className="w-3.5 h-3.5 text-text-dim opacity-0 group-hover:opacity-100 shrink-0 transition-opacity" />
