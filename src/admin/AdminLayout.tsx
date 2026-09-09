@@ -17,6 +17,7 @@ const SECOES: { to: string; label: string; sprite?: NomeIconeEditorial; lucide?:
   { to: '/painel/medicamentos', label: 'Medicamentos', lucide: Pill },
   { to: '/painel/complementos', label: 'Complementos', sprite: 'spark' },
   { to: '/painel/tratamentos', label: 'Prescrições', sprite: 'rx' },
+  { to: '/painel/materiais', label: 'Materiais', sprite: 'external' },
   { to: '/painel/geradores', label: 'Geradores', lucide: FileCode2 },
   { to: '/painel/revisao', label: 'Revisão', sprite: 'check' },
 ]

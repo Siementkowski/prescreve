@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FolderHeart, Pill, ListChecks, Baby, Search } from 'lucide-react'
-import { areasApi, patologiasApi, medicamentosApi } from './api'
-import type { Area, Patologia, Medicamento } from './types'
+import { areasApi, patologiasApi, medicamentosApi, materiaisComplementaresApi } from './api'
+import type { Area, Patologia, Medicamento, MaterialComplementar } from './types'
 import { useAuth } from '../core/auth/AuthProvider'
 import { IconePorNome } from './components/IconPicker'
 
@@ -17,12 +17,14 @@ export function AdminHub() {
   const [areas, setAreas] = useState<Area[]>([])
   const [patologias, setPatologias] = useState<Patologia[]>([])
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([])
+  const [materiais, setMateriais] = useState<MaterialComplementar[]>([])
   const [busca, setBusca] = useState('')
 
   useEffect(() => {
     areasApi.list().then((lista) => setAreas([...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))))
     patologiasApi.list().then(setPatologias)
     medicamentosApi.list().then(setMedicamentos)
+    materiaisComplementaresApi.list().then(setMateriais)
   }, [])
 
   const primeiroNome = (perfil?.nome || 'você').split(' ')[0]
@@ -204,6 +206,12 @@ export function AdminHub() {
             glyph="◇"
             titulo="Patologias"
             nota={`${patologias.length} cadastrada${patologias.length === 1 ? '' : 's'}`}
+          />
+          <CompactAction
+            to="/materiais"
+            glyph="↗"
+            titulo="Materiais"
+            nota={`${materiais.length} link${materiais.length === 1 ? '' : 's'} pro paciente`}
           />
         </div>
 

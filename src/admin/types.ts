@@ -141,6 +141,19 @@ export interface Gerador {
 }
 export type GeradorInput = Omit<Gerador, 'id' | 'atualizado_em'>
 
+/** Biblioteca de links pra material de apoio externo (orientação nutricional, controle
+ *  pressórico, controle glicêmico etc.) — o médico consulta e abre/imprime a página de
+ *  origem, o Prescreve só guarda o link organizado por categoria. Sem upload de arquivo. */
+export interface MaterialComplementar {
+  id: number
+  titulo: string
+  categoria: string
+  url: string
+  descricao: string | null
+  ordem: number
+}
+export type MaterialComplementarInput = Omit<MaterialComplementar, 'id'>
+
 export const LABEL_MODO_AREA: Record<ModoArea, string> = {
   ambulatorial: 'Ambulatorial',
   hospitalar: 'Hospitalar',

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Stethoscope, Baby, FileText, User, Pill, Settings, Microscope } from 'lucide-react'
+import { Stethoscope, Baby, FileText, User, Pill, Settings, Microscope, BookOpen } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
 import { LoginPage } from './core/auth/LoginPage'
 import { useSyncStore } from './core/sync'
@@ -19,6 +19,8 @@ import { MedicamentosPage } from './admin/MedicamentosPage'
 import { ComplementosPage } from './admin/ComplementosPage'
 import { TratamentosPage } from './admin/TratamentosPage'
 import { GeradoresPage } from './admin/GeradoresPage'
+import { MateriaisComplementaresPage } from './admin/MateriaisComplementaresPage'
+import { MateriaisPage } from './materiais/MateriaisPage'
 import { RevisaoPage } from './admin/RevisaoPage'
 import { AdminHub } from './admin/AdminHub'
 import { AvisoUsoProfissional } from './core/components/AvisoUsoProfissional'
@@ -84,6 +86,7 @@ function App() {
     { to: '/pediatria', label: 'Pediatria', lucide: Baby },
     { to: '/anamnese', label: 'Anamnese', lucide: FileText },
     { to: '/patologias', label: 'Patologias', lucide: Microscope },
+    { to: '/materiais', label: 'Materiais', lucide: BookOpen },
   ]
   const navPainel: ItemNav[] = isEditor
     ? [
@@ -131,6 +134,7 @@ function App() {
             <Route path="/pediatria" element={<PediatriaPage />} />
             <Route path="/anamnese" element={<AnamnesePage />} />
             <Route path="/patologias" element={<PatologiasPage />} />
+            <Route path="/materiais" element={<MateriaisPage />} />
             <Route path="/painel" element={<AdminLayout />}>
               <Route index element={<Navigate to="areas" replace />} />
               <Route path="areas" element={<AreasPage />} />
@@ -138,6 +142,7 @@ function App() {
               <Route path="medicamentos" element={<MedicamentosPage />} />
               <Route path="complementos" element={<ComplementosPage />} />
               <Route path="tratamentos" element={<TratamentosPage />} />
+              <Route path="materiais" element={<MateriaisComplementaresPage />} />
               <Route path="geradores" element={<GeradoresPage />} />
               <Route path="revisao" element={<RevisaoPage />} />
             </Route>

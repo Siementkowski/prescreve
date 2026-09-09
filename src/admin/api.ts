@@ -16,6 +16,8 @@ import type {
   PatologiaComplemento,
   Gerador,
   GeradorInput,
+  MaterialComplementar,
+  MaterialComplementarInput,
 } from './types'
 
 const MENSAGEM_OFFLINE = 'Sem conexão — edição bloqueada até a rede voltar. Sincronizar edições offline exigiria resolver conflitos, e não vale a complexidade: edite no PC com internet.'
@@ -240,4 +242,9 @@ export const geradoresApi = {
     return (data ?? []) as Gerador[]
   },
   reorder: (itens: { id: number; ordem: number }[]) => reorder('geradores', itens),
+}
+
+export const materiaisComplementaresApi = {
+  ...crud<MaterialComplementar, MaterialComplementarInput>('materiais_complementares', 'ordem'),
+  reorder: (itens: { id: number; ordem: number }[]) => reorder('materiais_complementares', itens),
 }
