@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ExternalLink } from 'lucide-react'
 import { materiaisComplementaresApi } from '../admin/api'
 import type { MaterialComplementar } from '../admin/types'
 import { SearchInput } from '../admin/components/SearchInput'
+import { corDaCategoria } from './cores'
 
 /** Materiais complementares — aba do usuário, só leitura, igual em espírito à Patologias:
  *  quem cadastra é o editor (Painel → Materiais, /painel/materiais); aqui é só consultar e
- *  abrir. Cada item é um link externo (orientação nutricional, controle pressórico,
- *  controle glicêmico etc.) — o médico abre numa aba nova e imprime a página de origem;
- *  o Prescreve não guarda arquivo nenhum, só o link organizado por categoria. */
+ *  abrir. Um card por categoria (cabeçalho colorido, cor determinística por posição
+ *  alfabética — ver cores.ts), itens em ordem alfabética dentro do card — mesmo layout do
+ *  print de referência. Cada item é um link externo: o médico abre numa aba nova e imprime
+ *  a página de origem, o Prescreve não guarda arquivo nenhum. */
 export function MateriaisPage() {
   const [materiais, setMateriais] = useState<MaterialComplementar[]>([])
   const [carregando, setCarregando] = useState(true)
@@ -22,6 +23,8 @@ export function MateriaisPage() {
       .catch((e) => setErro((e as Error).message))
       .finally(() => setCarregando(false))
   }, [])
+
+  const todasCategorias = useMemo(() => materiais.map((m) => m.categoria), [materiais])
 
   const filtrados = useMemo(() => {
     const t = busca.trim().toLowerCase()
@@ -42,13 +45,16 @@ export function MateriaisPage() {
       mapa.set(m.categoria, lista)
     }
     return [...mapa.entries()]
-      .map(([categoria, itens]) => ({ categoria, itens: itens.sort((a, b) => a.ordem - b.ordem) }))
+      .map(([categoria, itens]) => ({
+        categoria,
+        itens: itens.sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR')),
+      }))
       .sort((a, b) => a.categoria.localeCompare(b.categoria, 'pt-BR'))
   }, [filtrados])
 
   return (
     <div className="h-full overflow-y-auto p-6">
-      <div className="max-w-4xl mx-auto flex flex-col gap-6 pb-16">
+      <div className="max-w-6xl mx-auto flex flex-col gap-6 pb-16">
         <div>
           <span className="ed-eyebrow">
             <span className="ed-eyebrow-dot" style={{ background: 'var(--mint)' }} />
@@ -80,31 +86,37 @@ export function MateriaisPage() {
               : 'Nada encontrado pra essa busca.'}
           </p>
         ) : (
-          <div className="flex flex-col gap-8">
-            {grupos.map((grupo) => (
-              <div key={grupo.categoria}>
-                <h2 className="font-display text-[20px] tracking-[-.6px] text-text mb-3">{grupo.categoria}</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {grupo.itens.map((m) => (
-                    <a
-                      key={m.id}
-                      href={m.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group border border-border hover:border-text bg-surface rounded-[var(--radius-card,14px)] p-4 flex flex-col gap-1.5 transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-area,3px_3px_0_var(--color-text))]"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="text-sm font-semibold text-text leading-snug">{m.titulo}</span>
-                        <ExternalLink className="w-3.5 h-3.5 text-text-dim opacity-50 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5" />
-                      </div>
-                      {m.descricao && (
-                        <span className="text-xs text-text-dim leading-relaxed">{m.descricao}</span>
-                      )}
-                    </a>
-                  ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+            {grupos.map((grupo) => {
+              const cor = corDaCategoria(grupo.categoria, todasCategorias)
+              return (
+                <div
+                  key={grupo.categoria}
+                  className="rounded-[var(--radius-card,14px)] border border-border overflow-hidden bg-surface"
+                >
+                  <div
+                    className="px-4 py-3 text-center font-display font-semibold text-[15px] text-white"
+                    style={{ background: cor }}
+                  >
+                    {grupo.categoria}
+                  </div>
+                  <div className="p-4 flex flex-col gap-2.5">
+                    {grupo.itens.map((m) => (
+                      <a
+                        key={m.id}
+                        href={m.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={m.descricao ?? undefined}
+                        className="text-sm text-center text-accent underline underline-offset-2 decoration-accent/40 hover:decoration-accent transition-colors"
+                      >
+                        {m.titulo}
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

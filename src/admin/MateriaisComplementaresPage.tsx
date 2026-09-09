@@ -21,6 +21,16 @@ export function MateriaisComplementaresPage() {
   const [form, setForm] = useState<MaterialComplementarInput>(VAZIO)
   const [salvando, setSalvando] = useState(false)
   const [paraExcluir, setParaExcluir] = useState<MaterialComplementar | null>(null)
+  const [adicionandoCategoria, setAdicionandoCategoria] = useState(false)
+  const [novaCategoria, setNovaCategoria] = useState('')
+
+  // Categorias disponíveis pro toggle vêm dos materiais já cadastrados — sem tabela
+  // própria: evita fragmentar em "Controle Pressórico" vs "controle pressorico" só por
+  // digitação livre, mas continua crescendo sozinha conforme o editor cadastra.
+  const categoriasDisponiveis = useMemo(
+    () => [...new Set(materiais.map((m) => m.categoria))].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    [materiais]
+  )
 
   async function recarregar() {
     setCarregando(true)
@@ -158,13 +168,73 @@ export function MateriaisComplementaresPage() {
                 placeholder="Ex: Orientações para dieta hipossódica"
               />
 
-              <TextField
-                label="Categoria"
-                hint="Texto livre — agrupa a listagem pro usuário (ex: Nutrição, Controle pressórico, Controle glicêmico)."
-                value={form.categoria}
-                onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-                placeholder="Ex: Controle pressórico"
-              />
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[11px] font-bold text-text-dim uppercase tracking-[0.8px]">Categoria</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {categoriasDisponiveis.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => {
+                        setForm({ ...form, categoria: c })
+                        setAdicionandoCategoria(false)
+                      }}
+                      className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                        form.categoria === c
+                          ? 'bg-accent-dim border-accent text-accent'
+                          : 'bg-surface-2 border-border text-text-dim hover:text-text hover:border-text-dim'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+
+                  {!adicionandoCategoria ? (
+                    <button
+                      type="button"
+                      onClick={() => setAdicionandoCategoria(true)}
+                      className="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-dashed border-border text-text-dim hover:text-text hover:border-text-dim transition-colors"
+                    >
+                      + Nova categoria
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        autoFocus
+                        value={novaCategoria}
+                        onChange={(e) => setNovaCategoria(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key !== 'Enter') return
+                          e.preventDefault()
+                          if (!novaCategoria.trim()) return
+                          setForm({ ...form, categoria: novaCategoria.trim() })
+                          setNovaCategoria('')
+                          setAdicionandoCategoria(false)
+                        }}
+                        placeholder="Nome da categoria"
+                        className="bg-surface-2 border border-border rounded-lg px-2.5 py-1.5 text-xs text-text outline-none focus:border-text transition-colors"
+                      />
+                      <button
+                        type="button"
+                        disabled={!novaCategoria.trim()}
+                        onClick={() => {
+                          setForm({ ...form, categoria: novaCategoria.trim() })
+                          setNovaCategoria('')
+                          setAdicionandoCategoria(false)
+                        }}
+                        className="text-xs font-semibold text-accent hover:text-accent/80 disabled:opacity-40 transition-colors px-1"
+                      >
+                        Usar
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {form.categoria && (
+                  <span className="text-xs text-text-dim">
+                    Selecionada: <strong className="text-text">{form.categoria}</strong>
+                  </span>
+                )}
+              </div>
 
               <TextField
                 label="URL"
