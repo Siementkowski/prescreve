@@ -87,13 +87,13 @@ export function MateriaisPage() {
               : 'Nada encontrado pra essa busca.'}
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
             {grupos.map((grupo) => {
               const cor = corDaCategoria(grupo.categoria, todasCategorias)
               return (
                 <div
                   key={grupo.categoria}
-                  className="rounded-[var(--radius-card,14px)] border border-border overflow-hidden bg-surface shadow-[var(--shadow-float,0_4px_14px_rgba(17,17,17,.08))]"
+                  className="mb-4 break-inside-avoid rounded-[var(--radius-card,14px)] border border-border overflow-hidden bg-surface shadow-[var(--shadow-float,0_4px_14px_rgba(17,17,17,.08))]"
                 >
                   <div
                     className="px-4 py-3 font-display font-semibold text-[15px] tracking-[-.2px] text-white"
