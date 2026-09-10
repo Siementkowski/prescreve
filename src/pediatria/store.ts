@@ -13,6 +13,11 @@ interface PediatriaState {
   abaAberta: AbaPediatria
   setAbaAberta: (v: AbaPediatria) => void
 
+  // Data de nascimento — compartilhada entre Calendário vacinal e Marcos do
+  // desenvolvimento, pra não pedir duas vezes ao trocar de aba na mesma consulta.
+  dataNascimento: string | null
+  setDataNascimento: (v: string | null) => void
+
   pesoKg: number | null
   setPesoKg: (v: number | null) => void
 
@@ -27,6 +32,9 @@ interface PediatriaState {
 export const usePediatriaStore = create<PediatriaState>((set) => ({
   abaAberta: 'calculadora',
   setAbaAberta: (abaAberta) => set({ abaAberta }),
+
+  dataNascimento: null,
+  setDataNascimento: (dataNascimento) => set({ dataNascimento }),
 
   pesoKg: null,
   setPesoKg: (pesoKg) => set({ pesoKg }),

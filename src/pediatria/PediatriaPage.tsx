@@ -1,6 +1,8 @@
 import { Calculator, Syringe, ListChecks, Workflow } from 'lucide-react'
 import { usePediatriaStore, type AbaPediatria } from './store'
 import { CalculadoraDose } from './CalculadoraDose'
+import { CalendarioVacinal } from './CalendarioVacinal'
+import { MarcosDesenvolvimento } from './MarcosDesenvolvimento'
 
 const ABAS: { id: AbaPediatria; label: string; icone: typeof Calculator }[] = [
   { id: 'calculadora', label: 'Calculadora', icone: Calculator },
@@ -37,11 +39,11 @@ export function PediatriaPage() {
 
       <div className="flex-1 min-h-0">
         {abaAberta === 'calculadora' && <CalculadoraDose />}
-        {abaAberta !== 'calculadora' && (
+        {abaAberta === 'calendario_vacinal' && <CalendarioVacinal />}
+        {abaAberta === 'marcos_desenvolvimento' && <MarcosDesenvolvimento />}
+        {abaAberta === 'condutas' && (
           <div className="h-full flex items-center justify-center px-6">
-            <p className="text-sm text-text-dim text-center max-w-xs">
-              {ABAS.find((a) => a.id === abaAberta)?.label} — em breve.
-            </p>
+            <p className="text-sm text-text-dim text-center max-w-xs">Condutas — em breve.</p>
           </div>
         )}
       </div>
