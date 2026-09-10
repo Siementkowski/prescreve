@@ -1,83 +1,47 @@
-import { useMemo } from 'react'
-import { Baby } from 'lucide-react'
-import { useSyncStore } from '../core/sync'
-import { usePediatriaStore } from './store'
-import { CalculadoraMedicamento } from './CalculadoraMedicamento'
-import { SearchInput } from '../admin/components/SearchInput'
+import { Calculator, Syringe, ListChecks, Workflow } from 'lucide-react'
+import { usePediatriaStore, type AbaPediatria } from './store'
+import { CalculadoraDose } from './CalculadoraDose'
 
+const ABAS: { id: AbaPediatria; label: string; icone: typeof Calculator }[] = [
+  { id: 'calculadora', label: 'Calculadora', icone: Calculator },
+  { id: 'calendario_vacinal', label: 'Calendário vacinal', icone: Syringe },
+  { id: 'marcos_desenvolvimento', label: 'Marcos do desenvolvimento', icone: ListChecks },
+  { id: 'condutas', label: 'Condutas', icone: Workflow },
+]
+
+/** Casca do módulo de Pediatria — sub-nav entre os 4 módulos (Fase 3 do plano). Só
+ *  "Calculadora" está ligada nesta fase; as outras entram nas Fases 4 e 5, sem precisar
+ *  mexer aqui de novo (só trocar o placeholder pelo componente real). */
 export function PediatriaPage() {
-  // A base (a mesma do módulo de consulta, cacheada offline) vem do core/sync — já chega
-  // carregada aqui, tenha você entrado pela Consulta ou direto pela Pediatria.
-  const medicamentos = useSyncStore((s) => s.medicamentos)
-  const carregandoInicial = useSyncStore((s) => s.carregandoInicial)
-
-  const pesoKg = usePediatriaStore((s) => s.pesoKg)
-  const setPesoKg = usePediatriaStore((s) => s.setPesoKg)
-  const busca = usePediatriaStore((s) => s.busca)
-  const setBusca = usePediatriaStore((s) => s.setBusca)
-
-  const comDadosPediatricos = useMemo(
-    () => medicamentos.filter((m) => m.ped_mg_kg_dia != null && m.ped_mg_kg_dia > 0),
-    [medicamentos]
-  )
-
-  const filtrados = useMemo(() => {
-    const t = busca.trim().toLowerCase()
-    if (!t) return comDadosPediatricos
-    return comDadosPediatricos.filter(
-      (m) => m.nome.toLowerCase().includes(t) || (m.nome_comercial ?? '').toLowerCase().includes(t)
-    )
-  }, [comDadosPediatricos, busca])
-
-  if (carregandoInicial) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-sm text-text-dim">Carregando base…</p>
-      </div>
-    )
-  }
+  const abaAberta = usePediatriaStore((s) => s.abaAberta)
+  const setAbaAberta = usePediatriaStore((s) => s.setAbaAberta)
 
   return (
     <div className="h-full flex flex-col min-h-0">
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0 flex-wrap">
-        <div className="flex items-center gap-2.5">
-          <Baby className="w-4 h-4 text-accent shrink-0" />
-          <label className="text-sm text-text-dim shrink-0 font-medium">Peso</label>
-          <div className="relative">
-            <input
-              type="number"
-              min={0}
-              step="0.1"
-              value={pesoKg ?? ''}
-              onChange={(e) => setPesoKg(e.target.value === '' ? null : Number(e.target.value))}
-              placeholder="0,0"
-              className="tabular w-28 bg-surface-2 border-2 border-accent/40 focus:border-accent rounded-lg pl-3 pr-9 py-1.5 text-base font-semibold text-text outline-none transition-colors"
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-dim pointer-events-none">
-              kg
-            </span>
-          </div>
-        </div>
-
-        <div className="flex-1 min-w-48 max-w-xs">
-          <SearchInput value={busca} onChange={setBusca} placeholder="Buscar medicamento…" />
-        </div>
+      <div className="flex items-center gap-1.5 px-4 py-3 border-b border-border shrink-0 overflow-x-auto">
+        {ABAS.map(({ id, label, icone: Icone }) => (
+          <button
+            key={id}
+            onClick={() => setAbaAberta(id)}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap ${
+              abaAberta === id
+                ? 'bg-accent-dim border-accent text-accent'
+                : 'bg-surface border-border text-text-dim hover:text-text hover:border-text-dim'
+            }`}
+          >
+            <Icone className="w-4 h-4" />
+            {label}
+          </button>
+        ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
-        {!pesoKg || pesoKg <= 0 ? (
-          <p className="text-sm text-text-dim px-1 py-4">Informe o peso da criança para calcular as doses.</p>
-        ) : comDadosPediatricos.length === 0 ? (
-          <p className="text-sm text-text-dim px-1 py-4">
-            Nenhum medicamento com dados pediátricos cadastrados ainda.
-          </p>
-        ) : filtrados.length === 0 ? (
-          <p className="text-sm text-text-dim px-1 py-4">Nenhum medicamento encontrado.</p>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
-            {filtrados.map((m) => (
-              <CalculadoraMedicamento key={m.id} medicamento={m} pesoKg={pesoKg} />
-            ))}
+      <div className="flex-1 min-h-0">
+        {abaAberta === 'calculadora' && <CalculadoraDose />}
+        {abaAberta !== 'calculadora' && (
+          <div className="h-full flex items-center justify-center px-6">
+            <p className="text-sm text-text-dim text-center max-w-xs">
+              {ABAS.find((a) => a.id === abaAberta)?.label} — em breve.
+            </p>
           </div>
         )}
       </div>
