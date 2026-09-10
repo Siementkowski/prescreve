@@ -18,6 +18,8 @@ import type {
   GeradorInput,
   MaterialComplementar,
   MaterialComplementarInput,
+  Fluxograma,
+  FluxogramaInput,
 } from './types'
 
 const MENSAGEM_OFFLINE = 'Sem conexão — edição bloqueada até a rede voltar. Sincronizar edições offline exigiria resolver conflitos, e não vale a complexidade: edite no PC com internet.'
@@ -247,4 +249,9 @@ export const geradoresApi = {
 export const materiaisComplementaresApi = {
   ...crud<MaterialComplementar, MaterialComplementarInput>('materiais_complementares', 'ordem'),
   reorder: (itens: { id: number; ordem: number }[]) => reorder('materiais_complementares', itens),
+}
+
+export const fluxogramasApi = {
+  ...crud<Fluxograma, FluxogramaInput>('fluxogramas', 'ordem'),
+  reorder: (itens: { id: number; ordem: number }[]) => reorder('fluxogramas', itens),
 }

@@ -154,6 +154,20 @@ export interface MaterialComplementar {
 }
 export type MaterialComplementarInput = Omit<MaterialComplementar, 'id'>
 
+/** Fluxograma clínico — HTML colado (mesmo mecanismo dos Geradores, sandbox isolado),
+ *  organizado por categoria. Serve tanto pra biblioteca geral (/fluxogramas) quanto pras
+ *  condutas pediátricas por faixa etária (categoria "Pediatria") — mesma tabela, mesma
+ *  fonte de verdade, sem tela de admin duplicada. */
+export interface Fluxograma {
+  id: number
+  titulo: string
+  categoria: string
+  descricao: string | null
+  html: string
+  ordem: number
+}
+export type FluxogramaInput = Omit<Fluxograma, 'id'>
+
 export const LABEL_MODO_AREA: Record<ModoArea, string> = {
   ambulatorial: 'Ambulatorial',
   hospitalar: 'Hospitalar',

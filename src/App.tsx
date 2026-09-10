@@ -21,6 +21,7 @@ import { TratamentosPage } from './admin/TratamentosPage'
 import { GeradoresPage } from './admin/GeradoresPage'
 import { MateriaisComplementaresPage } from './admin/MateriaisComplementaresPage'
 import { MateriaisPage } from './materiais/MateriaisPage'
+import { FluxogramasPage as FluxogramasAdminPage } from './admin/FluxogramasPage'
 import { RevisaoPage } from './admin/RevisaoPage'
 import { AdminHub } from './admin/AdminHub'
 import { AvisoUsoProfissional } from './core/components/AvisoUsoProfissional'
@@ -143,6 +144,7 @@ function App() {
               <Route path="complementos" element={<ComplementosPage />} />
               <Route path="tratamentos" element={<TratamentosPage />} />
               <Route path="materiais" element={<MateriaisComplementaresPage />} />
+              <Route path="fluxogramas" element={<FluxogramasAdminPage />} />
               <Route path="geradores" element={<GeradoresPage />} />
               <Route path="revisao" element={<RevisaoPage />} />
             </Route>

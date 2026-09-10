@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { FileCode2, Pill, Microscope } from 'lucide-react'
+import { FileCode2, Pill, Microscope, Workflow } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { OfflineBanner } from './components/OfflineBanner'
 import { useRevisaoStore } from './revisaoStore'
@@ -18,6 +18,7 @@ const SECOES: { to: string; label: string; sprite?: NomeIconeEditorial; lucide?:
   { to: '/painel/complementos', label: 'Complementos', sprite: 'spark' },
   { to: '/painel/tratamentos', label: 'Prescrições', sprite: 'rx' },
   { to: '/painel/materiais', label: 'Materiais', sprite: 'external' },
+  { to: '/painel/fluxogramas', label: 'Fluxogramas', lucide: Workflow },
   { to: '/painel/geradores', label: 'Geradores', lucide: FileCode2 },
   { to: '/painel/revisao', label: 'Revisão', sprite: 'check' },
 ]
