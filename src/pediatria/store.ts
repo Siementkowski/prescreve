@@ -1,6 +1,14 @@
 import { create } from 'zustand'
 
-export type AbaPediatria = 'calculadora' | 'calendario_vacinal' | 'marcos_desenvolvimento' | 'condutas'
+export type AbaPediatria =
+  | 'calculadora'
+  | 'calendario_vacinal'
+  | 'marcos_desenvolvimento'
+  | 'condutas'
+  | 'exames'
+  | 'suplementacao'
+  | 'aleitamento'
+  | 'sinais_alerta_tea'
 
 // Estado da calculadora pediátrica. Não usa `persist` (localStorage) de propósito —
 // peso é específico do paciente que está na sua frente agora, não deve sobreviver
