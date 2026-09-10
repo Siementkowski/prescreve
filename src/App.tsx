@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Stethoscope, Baby, FileText, User, Pill, Settings, Microscope, BookOpen } from 'lucide-react'
+import { Stethoscope, Baby, FileText, User, Pill, Settings, Microscope, BookOpen, Workflow } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
 import { LoginPage } from './core/auth/LoginPage'
 import { useSyncStore } from './core/sync'
@@ -22,6 +22,7 @@ import { GeradoresPage } from './admin/GeradoresPage'
 import { MateriaisComplementaresPage } from './admin/MateriaisComplementaresPage'
 import { MateriaisPage } from './materiais/MateriaisPage'
 import { FluxogramasPage as FluxogramasAdminPage } from './admin/FluxogramasPage'
+import { FluxogramasPage } from './fluxogramas/FluxogramasPage'
 import { RevisaoPage } from './admin/RevisaoPage'
 import { AdminHub } from './admin/AdminHub'
 import { AvisoUsoProfissional } from './core/components/AvisoUsoProfissional'
@@ -88,6 +89,7 @@ function App() {
     { to: '/anamnese', label: 'Anamnese', lucide: FileText },
     { to: '/patologias', label: 'Patologias', lucide: Microscope },
     { to: '/materiais', label: 'Materiais', lucide: BookOpen },
+    { to: '/fluxogramas', label: 'Fluxogramas', lucide: Workflow },
   ]
   const navPainel: ItemNav[] = isEditor
     ? [
@@ -136,6 +138,7 @@ function App() {
             <Route path="/anamnese" element={<AnamnesePage />} />
             <Route path="/patologias" element={<PatologiasPage />} />
             <Route path="/materiais" element={<MateriaisPage />} />
+            <Route path="/fluxogramas" element={<FluxogramasPage />} />
             <Route path="/painel" element={<AdminLayout />}>
               <Route index element={<Navigate to="areas" replace />} />
               <Route path="areas" element={<AreasPage />} />
