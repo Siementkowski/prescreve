@@ -63,21 +63,21 @@ export function FluxogramasPage() {
     )
   }
 
-  // Categoria aberta — mostra o viewer em tela cheia de conteúdo, sem o resto da grade.
+  // Categoria aberta — mostra o viewer ocupando a tela inteira disponível, sem limitar
+  // largura (max-w) como a grade de categorias faz: aqui o conteúdo é o fluxograma em si,
+  // então quanto mais área, melhor pra leitura durante o atendimento.
   if (grupoAberto) {
     return (
-      <div className="h-full overflow-y-auto p-6">
-        <div className="max-w-5xl mx-auto flex flex-col gap-4 h-full min-h-0 pb-10">
-          <button
-            onClick={voltar}
-            className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors shrink-0 w-fit"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Voltar pras categorias
-          </button>
-          <h1 className="font-display text-[26px] tracking-[-.8px] text-text shrink-0">{grupoAberto.categoria}</h1>
-          <FluxogramaViewer fluxogramas={grupoAberto.itens} />
-        </div>
+      <div className="h-full min-h-0 flex flex-col gap-3 p-4">
+        <button
+          onClick={voltar}
+          className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors shrink-0 w-fit"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Voltar pras categorias
+        </button>
+        <h1 className="font-display text-[26px] tracking-[-.8px] text-text shrink-0">{grupoAberto.categoria}</h1>
+        <FluxogramaViewer fluxogramas={grupoAberto.itens} />
       </div>
     )
   }
