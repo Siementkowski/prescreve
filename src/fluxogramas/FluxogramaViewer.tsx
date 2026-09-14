@@ -71,7 +71,7 @@ export function FluxogramaViewer({ fluxogramas }: { fluxogramas: Fluxograma[] })
             >
               {emTelaCheia ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
-            <HtmlSandbox html={selecionado.html} className="h-full" />
+            <HtmlSandbox html={selecionado.html ?? undefined} url={selecionado.url ?? undefined} className="h-full" />
           </div>
         </>
       )}

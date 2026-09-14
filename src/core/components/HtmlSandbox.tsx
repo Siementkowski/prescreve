@@ -7,24 +7,35 @@ import { useEffect, useRef, useState } from 'react'
 const ALTURA_MINIMA_ACEITA = 40 // abaixo disso, o valor não parece altura de documento real
 const ALTURA_MAXIMA_ACEITA = 20000 // acima disso, é claramente um valor absurdo — ignora
 
-/** Executa HTML colado (geradores de anamnese) isolado num iframe sandbox — nunca no DOM
- *  da aplicação, nunca via dangerouslySetInnerHTML. `sandbox="allow-scripts"` sem
- *  `allow-same-origin` faz o conteúdo rodar numa origem opaca própria: o script roda
+/** Executa HTML colado (geradores de anamnese, fluxogramas) isolado num iframe sandbox —
+ *  nunca no DOM da aplicação, nunca via dangerouslySetInnerHTML. `sandbox="allow-scripts"`
+ *  sem `allow-same-origin` faz o conteúdo rodar numa origem opaca própria: o script roda
  *  normalmente, mas não enxerga localStorage, cookies, nem o DOM/sessão do app — mesmo
  *  isolamento vale pro preview do admin, que é justamente onde se cola código ainda não
  *  conferido.
  *
- *  Altura: como o iframe é cross-origin por causa do sandbox, não dá pra medir o conteúdo
- *  de fora — o próprio HTML avisa a altura via postMessage (ver SNIPPET_ALTURA, exibido na
- *  tela de Geradores). Até chegar o primeiro aviso válido, o iframe preenche o espaço
+ *  Alternativa `url` (fluxogramas publicados como página de verdade, ex: GitHub Pages):
+ *  vira um `src` normal em vez de `srcDoc` — já é uma origem externa de verdade, então não
+ *  tem o mesmo risco que justificava o sandbox pro HTML colado (que herdaria a origem do
+ *  app via srcDoc); imagens/CSS relativos da própria página funcionam porque carregam do
+ *  domínio de origem, não do nosso.
+ *
+ *  Altura: como o iframe é cross-origin (sandbox ou URL externa), não dá pra medir o
+ *  conteúdo de fora — o próprio HTML avisa a altura via postMessage (ver SNIPPET_ALTURA,
+ *  exibido na tela de Geradores/Fluxogramas — funciona nos dois casos, se a página colar
+ *  o mesmo trecho). Até chegar o primeiro aviso válido, o iframe preenche o espaço
  *  disponível (ou `alturaPadrao`, se informado) com scroll interno — nunca os dois scrolls
  *  (página + iframe) ao mesmo tempo, porque só um dos dois cresce além do necessário. */
 export function HtmlSandbox({
   html,
+  url,
   className,
   alturaPadrao,
 }: {
-  html: string
+  /** Um dos dois: HTML colado (renderiza via srcDoc, sandboxed) ou URL externa (renderiza
+   *  via src normal, sem sandbox — é uma origem de verdade). */
+  html?: string
+  url?: string
   className?: string
   /** Altura fixa (px) antes/sem medição — omitir faz preencher 100% do container pai
    *  (uso na Consulta, que já reserva a altura da viewport). O preview do admin passa um
@@ -35,8 +46,8 @@ export function HtmlSandbox({
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
-    setAlturaMedida(null) // HTML novo — volta a preencher o espaço até medir de novo
-  }, [html])
+    setAlturaMedida(null) // Conteúdo novo — volta a preencher o espaço até medir de novo
+  }, [html, url])
 
   useEffect(() => {
     function aoReceberMensagem(e: MessageEvent) {
@@ -61,8 +72,7 @@ export function HtmlSandbox({
   return (
     <iframe
       ref={iframeRef}
-      srcDoc={html}
-      sandbox="allow-scripts"
+      {...(url ? { src: url } : { srcDoc: html, sandbox: 'allow-scripts' })}
       title="Gerador"
       className={`w-full border-0 rounded-lg block ${className ?? ''}`}
       style={{ height: altura }}

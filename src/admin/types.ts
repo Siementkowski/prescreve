@@ -163,7 +163,11 @@ export interface Fluxograma {
   titulo: string
   categoria: string
   descricao: string | null
-  html: string
+  // Um dos dois preenchido (nunca os dois vazios — checado no banco): html colado
+  // (sandbox isolado) ou url de uma página já publicada (ex: GitHub Pages) — embed
+  // direto, sem os problemas de path relativo de imagem que o HTML colado tem.
+  html: string | null
+  url: string | null
   ordem: number
 }
 export type FluxogramaInput = Omit<Fluxograma, 'id'>

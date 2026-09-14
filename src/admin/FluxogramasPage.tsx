@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Trash2, ShieldCheck } from 'lucide-react'
+import { Trash2, ShieldCheck, Link2 } from 'lucide-react'
 import { fluxogramasApi } from './api'
 import type { Fluxograma, FluxogramaInput } from './types'
 import { AdminPageShell } from './components/AdminPageShell'
@@ -8,7 +8,9 @@ import { TextField, TextAreaField } from './components/Field'
 import { HtmlSandbox, SNIPPET_ALTURA } from '../core/components/HtmlSandbox'
 import { CopyButton } from '../consulta/components/CopyButton'
 
-const VAZIO: FluxogramaInput = { titulo: '', categoria: '', descricao: '', html: '', ordem: 0 }
+type Modo = 'html' | 'url'
+
+const VAZIO: FluxogramaInput = { titulo: '', categoria: '', descricao: '', html: '', url: null, ordem: 0 }
 
 /** Biblioteca de fluxogramas clínicos — HTML colado inteiro (mesmo mecanismo dos
  *  Geradores, sandbox isolado), organizado por categoria (toggle list, mesmo padrão de
@@ -25,6 +27,7 @@ export function FluxogramasPage() {
   const [paraExcluir, setParaExcluir] = useState<Fluxograma | null>(null)
   const [adicionandoCategoria, setAdicionandoCategoria] = useState(false)
   const [novaCategoria, setNovaCategoria] = useState('')
+  const [modo, setModo] = useState<Modo>('html')
 
   const categoriasDisponiveis = useMemo(
     () => [...new Set(fluxogramas.map((f) => f.categoria))].sort((a, b) => a.localeCompare(b, 'pt-BR')),
@@ -60,12 +63,14 @@ export function FluxogramasPage() {
   function novo() {
     setSelecionadoId(null)
     setForm({ ...VAZIO, ordem: fluxogramas.length })
+    setModo('html')
     setErro(null)
   }
 
   function selecionar(f: Fluxograma) {
     setSelecionadoId(f.id)
     setForm(f)
+    setModo(f.url ? 'url' : 'html')
     setErro(null)
   }
 
@@ -78,20 +83,33 @@ export function FluxogramasPage() {
       setErro('Categoria é obrigatória — é o que agrupa a listagem pro usuário.')
       return
     }
-    if (!form.html.trim()) {
+    if (modo === 'html' && !(form.html ?? '').trim()) {
       setErro('Cole o HTML do fluxograma.')
       return
+    }
+    if (modo === 'url' && !(form.url ?? '').trim()) {
+      setErro('Cole o link da página publicada.')
+      return
+    }
+    // Só o modo ativo vai preenchido — trocar de HTML pra URL (ou vice-versa) não deixa
+    // lixo do outro modo no registro.
+    const payload: FluxogramaInput = {
+      titulo: form.titulo,
+      categoria: form.categoria,
+      descricao: form.descricao,
+      ordem: form.ordem,
+      html: modo === 'html' ? form.html : null,
+      url: modo === 'url' ? form.url : null,
     }
     setSalvando(true)
     setErro(null)
     try {
       if (selecionadoId) {
-        const { titulo, categoria, descricao, html, ordem } = form
-        const atualizado = await fluxogramasApi.update(selecionadoId, { titulo, categoria, descricao, html, ordem })
+        const atualizado = await fluxogramasApi.update(selecionadoId, payload)
         setFluxogramas((prev) => prev.map((f) => (f.id === selecionadoId ? atualizado : f)))
         setForm(atualizado)
       } else {
-        const criado = await fluxogramasApi.insert(form)
+        const criado = await fluxogramasApi.insert(payload)
         setFluxogramas((prev) => [...prev, criado])
         setSelecionadoId(criado.id)
         setForm(criado)
@@ -239,35 +257,92 @@ export function FluxogramasPage() {
                 placeholder="Uma linha sobre o que esse fluxograma cobre"
               />
 
-              <div className="rounded-md border border-border bg-surface-2 p-3 flex flex-col gap-1.5">
-                <div className="flex items-center gap-1.5 text-xs font-medium text-text-dim">
-                  <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-ok" />
-                  Executa isolado — sandbox sem acesso à sessão do app
-                </div>
-                <p className="text-xs text-text-dim leading-relaxed">
-                  Cole o HTML/SVG do fluxograma inteiro. Pra uma imagem pronta (Canva, Figma etc.),
-                  exporte como PNG e cole como <code>&lt;img src="data:image/png;base64,..."&gt;</code> —
-                  não precisa de upload de arquivo.
-                </p>
-                <p className="text-xs text-text-dim leading-relaxed">
-                  Opcional: cole este trecho no fim do HTML pra altura acompanhar sozinha o conteúdo:
-                </p>
-                <div className="relative">
-                  <pre className="text-[11px] font-mono bg-bg border border-border rounded-md p-2.5 overflow-x-auto whitespace-pre-wrap">
-                    {SNIPPET_ALTURA}
-                  </pre>
-                  <CopyButton texto={SNIPPET_ALTURA} label="Copiar" className="absolute top-1.5 right-1.5" />
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[11px] font-bold text-text-dim uppercase tracking-[0.8px]">Origem do conteúdo</span>
+                <div className="inline-flex gap-1 bg-surface-2 border border-border rounded-lg p-1 w-fit">
+                  <button
+                    type="button"
+                    onClick={() => setModo('html')}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                      modo === 'html' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
+                    }`}
+                  >
+                    Colar HTML
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModo('url')}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                      modo === 'url' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
+                    }`}
+                  >
+                    Link (página publicada)
+                  </button>
                 </div>
               </div>
 
-              <TextAreaField
-                label="HTML do fluxograma"
-                hint="Arquivo inteiro — inclua <script> se precisar."
-                value={form.html}
-                onChange={(e) => setForm({ ...form, html: e.target.value })}
-                rows={14}
-                textareaClassName="font-mono text-xs"
-              />
+              {modo === 'html' ? (
+                <>
+                  <div className="rounded-md border border-border bg-surface-2 p-3 flex flex-col gap-1.5">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-text-dim">
+                      <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-ok" />
+                      Executa isolado — sandbox sem acesso à sessão do app
+                    </div>
+                    <p className="text-xs text-text-dim leading-relaxed">
+                      Cole o HTML/SVG do fluxograma inteiro. Pra uma imagem pronta (Canva, Figma etc.),
+                      exporte como PNG e cole como <code>&lt;img src="data:image/png;base64,..."&gt;</code> —
+                      não precisa de upload de arquivo. Se a imagem já estiver publicada em outra página
+                      (com caminho relativo), use "Link" em vez de colar aqui — path relativo quebra fora
+                      da página de origem.
+                    </p>
+                    <p className="text-xs text-text-dim leading-relaxed">
+                      Opcional: cole este trecho no fim do HTML pra altura acompanhar sozinha o conteúdo:
+                    </p>
+                    <div className="relative">
+                      <pre className="text-[11px] font-mono bg-bg border border-border rounded-md p-2.5 overflow-x-auto whitespace-pre-wrap">
+                        {SNIPPET_ALTURA}
+                      </pre>
+                      <CopyButton texto={SNIPPET_ALTURA} label="Copiar" className="absolute top-1.5 right-1.5" />
+                    </div>
+                  </div>
+
+                  <TextAreaField
+                    label="HTML do fluxograma"
+                    hint="Arquivo inteiro — inclua <script> se precisar."
+                    value={form.html ?? ''}
+                    onChange={(e) => setForm({ ...form, html: e.target.value })}
+                    rows={14}
+                    textareaClassName="font-mono text-xs"
+                  />
+                </>
+              ) : (
+                <>
+                  <div className="rounded-md border border-border bg-surface-2 p-3 flex flex-col gap-1.5">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-text-dim">
+                      <Link2 className="w-3.5 h-3.5 shrink-0 text-accent" />
+                      Embed direto — sem sandbox, é uma página de verdade
+                    </div>
+                    <p className="text-xs text-text-dim leading-relaxed">
+                      Pra fluxograma já publicado como página (ex: GitHub Pages —{' '}
+                      <code>usuario.github.io/repo/arquivo.html</code>). Imagens e CSS relativos da
+                      própria página funcionam normalmente, porque carregam do domínio de origem dela.
+                    </p>
+                    <p className="text-xs text-text-dim leading-relaxed">
+                      Não funciona com link de arquivo solto no repositório (ex:{' '}
+                      <code>github.com/usuario/repo/blob/...</code>) — o GitHub bloqueia isso de rodar
+                      dentro de outra página. Precisa ser a página publicada (GitHub Pages), não o código-fonte.
+                    </p>
+                  </div>
+
+                  <TextField
+                    label="URL da página"
+                    hint="Link completo, com https://"
+                    value={form.url ?? ''}
+                    onChange={(e) => setForm({ ...form, url: e.target.value })}
+                    placeholder="https://usuario.github.io/repo/fluxograma.html"
+                  />
+                </>
+              )}
 
               {erro && (
                 <p className="text-sm text-danger bg-danger-dim border border-danger/30 rounded-lg px-3 py-2">
@@ -299,13 +374,17 @@ export function FluxogramasPage() {
 
             <div className="flex flex-col gap-2">
               <span className="text-[11px] font-medium text-text-dim uppercase tracking-wide">Preview</span>
-              {form.html.trim() ? (
+              {modo === 'html' && (form.html ?? '').trim() ? (
                 <div className="border border-border rounded-lg overflow-hidden bg-white">
-                  <HtmlSandbox html={form.html} alturaPadrao={420} />
+                  <HtmlSandbox html={form.html ?? ''} alturaPadrao={420} />
+                </div>
+              ) : modo === 'url' && (form.url ?? '').trim() ? (
+                <div className="border border-border rounded-lg overflow-hidden bg-white">
+                  <HtmlSandbox url={form.url ?? ''} alturaPadrao={420} />
                 </div>
               ) : (
                 <p className="text-xs text-text-dim border border-dashed border-border rounded-lg px-3 py-6 text-center">
-                  Cole o HTML acima pra ver o preview aqui.
+                  {modo === 'html' ? 'Cole o HTML acima pra ver o preview aqui.' : 'Cole o link acima pra ver o preview aqui.'}
                 </p>
               )}
             </div>
