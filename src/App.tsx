@@ -102,7 +102,7 @@ function App() {
 
   return (
     <div className="tema-editorial h-screen w-full bg-bg text-text flex flex-col" data-theme={tema}>
-      <Topbar tema={tema} onAlternarTema={() => setTema((t) => (t === 'dark' ? 'light' : 'dark'))}>
+      <Topbar tema={tema} onAlternarTema={() => setTema((t) => (t === 'dark' ? 'light' : 'dark'))} painel={navPainel}>
         <button
           onClick={signOut}
           className="flex items-center justify-center w-9 h-9 rounded-full bg-text text-bg shrink-0"
@@ -118,7 +118,7 @@ function App() {
       <div className="flex-1 min-h-0 flex overflow-hidden">
         <Sidebar
           principal={navPrincipal}
-          painel={navPainel}
+          painel={[]}
           rodape={
             <div className="flex flex-col gap-2">
               {!isEditor && (
