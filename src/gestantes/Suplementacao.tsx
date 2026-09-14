@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { CheckCircle2, Clock, MinusCircle, Info } from 'lucide-react'
-import { useGestantesStore, igAtualDaStore } from './store'
+import { useGestantesStore, calcularIGDoContexto } from './store'
 import { formatarIG } from './idade'
 import {
   calcularAcidoFolico,
@@ -30,7 +30,15 @@ const COR_STATUS: Record<RecomendacaoSuplementoGestante['status'], string> = {
  *  fatores de risco marcados abaixo — ver dados/suplementacao.ts pro racional de cada
  *  janela. Não substitui julgamento clínico individual. */
 export function Suplementacao() {
-  const ig = useGestantesStore(igAtualDaStore)
+  const metodo = useGestantesStore((s) => s.metodo)
+  const dum = useGestantesStore((s) => s.dum)
+  const dataExameUSG = useGestantesStore((s) => s.dataExameUSG)
+  const igUsgSemanas = useGestantesStore((s) => s.igUsgSemanas)
+  const igUsgDias = useGestantesStore((s) => s.igUsgDias)
+  const ig = useMemo(
+    () => calcularIGDoContexto({ metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias }),
+    [metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias]
+  )
   const [riscoFolatoAlto, setRiscoFolatoAlto] = useState(false)
   const [anemiaConfirmada, setAnemiaConfirmada] = useState(false)
   const [riscoPreEclampsia, setRiscoPreEclampsia] = useState(false)

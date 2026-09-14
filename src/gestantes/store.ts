@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { calcularIGPorDUM, calcularIGPorUSG, type IdadeGestacional } from './idade'
 
-export type AbaGestantes = 'pre_natal' | 'suplementacao' | 'vacinacao'
+export type AbaGestantes = 'pre_natal' | 'suplementacao' | 'vacinacao' | 'intercorrencias'
 export type MetodoIG = 'dum' | 'usg'
 
 // Estado da calculadora de idade gestacional — compartilhado entre as sub-abas do módulo
@@ -50,17 +50,27 @@ function dataDeInput(iso: string): Date {
   return new Date(ano, mes - 1, dia)
 }
 
-/** IG atual calculada a partir do que estiver preenchido na store — null se não tem dado
- *  suficiente ainda. Usada por Suplementação/Vacinação pra saber "em que semana ela tá"
- *  sem duplicar o formulário de cálculo, que mora só em Pré-natal. */
-export function igAtualDaStore(s: GestantesState): IdadeGestacional | null {
-  if (s.metodo === 'dum') {
-    if (!s.dum) return null
-    return calcularIGPorDUM(dataDeInput(s.dum))
+export interface ContextoIG {
+  metodo: MetodoIG
+  dum: string
+  dataExameUSG: string
+  igUsgSemanas: string
+  igUsgDias: string
+}
+
+/** IG atual a partir dos campos preenchidos — null se não tem dado suficiente ainda.
+ *  Função pura (não é selector de Zustand): sempre monte o contexto com useGestantesStore
+ *  selecionando cada campo primitivo, e passe pra cá dentro de um useMemo — selecionar a
+ *  store com uma função que devolve objeto novo a cada leitura (como essa fazia antes)
+ *  gera um novo objeto a cada render e entra em loop infinito com useSyncExternalStore. */
+export function calcularIGDoContexto(ctx: ContextoIG): IdadeGestacional | null {
+  if (ctx.metodo === 'dum') {
+    if (!ctx.dum) return null
+    return calcularIGPorDUM(dataDeInput(ctx.dum))
   }
-  if (!s.dataExameUSG || s.igUsgSemanas === '') return null
-  return calcularIGPorUSG(dataDeInput(s.dataExameUSG), {
-    semanas: Number(s.igUsgSemanas) || 0,
-    dias: Number(s.igUsgDias) || 0,
+  if (!ctx.dataExameUSG || ctx.igUsgSemanas === '') return null
+  return calcularIGPorUSG(dataDeInput(ctx.dataExameUSG), {
+    semanas: Number(ctx.igUsgSemanas) || 0,
+    dias: Number(ctx.igUsgDias) || 0,
   })
 }

@@ -1,13 +1,22 @@
+import { useMemo } from 'react'
 import { ShieldAlert, ShieldCheck, Syringe } from 'lucide-react'
 import { VACINAS_CONTRAINDICADAS, VACINAS_INDICADAS, ESQUEMA_TETANO } from './dados/vacinas'
-import { useGestantesStore, igAtualDaStore } from './store'
+import { useGestantesStore, calcularIGDoContexto } from './store'
 import { formatarIG } from './idade'
 
 /** Vacinação na gestação — conteúdo majoritariamente estático (mesmo espírito de
  *  Aleitamento na Pediatria). Só a semana atual (se já calculada em Pré-natal, via store
  *  compartilhada) contextualiza o aviso da dTpa/tétano, que tem janela ideal marcada. */
 export function Vacinacao() {
-  const ig = useGestantesStore(igAtualDaStore)
+  const metodo = useGestantesStore((s) => s.metodo)
+  const dum = useGestantesStore((s) => s.dum)
+  const dataExameUSG = useGestantesStore((s) => s.dataExameUSG)
+  const igUsgSemanas = useGestantesStore((s) => s.igUsgSemanas)
+  const igUsgDias = useGestantesStore((s) => s.igUsgDias)
+  const ig = useMemo(
+    () => calcularIGDoContexto({ metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias }),
+    [metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias]
+  )
 
   return (
     <div className="h-full overflow-y-auto p-6">

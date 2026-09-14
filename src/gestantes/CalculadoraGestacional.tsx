@@ -1,7 +1,8 @@
+import { useMemo } from 'react'
 import { Calendar, Info, AlertTriangle, ClipboardCheck, CalendarClock, MessageCircleQuestion } from 'lucide-react'
 import { calcularDPP, dppCorrigidaPorUSG, trimestreDaIG, formatarIG, formatarData } from './idade'
 import { PRE_NATAL, AVALIAR_SEMPRE, PERIODICIDADE_CONSULTAS, PERGUNTAS_ESSENCIAIS, type BlocoTrimestre } from './dados/preNatal'
-import { useGestantesStore, igAtualDaStore } from './store'
+import { useGestantesStore, calcularIGDoContexto } from './store'
 
 function dataDeInput(iso: string): Date {
   const [ano, mes, dia] = iso.split('-').map(Number)
@@ -31,7 +32,10 @@ export function CalculadoraGestacional() {
   const igUsgDias = useGestantesStore((s) => s.igUsgDias)
   const setIgUsgDias = useGestantesStore((s) => s.setIgUsgDias)
 
-  const ig = useGestantesStore(igAtualDaStore)
+  const ig = useMemo(
+    () => calcularIGDoContexto({ metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias }),
+    [metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias]
+  )
   const dpp =
     ig == null
       ? null
