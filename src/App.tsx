@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Stethoscope, Baby, FileText, User, Pill, Settings, Microscope, BookOpen, Workflow } from 'lucide-react'
+import { Stethoscope, Baby, FileText, User, Pill, Settings, Microscope, BookOpen, Workflow, HeartPulse } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
 import { LoginPage } from './core/auth/LoginPage'
 import { useSyncStore } from './core/sync'
@@ -10,6 +10,7 @@ import { PwaUpdatePrompt } from './core/components/PwaUpdatePrompt'
 import { AtualizacaoDisponivelBanner } from './core/components/AtualizacaoDisponivelBanner'
 import { ConsultaPage } from './consulta/ConsultaPage'
 import { PediatriaPage } from './pediatria/PediatriaPage'
+import { GestantesPage } from './gestantes/GestantesPage'
 import { AnamnesePage } from './anamnese/AnamnesePage'
 import { AdminLayout } from './admin/AdminLayout'
 import { AreasPage } from './admin/AreasPage'
@@ -86,6 +87,7 @@ function App() {
     { to: '/', label: 'Início', sprite: 'grid', end: true },
     { to: '/consulta', label: 'Consulta', lucide: Stethoscope },
     { to: '/pediatria', label: 'Pediatria', lucide: Baby },
+    { to: '/gestantes', label: 'Gestantes', lucide: HeartPulse },
     { to: '/anamnese', label: 'Anamnese', lucide: FileText },
     { to: '/patologias', label: 'Patologias', lucide: Microscope },
     { to: '/materiais', label: 'Materiais', lucide: BookOpen },
@@ -135,6 +137,7 @@ function App() {
             <Route path="/" element={<AdminHub />} />
             <Route path="/consulta" element={<ConsultaPage />} />
             <Route path="/pediatria" element={<PediatriaPage />} />
+            <Route path="/gestantes" element={<GestantesPage />} />
             <Route path="/anamnese" element={<AnamnesePage />} />
             <Route path="/patologias" element={<PatologiasPage />} />
             <Route path="/materiais" element={<MateriaisPage />} />
