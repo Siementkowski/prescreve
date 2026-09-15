@@ -1,14 +1,14 @@
-// Suplementação de rotina no pré-natal — Ácido Fólico, Ferro, AAS e Vitaminas B12/D,
-// conteúdo fornecido pelo usuário. Cálcio (Carbonato de Cálcio) fica de fora por enquanto
-// — usuário sinalizou que a dose de referência pode estar desatualizada, aguardando
-// confirmação antes de entrar aqui.
+// Suplementação de rotina no pré-natal — Ácido Fólico, Ferro, Cálcio, AAS e Vitaminas
+// B12/D, conteúdo fornecido pelo usuário (Ministério da Saúde / Febrasgo).
 
 export type StatusSuplementoGestante = 'aguardar' | 'iniciar' | 'concluido' | 'nao_aplicavel'
 
 export interface ContextoSuplementacaoGestante {
   semanasIG: number | null
-  /** Epilepsia, obesidade, DM ou uso de anticonvulsivantes — eleva a dose de ácido fólico
-   *  de 400 mcg/dia pra 4 mg/dia. */
+  /** Antecedente pessoal/familiar de defeito do tubo neural, epilepsia, uso de
+   *  anticonvulsivantes, diabetes, obesidade, polimorfismos genéticos, doença
+   *  inflamatória intestinal ou cirurgia bariátrica — eleva a dose de ácido fólico de
+   *  400 mcg/dia pra 4-5 mg/dia. */
   riscoFolatoAlto: boolean
   /** Anemia confirmada (Hb < 11) — eleva a dose de ferro elementar. */
   anemiaConfirmada: boolean
@@ -30,48 +30,59 @@ export interface RecomendacaoSuplementoGestante {
 
 export function calcularAcidoFolico(ctx: ContextoSuplementacaoGestante): RecomendacaoSuplementoGestante {
   const { semanasIG, riscoFolatoAlto } = ctx
-  const dose = riscoFolatoAlto ? '4 mg/dia' : '400 mcg/dia'
-  const indicacao = 'Todas as gestantes (profilaxia universal) — 4 mg/dia em epilepsia, obesidade, DM ou uso de anticonvulsivantes'
+  const dose = riscoFolatoAlto ? '4 a 5 mg/dia' : '400 mcg/dia'
+  const indicacao =
+    'Todas as gestantes (profilaxia universal, evita defeitos de fechamento do tubo neural) — 4 a 5 mg/dia em: antecedente pessoal/familiar de defeito do tubo neural, uso de anticonvulsivantes, diabetes, obesidade, polimorfismos genéticos, doença inflamatória intestinal ou cirurgia bariátrica'
+  const janela = 'Mínimo 30 dias antes da concepção até o final do 1º trimestre'
 
   if (semanasIG == null) {
-    return { nome: 'Ácido Fólico', status: 'iniciar', rotuloStatus: 'Rotina', dose, janela: '2 a 3 meses antes da concepção até 12 semanas de gestação', indicacao }
+    return { nome: 'Ácido Fólico', status: 'iniciar', rotuloStatus: 'Rotina', dose, janela, indicacao }
   }
-  if (semanasIG <= 12) {
-    return { nome: 'Ácido Fólico', status: 'iniciar', rotuloStatus: 'Em uso', dose, janela: '2 a 3 meses antes da concepção até 12 semanas de gestação', indicacao }
+  if (semanasIG <= 13) {
+    return { nome: 'Ácido Fólico', status: 'iniciar', rotuloStatus: 'Em uso', dose, janela, indicacao }
   }
   return {
     nome: 'Ácido Fólico',
     status: 'concluido',
     rotuloStatus: 'Janela encerrada',
     dose: '—',
-    janela: 'A janela de suplementação (até 12 semanas) já passou.',
+    janela: 'A janela de suplementação (até o final do 1º trimestre) já passou.',
     indicacao,
   }
 }
 
 export function calcularFerro(ctx: ContextoSuplementacaoGestante): RecomendacaoSuplementoGestante {
   const { semanasIG, anemiaConfirmada } = ctx
-  const indicacao = 'Todas as gestantes, se dieta insuficiente — confirmado por exame ou em profilaxia'
+  const dose = anemiaConfirmada
+    ? '120–240 mg/dia de ferro elementar (anemia confirmada, Hb < 11)'
+    : '40 mg de ferro elementar/dia (~200 mg de sulfato ferroso)'
+  const indicacao = 'Todas as gestantes, a partir da confirmação da gravidez'
+  const janela = 'Após confirmação da gravidez até o final da gestação'
 
-  if (semanasIG == null || semanasIG < 20) {
-    return {
-      nome: 'Ferro (Sulfato Ferroso)',
-      status: 'aguardar',
-      rotuloStatus: 'Aguardar',
-      dose: anemiaConfirmada ? '120–240 mg/dia de ferro elementar (anemia confirmada, Hb < 11)' : '40 mg de ferro elementar/dia (~200 mg de sulfato ferroso)',
-      janela: 'Suplementação profilática universal a partir da 20ª semana (MS / Caderneta da Gestante)',
-      indicacao,
-    }
+  if (semanasIG == null) {
+    return { nome: 'Ferro (Sulfato Ferroso)', status: 'aguardar', rotuloStatus: 'Aguardar', dose, janela, indicacao }
   }
   return {
     nome: 'Ferro (Sulfato Ferroso)',
     status: 'iniciar',
     rotuloStatus: 'Em uso',
-    dose: anemiaConfirmada ? '120–240 mg/dia de ferro elementar (anemia confirmada, Hb < 11)' : '40 mg de ferro elementar/dia (~200 mg de sulfato ferroso)',
-    janela: 'Até o fim da gestação; manter no puerpério se anemia',
+    dose,
+    janela,
     indicacao,
     observacao: 'Tomar antes das refeições para melhor absorção.',
   }
+}
+
+export function calcularCalcio(ctx: ContextoSuplementacaoGestante): RecomendacaoSuplementoGestante {
+  const { semanasIG } = ctx
+  const dose = '1 g/dia de Carbonato de Cálcio'
+  const indicacao = 'Todas as gestantes (Ministério da Saúde)'
+  const observacao = 'Não ingerir junto com o ferro — respeitar intervalo de 2 horas entre eles.'
+
+  if (semanasIG == null || semanasIG < 12) {
+    return { nome: 'Cálcio (Carbonato de Cálcio)', status: 'aguardar', rotuloStatus: 'Aguardar', dose, janela: 'A partir da 12ª semana de gestação até o parto', indicacao, observacao }
+  }
+  return { nome: 'Cálcio (Carbonato de Cálcio)', status: 'iniciar', rotuloStatus: 'Em uso', dose, janela: 'Até o parto', indicacao, observacao }
 }
 
 export function calcularAAS(ctx: ContextoSuplementacaoGestante): RecomendacaoSuplementoGestante {

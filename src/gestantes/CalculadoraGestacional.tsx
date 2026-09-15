@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { Calendar, Info, AlertTriangle, ClipboardCheck, CalendarClock, MessageCircleQuestion } from 'lucide-react'
+import { Calendar, Info, AlertTriangle, ClipboardCheck, CalendarClock, MessageCircleQuestion, Activity } from 'lucide-react'
 import { calcularDPP, dppCorrigidaPorUSG, trimestreDaIG, formatarIG, formatarData } from './idade'
-import { PRE_NATAL, AVALIAR_SEMPRE, PERIODICIDADE_CONSULTAS, PERGUNTAS_ESSENCIAIS, type BlocoTrimestre } from './dados/preNatal'
+import { PRE_NATAL, AVALIAR_SEMPRE, PERIODICIDADE_CONSULTAS, PERGUNTAS_ESSENCIAIS, ATIVIDADE_FISICA, type BlocoTrimestre } from './dados/preNatal'
 import { useGestantesStore, calcularIGDoContexto } from './store'
 
 function dataDeInput(iso: string): Date {
@@ -149,8 +149,8 @@ export function CalculadoraGestacional() {
           </div>
         )}
 
-        {/* ---- avaliar sempre + periodicidade + perguntas essenciais ---- */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* ---- avaliar sempre + periodicidade + perguntas essenciais + atividade física ---- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <SecaoCompacta icone={ClipboardCheck} titulo="Avaliar sempre">
             <ul className="flex flex-col gap-1.5">
               {AVALIAR_SEMPRE.map((item) => (
@@ -178,6 +178,16 @@ export function CalculadoraGestacional() {
                 <li key={p.titulo} className="text-[13px] leading-snug">
                   <strong className="text-text font-semibold">{p.titulo}:</strong>{' '}
                   <span className="text-text-dim">{p.descricao}</span>
+                </li>
+              ))}
+            </ul>
+          </SecaoCompacta>
+
+          <SecaoCompacta icone={Activity} titulo="Atividade física">
+            <ul className="flex flex-col gap-1.5">
+              {ATIVIDADE_FISICA.map((item) => (
+                <li key={item} className="text-[13px] text-text-dim leading-snug">
+                  • {item}
                 </li>
               ))}
             </ul>
@@ -253,7 +263,7 @@ export function CalculadoraGestacional() {
                                       </span>
                                     )}
                                   </span>
-                                  <p className="text-text-dim mt-0.5 leading-snug">{sub.descricao}</p>
+                                  {sub.descricao && <p className="text-text-dim mt-0.5 leading-snug">{sub.descricao}</p>}
                                 </div>
                               ))}
                             </div>

@@ -5,6 +5,7 @@ import { formatarIG } from './idade'
 import {
   calcularAcidoFolico,
   calcularFerro,
+  calcularCalcio,
   calcularAAS,
   calcularB12D,
   type RecomendacaoSuplementoGestante,
@@ -52,7 +53,7 @@ export function Suplementacao() {
       riscoPreEclampsia,
       dietaRestritivaOuHipovitaminose,
     }
-    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularAAS(ctx), calcularB12D(ctx)]
+    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularCalcio(ctx), calcularAAS(ctx), calcularB12D(ctx)]
   }, [ig, riscoFolatoAlto, anemiaConfirmada, riscoPreEclampsia, dietaRestritivaOuHipovitaminose])
 
   return (
@@ -77,7 +78,9 @@ export function Suplementacao() {
               onChange={(e) => setRiscoFolatoAlto(e.target.checked)}
               className="w-4 h-4 accent-[var(--color-accent)]"
             />
-            Epilepsia, obesidade, DM ou uso de anticonvulsivantes (eleva dose de ácido fólico)
+            Antecedente pessoal/familiar de defeito do tubo neural, epilepsia, uso de anticonvulsivantes, diabetes,
+            obesidade, polimorfismos genéticos, doença inflamatória intestinal ou cirurgia bariátrica (eleva dose de
+            ácido fólico)
           </label>
           <label className="flex items-center gap-2.5 text-sm cursor-pointer">
             <input
@@ -128,10 +131,6 @@ export function Suplementacao() {
             )
           })}
         </div>
-
-        <p className="text-xs text-text-dim px-0.5">
-          Cálcio (Carbonato de Cálcio) ainda não entra aqui — dose de referência em revisão.
-        </p>
       </div>
     </div>
   )

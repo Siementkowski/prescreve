@@ -41,6 +41,14 @@ export const PERGUNTAS_ESSENCIAIS: { titulo: string; descricao: string }[] = [
   { titulo: 'Movimentação fetal', descricao: 'Checagem da atividade fetal, importante indicador da saúde do bebê.' },
 ]
 
+/** Orientação de atividade física de rotina — não é exame nem conduta pontual, mesmo
+ *  espírito de AVALIAR_SEMPRE/PERGUNTAS_ESSENCIAIS: informação de fundo, sempre válida. */
+export const ATIVIDADE_FISICA: string[] = [
+  'Intensidade moderada por 30 minutos, ou mais, diariamente.',
+  'Evitar exercícios de risco para queda e acidentes no abdome.',
+  'Não é o momento de iniciar novos exercícios aeróbios ou intensificar o treinamento.',
+]
+
 /** Nota curta associada a um exame — ex: limiar diagnóstico. `alerta` destaca visualmente
  *  (mesmo tratamento das condutas com `alerta`). */
 export interface NotaExame {
@@ -48,11 +56,11 @@ export interface NotaExame {
   alerta?: boolean
 }
 
-/** Sub-item de indicação mais estruturado que uma nota simples — usado no EGB, que tem 4
- *  critérios nomeados, alguns "indicação absoluta". */
+/** Sub-item de indicação mais estruturado que uma nota simples — usado no EGB e no
+ *  Ecocardiograma fetal, que têm critérios nomeados, alguns "indicação absoluta". */
 export interface SubitemExame {
   titulo: string
-  descricao: string
+  descricao?: string
   absoluta?: boolean
 }
 
@@ -83,7 +91,7 @@ export const PRE_NATAL: BlocoTrimestre[] = [
     semanaFim: 13,
     exames: [
       { nome: 'Hemograma completo', periodicidade: '1ª consulta' },
-      { nome: 'Tipagem sanguínea + Fator Rh + Coombs indireto', periodicidade: '1ª consulta' },
+      { nome: 'Tipagem sanguínea + Fator Rh + Coombs indireto', periodicidade: '1ª consulta (Coombs se Rh negativo)' },
       {
         nome: 'Glicemia de jejum',
         periodicidade: '1ª consulta',
@@ -102,18 +110,41 @@ export const PRE_NATAL: BlocoTrimestre[] = [
         nome: 'Toxoplasmose IgG/IgM',
         periodicidade: '1ª consulta',
         notas: [
-          { texto: 'Suscetível (IgG−/IgM−): repetir trimestralmente' },
+          { texto: 'Suscetível (IgG−/IgM−): repetir no máximo a cada 2 meses' },
           { texto: 'Infecção aguda: encaminhar para pré-natal de alto risco', alerta: true },
         ],
       },
-      { nome: 'Colpocitologia oncótica', periodicidade: 'Se não realizada nos últimos 3 anos' },
+      {
+        nome: 'HTLV',
+        periodicidade: '1ª consulta — triagem sorológica (ELISA/CLIA/ECLIA)',
+        subitens: [
+          { titulo: 'Não reagente', descricao: 'Encerra investigação — sem HTLV.' },
+          { titulo: 'Reagente ou indeterminado', descricao: 'Segue para teste confirmatório sorológico (Western Blot/LIA).' },
+          { titulo: 'Confirmatório reagente', descricao: 'HTLV confirmado.' },
+          { titulo: 'Confirmatório indeterminado', descricao: 'Segue para teste molecular (carga proviral) — define detectado ou não detectado.' },
+        ],
+      },
+      { nome: 'Ferritina', periodicidade: '1ª consulta (Febrasgo)' },
+      { nome: 'TSH', periodicidade: '1ª consulta (Febrasgo)' },
+      { nome: 'Colpocitologia oncótica (Papanicolau)', periodicidade: 'Se não realizada nos últimos 3 anos' },
+      { nome: 'Exame de secreção vaginal', periodicidade: 'Se houver indicação clínica' },
+      { nome: 'Protoparasitológico de fezes', periodicidade: 'Se houver indicação clínica' },
+      { nome: 'Swab clamídia e gonococo', periodicidade: 'Quando necessário (Febrasgo)' },
       { nome: 'Eletroforese de hemoglobina', periodicidade: '1ª consulta — rastreamento de doença falciforme' },
       {
-        nome: 'USG 1º trimestre',
-        periodicidade: '11 semanas a 13 semanas e 6 dias',
+        nome: 'USG obstétrica inicial',
+        periodicidade: '6 a 9 semanas',
+        notas: [{ texto: 'Diagnóstico/evolutiva, datação, tópica x ectópica, única x múltipla, corionicidade' }],
+      },
+      {
+        nome: 'USG morfológica de 1º trimestre',
+        periodicidade: '11 a 14 semanas',
         notas: [
-          { texto: 'Datar a gestação com maior precisão' },
-          { texto: 'Avaliar translucência nucal (rastreamento de aneuploidias)' },
+          { texto: 'Rastreio (risco) de cromossomopatias' },
+          { texto: 'Medida de translucência nucal' },
+          { texto: 'Fluxo no ducto venoso' },
+          { texto: 'Identificação do ossículo nasal' },
+          { texto: 'Lei 14.598/2023: garante pelo menos 2 USG transvaginais no 1º quadrimestre de gestação, pelo SUS.' },
         ],
       },
     ],
@@ -127,6 +158,7 @@ export const PRE_NATAL: BlocoTrimestre[] = [
       { nome: 'Hemograma', periodicidade: '24–28 semanas' },
       { nome: 'VDRL', periodicidade: '24–28 semanas' },
       { nome: 'EAS + Urocultura', periodicidade: '24–28 semanas' },
+      { nome: 'Coombs indireto', periodicidade: 'Mensal, se Rh negativo' },
       {
         nome: 'TOTG 75g',
         periodicidade: '24–28 semanas — padrão-ouro para DMG',
@@ -138,9 +170,24 @@ export const PRE_NATAL: BlocoTrimestre[] = [
           { texto: 'Pós-bariátrica: não realizar TOTG — risco de hipoglicemia; usar glicemia de jejum seriada', alerta: true },
         ],
       },
-      { nome: 'Toxoplasmose IgG/IgM', periodicidade: 'Se suscetível no 1º trimestre' },
+      { nome: 'Toxoplasmose IgG/IgM', periodicidade: 'Se suscetível — no máximo a cada 2 meses' },
       { nome: 'HIV', periodicidade: 'Repetir no 2º ou 3º trimestre, conforme protocolo local' },
-      { nome: 'USG morfológico fetal', periodicidade: '20–24 semanas — avaliação completa da anatomia fetal' },
+      { nome: 'USG morfológica de 2º trimestre', periodicidade: '18 a 24 semanas', notas: [{ texto: 'Toda a morfologia do feto, medida do comprimento do colo uterino (normal ≥ 2,5cm), avaliação da placenta' }] },
+      {
+        nome: 'Ecocardiograma fetal',
+        periodicidade: '22 a 28 semanas — Lei 14.598/2023 inclui na rotina do pré-natal',
+        subitens: [
+          { titulo: 'Idade materna avançada' },
+          { titulo: 'Diabetes mellitus pré-gestacional' },
+          { titulo: 'Antecedente de outro filho com cardiopatia congênita' },
+          { titulo: 'Cardiopatia congênita materna' },
+          { titulo: 'Doenças reumatológicas com anti-Ro/anti-La positivos' },
+          { titulo: 'Ultrassom morfológico alterado' },
+          { titulo: 'Cariótipo alterado' },
+          { titulo: 'Gestação de FIV' },
+          { titulo: 'Uso de medicações: carbamazepina, lítio, iECA, varfarina' },
+        ],
+      },
     ],
     condutas: [],
   },
@@ -152,13 +199,15 @@ export const PRE_NATAL: BlocoTrimestre[] = [
       { nome: 'Hemograma', periodicidade: '28–36 semanas' },
       { nome: 'VDRL', periodicidade: '28–36 semanas' },
       { nome: 'EAS + Urocultura', periodicidade: '28–36 semanas' },
+      { nome: 'Coombs indireto', periodicidade: 'Mensal, se Rh negativo' },
       { nome: 'Glicemia de jejum', periodicidade: 'Se TOTG não realizado' },
-      { nome: 'Toxoplasmose IgG/IgM', periodicidade: 'Se suscetível' },
+      { nome: 'Toxoplasmose IgG/IgM', periodicidade: 'Se suscetível — no máximo a cada 2 meses' },
       { nome: 'HIV', periodicidade: 'Repetir — obrigatório no 3º trimestre e na internação para o parto', notas: [{ texto: 'Obrigatório mesmo se já negativo antes', alerta: true }] },
       { nome: 'Anti-HCV (Hepatite C)', periodicidade: 'Solicitar no 1º e no 3º trimestres' },
+      { nome: 'Bacterioscopia de secreção vaginal', periodicidade: 'A partir de 37 semanas de gestação' },
       {
         nome: 'Streptococcus agalactiae (Estreptococo B)',
-        periodicidade: 'Swab vaginal/retal entre 35–37 semanas',
+        periodicidade: 'Swab vaginal/retal entre 35–37 semanas — rastreamento universal',
         notas: [{ texto: 'Positivo: profilaxia intraparto com penicilina G ou ampicilina', alerta: true }],
         subitens: [
           {
@@ -183,7 +232,11 @@ export const PRE_NATAL: BlocoTrimestre[] = [
           },
         ],
       },
-      { nome: 'USG 3º trimestre', periodicidade: '32–34 semanas — crescimento fetal, volume de líquido amniótico, localização placentária' },
+      {
+        nome: 'USG obstétrica de 3º trimestre',
+        periodicidade: '34 a 36 semanas',
+        notas: [{ texto: 'Apresentação fetal, avaliação de vitalidade fetal (Dopplervelocimetria e ILA), peso fetal estimado' }],
+      },
     ],
     condutas: [
       {

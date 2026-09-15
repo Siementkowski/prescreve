@@ -105,28 +105,31 @@ export function Intercorrencias() {
             <li>Triagem com urina tipo I e urocultura é essencial, mesmo em gestantes assintomáticas.</li>
           </ul>
 
-          <SubTitulo className="mt-4">Classificações</SubTitulo>
-          <div className="flex flex-col gap-2.5">
-            <Item titulo="Bacteriúria assintomática">
-              Prevalência de 2% a 15%. Associada a pielonefrite e complicações neonatais. Deve ser sempre tratada.
-            </Item>
-            <Item titulo="ITU baixa (cistite)">
-              Disúria, polaciúria, dor suprapúbica — sem febre ou dor lombar (provavelmente não é pielonefrite). Trata
-              empiricamente após coletar urocultura.
-            </Item>
-            <Item titulo="ITU alta (pielonefrite)" alerta>
-              Febre, dor lombar, disúria. Manejo hospitalar, com antibiótico venoso e urocultura. Troca para
-              antibiótico oral após melhora em 24-48h.
-            </Item>
-          </div>
+          <SubTitulo className="mt-4">Características, diagnóstico e conduta</SubTitulo>
+          <Tabela
+            cabecalho={['Características', 'Bacteriúria assintomática', 'Cistite', 'Pielonefrite']}
+            linhas={[
+              ['Clínica', 'Assintomática', 'Disúria, desconforto suprapúbico, polaciúria', 'Febre, queda do estado geral, dor lombar, disúria'],
+              ['Diagnóstico', 'Urocultura com crescimento de mais de 100.000 UFC de mesmo microrganismo', 'Urocultura', 'Anamnese, exame físico e urocultura'],
+              [
+                'Conduta',
+                'Toda bacteriúria assintomática deve ser tratada em gestante com antibioticoterapia (nitrofurantoína, cefalexina, fosfomicina)',
+                'Antibioticoterapia ambulatorial',
+                'Internação hospitalar, antibioticoterapia parenteral (Cefazolina 1g 8/8h, Ceftriaxone 1g 12/12h)',
+              ],
+            ]}
+          />
+          <p className="text-xs font-semibold text-text bg-surface-2 border border-border rounded-lg px-3 py-2 mt-2">
+            Urocultura + antibiograma pré e pós-tratamento (em 7 dias).
+          </p>
 
           <SubTitulo className="mt-4">Tratamento</SubTitulo>
           <p className="text-sm text-text-dim mb-1.5">
-            Antibióticos seguros: Cefalexina, Amoxicilina, Amoxicilina-Clavulanato, Nitrofurantoína.
+            Antibióticos seguros: Cefalexina, Amoxicilina, Amoxicilina-Clavulanato, Nitrofurantoína, Fosfomicina.
           </p>
           <span className="flex items-start gap-1.5 text-[12.5px] font-semibold text-warn bg-warn-dim border border-warn/30 rounded-full px-3 py-1.5 w-fit mb-1.5">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-            Nitrofurantoína: evitar no 1º e 3º trimestre
+            Nitrofurantoína: contraindicada a partir de 26 semanas
           </span>
           <p className="text-sm text-text-dim">Duração: 3 a 7 dias (ideal ainda não definido).</p>
 
@@ -137,20 +140,45 @@ export function Intercorrencias() {
             <li>Resultados de urocultura demoram 2-3 dias — fluxos laboratoriais devem ser otimizados.</li>
           </ul>
 
-          <SubTitulo className="mt-4">ITU de repetição</SubTitulo>
-          <p className="text-sm text-text-dim mb-1.5">
-            Definida por ≥ 3 uroculturas positivas — excluir diagnósticos incorretos (ex: urina contaminada).
-          </p>
-          <p className="text-sm font-semibold text-text mb-1">Conduta:</p>
+          <SubTitulo className="mt-4">Prevenção de recorrência</SubTitulo>
+          <p className="text-sm text-text-dim mb-1.5">Quimioprofilaxia indicada se houver:</p>
           <ul className="list-disc pl-5 flex flex-col gap-1 text-sm text-text-dim">
-            <li>Tratar conforme antibiograma.</li>
-            <li>Iniciar quimioprofilaxia: Nitrofurantoína 100 mg/dia ou Cefalexina até o parto (e até ~40 dias no puerpério).</li>
+            <li>História prévia de ITUs recorrentes antes da gestação.</li>
+            <li>Um episódio de pielonefrite durante a gravidez.</li>
+            <li>Duas ou mais ITUs baixas na gestação.</li>
+            <li>Uma ITU baixa complicada por hematúria franca e/ou febre.</li>
+            <li>Uma ITU baixa associada a fatores de risco importantes para recorrência: alterações anatômicas, bexiga neurogênica, refluxo vesicoureteral, imunossupressão.</li>
           </ul>
+          <p className="text-xs font-semibold text-text bg-surface-2 border border-border rounded-lg px-3 py-2 mt-2">
+            Profilaxia: Nitrofurantoína 50-100 mg/dia (só até 26 semanas) ou Cefalexina 250-500 mg/dia, até o parto (e
+            até ~40 dias no puerpério).
+          </p>
 
           <SubTitulo className="mt-4">Conduta frente a pielonefrite</SubTitulo>
           <ul className="list-disc pl-5 flex flex-col gap-1 text-sm text-text-dim">
-            <li>Internação imediata, iniciar antibiótico venoso (ex: cefalosporina de 3ª geração).</li>
+            <li>Internação imediata, iniciar antibiótico venoso (Cefazolina 1g 8/8h ou Ceftriaxone 1g 12/12h).</li>
             <li>Avaliar sinais de sepse e iniciar protocolos específicos quando necessário.</li>
+          </ul>
+        </Secao>
+
+        <Secao titulo="Hiperêmese gravídica">
+          <SubTitulo>Diagnóstico clínico</SubTitulo>
+          <ul className="list-disc pl-5 flex flex-col gap-1 text-sm text-text-dim mb-2.5">
+            <li>Náuseas e vômitos persistentes → desidratação, distúrbio hidroeletrolítico, distúrbio ácido-básico, deficiência nutricional.</li>
+            <li>Idade gestacional entre 10 e 16 semanas.</li>
+          </ul>
+          <Item titulo="Critério diagnóstico" alerta>
+            Perda de peso igual ou superior a 5% do peso corpóreo pré-gravídico e/ou cetonúria.
+          </Item>
+
+          <SubTitulo className="mt-4">Tratamento</SubTitulo>
+          <ul className="list-disc pl-5 flex flex-col gap-1 text-sm text-text-dim">
+            <li>Internação hospitalar.</li>
+            <li>Jejum durante 24 a 48 horas.</li>
+            <li>Reposição hídrica vigorosa endovenosa (preferência pela solução glicofisiológica).</li>
+            <li>Antiemético endovenoso — em alguns casos, associar uso de corticosteroide.</li>
+            <li>Corrigir distúrbios hidroeletrolíticos.</li>
+            <li>Em casos de difícil controle de sintomas, pode-se optar por início de nutrição parenteral.</li>
           </ul>
         </Secao>
 
