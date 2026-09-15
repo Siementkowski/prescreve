@@ -49,17 +49,17 @@ const SEMANAS_POR_INTERVALO: Record<string, number> = { Mensal: 4, Quinzenal: 2,
 export function GuiaConsulta() {
   const metodo = useGestantesStore((s) => s.metodo)
   const dum = useGestantesStore((s) => s.dum)
-  const dataExameUSG = useGestantesStore((s) => s.dataExameUSG)
-  const igUsgSemanas = useGestantesStore((s) => s.igUsgSemanas)
-  const igUsgDias = useGestantesStore((s) => s.igUsgDias)
+  const dataReferencia = useGestantesStore((s) => s.dataReferencia)
+  const igReferenciaSemanas = useGestantesStore((s) => s.igReferenciaSemanas)
+  const igReferenciaDias = useGestantesStore((s) => s.igReferenciaDias)
   const setAbaAberta = useGestantesStore((s) => s.setAbaAberta)
   const ig = useIGAtual()
   const dpp = useMemo(() => {
     if (!ig) return null
     return metodo === 'dum'
       ? calcularDPP(dataDeInputISO(dum))
-      : dppCorrigidaPorUSG(dataDeInputISO(dataExameUSG), { semanas: Number(igUsgSemanas) || 0, dias: Number(igUsgDias) || 0 })
-  }, [ig, metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias])
+      : dppCorrigidaPorUSG(dataDeInputISO(dataReferencia), { semanas: Number(igReferenciaSemanas) || 0, dias: Number(igReferenciaDias) || 0 })
+  }, [ig, metodo, dum, dataReferencia, igReferenciaSemanas, igReferenciaDias])
 
   const [primeiraConsulta, setPrimeiraConsulta] = useState<boolean | null>(null)
 
@@ -128,10 +128,14 @@ export function GuiaConsulta() {
   const textoFinal = useMemo(() => {
     if (!ig || !dpp || primeiraConsulta == null) return ''
 
+    const dataRefTexto = dataReferencia ? formatarData(dataDeInputISO(dataReferencia)) : '___'
+    const igNaRefTexto = `${igReferenciaSemanas || '0'}s${igReferenciaDias ? igReferenciaDias + 'd' : ''}`
     const igHeader =
       metodo === 'usg'
-        ? `IG (USG ${dataExameUSG ? formatarData(dataDeInputISO(dataExameUSG)) : '___'} com ${igUsgSemanas || '0'}s${igUsgDias ? igUsgDias + 'd' : ''})`
-        : `IG (DUM ${dum ? formatarData(dataDeInputISO(dum)) : '___'})`
+        ? `IG (USG ${dataRefTexto} com ${igNaRefTexto})`
+        : metodo === 'previa'
+          ? `IG (prévia de ${dataRefTexto} com ${igNaRefTexto})`
+          : `IG (DUM ${dum ? formatarData(dataDeInputISO(dum)) : '___'})`
 
     const referidas = PERGUNTAS_ESSENCIAIS.filter((p) => queixas[p.titulo])
     const textoQueixas =
@@ -208,9 +212,9 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
     primeiraConsulta,
     metodo,
     dum,
-    dataExameUSG,
-    igUsgSemanas,
-    igUsgDias,
+    dataReferencia,
+    igReferenciaSemanas,
+    igReferenciaDias,
     g,
     c,
     a,

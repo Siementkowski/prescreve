@@ -19,12 +19,12 @@ export function CalculadoraGestacional() {
   const setMetodo = useGestantesStore((s) => s.setMetodo)
   const dum = useGestantesStore((s) => s.dum)
   const setDum = useGestantesStore((s) => s.setDum)
-  const dataExameUSG = useGestantesStore((s) => s.dataExameUSG)
-  const setDataExameUSG = useGestantesStore((s) => s.setDataExameUSG)
-  const igUsgSemanas = useGestantesStore((s) => s.igUsgSemanas)
-  const setIgUsgSemanas = useGestantesStore((s) => s.setIgUsgSemanas)
-  const igUsgDias = useGestantesStore((s) => s.igUsgDias)
-  const setIgUsgDias = useGestantesStore((s) => s.setIgUsgDias)
+  const dataReferencia = useGestantesStore((s) => s.dataReferencia)
+  const setDataReferencia = useGestantesStore((s) => s.setDataReferencia)
+  const igReferenciaSemanas = useGestantesStore((s) => s.igReferenciaSemanas)
+  const setIgReferenciaSemanas = useGestantesStore((s) => s.setIgReferenciaSemanas)
+  const igReferenciaDias = useGestantesStore((s) => s.igReferenciaDias)
+  const setIgReferenciaDias = useGestantesStore((s) => s.setIgReferenciaDias)
 
   const ig = useIGAtual()
   const dpp =
@@ -32,7 +32,10 @@ export function CalculadoraGestacional() {
       ? null
       : metodo === 'dum'
         ? calcularDPP(dataDeInputISO(dum))
-        : dppCorrigidaPorUSG(dataDeInputISO(dataExameUSG), { semanas: Number(igUsgSemanas) || 0, dias: Number(igUsgDias) || 0 })
+        : dppCorrigidaPorUSG(dataDeInputISO(dataReferencia), {
+            semanas: Number(igReferenciaSemanas) || 0,
+            dias: Number(igReferenciaDias) || 0,
+          })
 
   const trimestreAtual = ig ? trimestreDaIG(ig.semanas) : null
   const periodicidadeAtual = ig ? PERIODICIDADE_CONSULTAS.find((f) => ig.semanas >= f.semanaInicio && (f.semanaFim == null || ig.semanas < f.semanaFim)) : null
@@ -64,6 +67,14 @@ export function CalculadoraGestacional() {
               >
                 Por USG
               </button>
+              <button
+                onClick={() => setMetodo('previa')}
+                className={`text-xs font-semibold px-3.5 py-1.5 rounded-full transition-colors ${
+                  metodo === 'previa' ? 'bg-text text-bg' : 'text-text-dim'
+                }`}
+              >
+                IG prévia
+              </button>
             </div>
           </div>
 
@@ -81,33 +92,33 @@ export function CalculadoraGestacional() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Campo label="Data do exame">
+              <Campo label={metodo === 'usg' ? 'Data do exame' : 'Data em que a IG foi registrada'}>
                 <input
                   type="date"
-                  value={dataExameUSG}
-                  onChange={(e) => setDataExameUSG(e.target.value)}
+                  value={dataReferencia}
+                  onChange={(e) => setDataReferencia(e.target.value)}
                   max={new Date().toISOString().slice(0, 10)}
                   className="bg-surface-2 border-2 border-accent/40 focus:border-accent rounded-lg px-3 py-2 text-sm font-semibold text-text outline-none transition-colors w-full"
                 />
               </Campo>
-              <Campo label="IG no exame — semanas">
+              <Campo label={metodo === 'usg' ? 'IG no exame — semanas' : 'IG prévia — semanas'}>
                 <input
                   type="number"
                   min={0}
                   max={42}
-                  value={igUsgSemanas}
-                  onChange={(e) => setIgUsgSemanas(e.target.value)}
+                  value={igReferenciaSemanas}
+                  onChange={(e) => setIgReferenciaSemanas(e.target.value)}
                   placeholder="0"
                   className="bg-surface-2 border-2 border-accent/40 focus:border-accent rounded-lg px-3 py-2 text-sm font-semibold text-text outline-none transition-colors w-full"
                 />
               </Campo>
-              <Campo label="IG no exame — dias">
+              <Campo label={metodo === 'usg' ? 'IG no exame — dias' : 'IG prévia — dias'}>
                 <input
                   type="number"
                   min={0}
                   max={6}
-                  value={igUsgDias}
-                  onChange={(e) => setIgUsgDias(e.target.value)}
+                  value={igReferenciaDias}
+                  onChange={(e) => setIgReferenciaDias(e.target.value)}
                   placeholder="0"
                   className="bg-surface-2 border-2 border-accent/40 focus:border-accent rounded-lg px-3 py-2 text-sm font-semibold text-text outline-none transition-colors w-full"
                 />
