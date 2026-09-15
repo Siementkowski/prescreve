@@ -22,7 +22,7 @@ export function Vacinacao() {
         <Secao titulo="Vacinas indicadas" icone={ShieldCheck} tom="ok">
           <div className="flex flex-col gap-2.5">
             {VACINAS_INDICADAS.map((v) => (
-              <div key={v.nome} className="border border-border rounded-lg px-3.5 py-2.5">
+              <div key={v.nome} className="border border-border rounded-[var(--radius-item,11px)] px-3.5 py-2.5">
                 <strong className="block text-sm font-semibold text-text">{v.nome}</strong>
                 {v.observacao && <span className="block text-xs text-text-dim mt-0.5">{v.observacao}</span>}
                 {v.esquema && v.esquema.length > 0 && (
@@ -65,7 +65,7 @@ export function Vacinacao() {
             ))}
           </div>
           <p className="text-sm text-text-dim mb-2">{VACINA_HPV_OBSERVACAO}</p>
-          <p className="text-xs font-semibold text-warn bg-warn-dim border border-warn/30 rounded-lg px-3 py-2">
+          <p className="text-xs font-semibold text-warn bg-warn-dim border border-warn/30 rounded-[var(--radius-item,11px)] px-3 py-2">
             {NOTA_VACINAS_CONTRAINDICADAS}
           </p>
         </Secao>

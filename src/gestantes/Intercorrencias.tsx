@@ -120,7 +120,7 @@ export function Intercorrencias() {
               ],
             ]}
           />
-          <p className="text-xs font-semibold text-text bg-surface-2 border border-border rounded-lg px-3 py-2 mt-2">
+          <p className="text-xs font-semibold text-text bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2 mt-2">
             Urocultura + antibiograma pré e pós-tratamento (em 7 dias).
           </p>
 
@@ -150,7 +150,7 @@ export function Intercorrencias() {
             <li>Uma ITU baixa complicada por hematúria franca e/ou febre.</li>
             <li>Uma ITU baixa associada a fatores de risco importantes para recorrência: alterações anatômicas, bexiga neurogênica, refluxo vesicoureteral, imunossupressão.</li>
           </ul>
-          <p className="text-xs font-semibold text-text bg-surface-2 border border-border rounded-lg px-3 py-2 mt-2">
+          <p className="text-xs font-semibold text-text bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2 mt-2">
             Profilaxia: Nitrofurantoína 50-100 mg/dia (só até 26 semanas) ou Cefalexina 250-500 mg/dia, até o parto (e
             até ~40 dias no puerpério).
           </p>
@@ -197,7 +197,7 @@ function SubTitulo({ children, className = '' }: { children: React.ReactNode; cl
 
 function Item({ titulo, alerta, children }: { titulo: string; alerta?: boolean; children: React.ReactNode }) {
   return (
-    <div className={alerta ? 'border border-warn/30 bg-warn-dim rounded-lg px-3 py-2.5' : ''}>
+    <div className={alerta ? 'border border-warn/30 bg-warn-dim rounded-[var(--radius-item,11px)] px-3 py-2.5' : ''}>
       <p className={`text-sm font-semibold flex items-center gap-1.5 ${alerta ? 'text-warn' : 'text-text'}`}>
         {alerta && <AlertTriangle className="w-3.5 h-3.5 shrink-0" />}
         {titulo}

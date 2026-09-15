@@ -309,7 +309,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto flex flex-col gap-4 pb-16">
-        <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-lg px-3 py-2.5">
+        <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2.5">
           <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             Em construção — idade gestacional atual: {formatarIG(ig)}, {trimestreAtual}º trimestre (calculada em
@@ -318,12 +318,12 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
         </div>
 
         {/* ---- gate: 1ª consulta ou retorno ---- */}
-        <div className="bg-surface border border-border rounded-2xl p-5 flex flex-col gap-3">
+        <div className="bg-surface border border-border rounded-[var(--radius-panel,18px)] p-5 flex flex-col gap-3">
           <p className="font-display text-[16px] font-semibold">Essa é a primeira consulta de pré-natal dela?</p>
           <div className="flex gap-2">
             <button
               onClick={() => setPrimeiraConsulta(true)}
-              className={`flex-1 text-sm font-semibold rounded-xl border px-4 py-3 transition-colors ${
+              className={`flex-1 text-sm font-semibold rounded-[var(--radius-control,12px)] border px-4 py-3 transition-colors ${
                 primeiraConsulta === true ? 'bg-accent-dim border-accent text-accent' : 'bg-surface-2 border-border text-text-dim hover:text-text'
               }`}
             >
@@ -331,7 +331,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
             </button>
             <button
               onClick={() => setPrimeiraConsulta(false)}
-              className={`flex-1 text-sm font-semibold rounded-xl border px-4 py-3 transition-colors ${
+              className={`flex-1 text-sm font-semibold rounded-[var(--radius-control,12px)] border px-4 py-3 transition-colors ${
                 primeiraConsulta === false ? 'bg-accent-dim border-accent text-accent' : 'bg-surface-2 border-border text-text-dim hover:text-text'
               }`}
             >
@@ -399,7 +399,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                   {suplementos.map((s) => (
                     <label
                       key={s.nome}
-                      className="flex items-start gap-2.5 border border-border rounded-lg px-3 py-2 cursor-pointer hover:border-text-dim transition-colors"
+                      className="flex items-start gap-2.5 border border-border rounded-[var(--radius-item,11px)] px-3 py-2 cursor-pointer hover:border-text-dim transition-colors"
                     >
                       <input
                         type="checkbox"
@@ -558,7 +558,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                 {exames.map((e) => (
                   <label
                     key={e.nome}
-                    className="flex items-start gap-2.5 border border-border rounded-xl bg-surface p-3 cursor-pointer hover:border-text-dim transition-colors"
+                    className="flex items-start gap-2.5 border border-border rounded-[var(--radius-card,14px)] bg-surface p-3 cursor-pointer hover:border-text-dim transition-colors"
                   >
                     <input
                       type="checkbox"
@@ -588,7 +588,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                         {cd.texto}
                       </span>
                     ) : (
-                      <div key={cd.texto} className="border border-border rounded-lg px-3 py-2 text-sm font-semibold">
+                      <div key={cd.texto} className="border border-border rounded-[var(--radius-item,11px)] px-3 py-2 text-sm font-semibold">
                         {cd.texto}
                       </div>
                     )
@@ -616,12 +616,12 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
             </Secao>
 
             {/* ============ TEXTO FINAL ============ */}
-            <div className="bg-surface border-2 border-accent/40 rounded-2xl p-4 flex flex-col gap-2.5">
+            <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-bold text-accent uppercase tracking-wide">Anamnese — pronta pra copiar</span>
+                <span className="text-[11px] font-bold text-text-dim uppercase tracking-wide">Anamnese — pronta pra copiar</span>
                 <CopyButton texto={textoFinal} label="Copiar anamnese" variant="solid" />
               </div>
-              <pre className="text-xs text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-lg p-3 max-h-96 overflow-y-auto">
+              <pre className="text-xs text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-[var(--radius-item,11px)] p-3 max-h-96 overflow-y-auto">
                 {textoFinal}
               </pre>
             </div>
@@ -633,7 +633,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
 }
 
 const inputCls =
-  'bg-surface-2 border border-border focus:border-accent rounded-lg px-2.5 py-1.5 text-sm text-text outline-none transition-colors'
+  'bg-surface-2 border border-border focus:border-text rounded-[var(--radius-input,9px)] px-2.5 py-1.5 text-sm text-text outline-none transition-colors'
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (

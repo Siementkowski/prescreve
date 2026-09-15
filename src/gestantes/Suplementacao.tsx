@@ -52,7 +52,7 @@ export function Suplementacao() {
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto flex flex-col gap-4 pb-16">
-        <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-lg px-3 py-2.5">
+        <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2.5">
           <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             {ig
@@ -110,7 +110,7 @@ export function Suplementacao() {
             {recomendacoes.map((r) => {
               const Icone = ICONE_STATUS[r.status]
               return (
-                <div key={r.nome} className="border border-border rounded-lg p-3.5 flex flex-col gap-2">
+                <div key={r.nome} className="border border-border rounded-[var(--radius-item,11px)] p-3.5 flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold text-text">{r.nome}</p>
                     <span className={`flex items-center gap-1.5 text-xs font-semibold shrink-0 ${COR_STATUS[r.status]}`}>
