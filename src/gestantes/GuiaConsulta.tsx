@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import {
   AlertTriangle,
-  ArrowRight,
+  Calendar,
   Info,
   ClipboardList,
   Pill,
@@ -46,11 +46,15 @@ const SEMANAS_POR_INTERVALO: Record<string, number> = { Mensal: 4, Quinzenal: 2,
  *  fica se só trocar de aba. */
 export function GuiaConsulta() {
   const metodo = useGestantesStore((s) => s.metodo)
+  const setMetodo = useGestantesStore((s) => s.setMetodo)
   const dum = useGestantesStore((s) => s.dum)
+  const setDum = useGestantesStore((s) => s.setDum)
   const dataReferencia = useGestantesStore((s) => s.dataReferencia)
+  const setDataReferencia = useGestantesStore((s) => s.setDataReferencia)
   const igReferenciaSemanas = useGestantesStore((s) => s.igReferenciaSemanas)
+  const setIgReferenciaSemanas = useGestantesStore((s) => s.setIgReferenciaSemanas)
   const igReferenciaDias = useGestantesStore((s) => s.igReferenciaDias)
-  const setAbaAberta = useGestantesStore((s) => s.setAbaAberta)
+  const setIgReferenciaDias = useGestantesStore((s) => s.setIgReferenciaDias)
   const ig = useIGAtual()
   const dpp = useMemo(() => {
     if (!ig) return null
@@ -288,63 +292,142 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
     proximaImagem,
   ])
 
-  if (!ig) {
-    return (
-      <div className="h-full flex items-center justify-center px-6">
-        <div className="text-center max-w-sm flex flex-col items-center gap-3">
-          <p className="text-sm text-text-dim">
-            Calcule a idade gestacional em Pré-natal primeiro — o guia usa ela pra montar a anamnese certa.
-          </p>
-          <button
-            onClick={() => setAbaAberta('pre_natal')}
-            className="flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
-          >
-            Ir para Pré-natal <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto flex flex-col gap-4 pb-16">
-        <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2.5">
-          <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-          <span>
-            Em construção — idade gestacional atual: {formatarIG(ig)}, {trimestreAtual}º trimestre (calculada em
-            Pré-natal).
-          </span>
-        </div>
-
-        {/* ---- gate: 1ª consulta ou retorno ---- */}
-        <div className="bg-surface border border-border rounded-[var(--radius-panel,18px)] p-5 flex flex-col gap-3">
-          <p className="font-display text-[16px] font-semibold">Essa é a primeira consulta de pré-natal dela?</p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setPrimeiraConsulta(true)}
-              className={`flex-1 text-sm font-semibold rounded-[var(--radius-control,12px)] border px-4 py-3 transition-colors ${
-                primeiraConsulta === true ? 'bg-accent-dim border-accent text-accent' : 'bg-surface-2 border-border text-text-dim hover:text-text'
-              }`}
-            >
-              Sim, primeira consulta
-            </button>
-            <button
-              onClick={() => setPrimeiraConsulta(false)}
-              className={`flex-1 text-sm font-semibold rounded-[var(--radius-control,12px)] border px-4 py-3 transition-colors ${
-                primeiraConsulta === false ? 'bg-accent-dim border-accent text-accent' : 'bg-surface-2 border-border text-text-dim hover:text-text'
-              }`}
-            >
-              Não, é retorno
-            </button>
+        {/* ---- calculadora de idade gestacional ---- */}
+        <div className="bg-surface border border-border rounded-[var(--radius-panel,18px)] p-5 flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2.5">
+              <Calendar className="w-[18px] h-[18px] text-accent" />
+              <h2 className="font-display text-[17px] font-semibold">Idade gestacional</h2>
+            </div>
+            <div className="inline-flex p-[3px] rounded-[var(--radius-pill,999px)] bg-surface-2 border border-border">
+              <button
+                onClick={() => setMetodo('dum')}
+                className={`text-xs font-semibold px-3.5 py-1.5 rounded-[var(--radius-pill,999px)] transition-colors ${
+                  metodo === 'dum' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
+                }`}
+              >
+                Por DUM
+              </button>
+              <button
+                onClick={() => setMetodo('usg')}
+                className={`text-xs font-semibold px-3.5 py-1.5 rounded-[var(--radius-pill,999px)] transition-colors ${
+                  metodo === 'usg' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
+                }`}
+              >
+                Por USG
+              </button>
+              <button
+                onClick={() => setMetodo('previa')}
+                className={`text-xs font-semibold px-3.5 py-1.5 rounded-[var(--radius-pill,999px)] transition-colors ${
+                  metodo === 'previa' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
+                }`}
+              >
+                IG prévia
+              </button>
+            </div>
           </div>
+
+          {metodo === 'dum' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Campo label="Data da última menstruação">
+                <input
+                  type="date"
+                  value={dum}
+                  onChange={(e) => setDum(e.target.value)}
+                  max={new Date().toISOString().slice(0, 10)}
+                  className={inputCls + ' w-full'}
+                />
+              </Campo>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Campo label={metodo === 'usg' ? 'Data do exame' : 'Data em que a IG foi registrada'}>
+                <input
+                  type="date"
+                  value={dataReferencia}
+                  onChange={(e) => setDataReferencia(e.target.value)}
+                  max={new Date().toISOString().slice(0, 10)}
+                  className={inputCls + ' w-full'}
+                />
+              </Campo>
+              <Campo label={metodo === 'usg' ? 'IG no exame — semanas' : 'IG prévia — semanas'}>
+                <input
+                  type="number"
+                  min={0}
+                  max={42}
+                  value={igReferenciaSemanas}
+                  onChange={(e) => setIgReferenciaSemanas(e.target.value)}
+                  placeholder="0"
+                  className={inputCls + ' w-full'}
+                />
+              </Campo>
+              <Campo label={metodo === 'usg' ? 'IG no exame — dias' : 'IG prévia — dias'}>
+                <input
+                  type="number"
+                  min={0}
+                  max={6}
+                  value={igReferenciaDias}
+                  onChange={(e) => setIgReferenciaDias(e.target.value)}
+                  placeholder="0"
+                  className={inputCls + ' w-full'}
+                />
+              </Campo>
+            </div>
+          )}
+
+          {ig && dpp && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-dashed border-border">
+              <Stat label="Idade gestacional" valor={formatarIG(ig)} destaque />
+              <Stat label={metodo === 'dum' ? 'DPP (Naegele)' : 'DPP corrigida'} valor={formatarData(dpp)} />
+              <Stat label="Trimestre" valor={`${trimestreAtual}º`} />
+            </div>
+          )}
         </div>
 
-        {primeiraConsulta != null && (
-          <>
-            {/* ============ ANAMNESE ============ */}
+        {!ig && (
+          <p className="text-sm text-text-dim px-0.5">Calcule a idade gestacional acima pra continuar o guia.</p>
+        )}
 
-            <Secao titulo="Antecedentes" icone={ClipboardList}>
+        {ig && (
+          <>
+            <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2.5">
+              <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              <span>
+                Em construção — idade gestacional atual: {formatarIG(ig)}, {trimestreAtual}º trimestre.
+              </span>
+            </div>
+
+            {/* ---- gate: 1ª consulta ou retorno ---- */}
+            <div className="bg-surface border border-border rounded-[var(--radius-panel,18px)] p-5 flex flex-col gap-3">
+              <p className="font-display text-[16px] font-semibold">Essa é a primeira consulta de pré-natal dela?</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPrimeiraConsulta(true)}
+                  className={`flex-1 text-sm font-semibold rounded-[var(--radius-control,12px)] border px-4 py-3 transition-colors ${
+                    primeiraConsulta === true ? 'bg-text border-text text-bg' : 'bg-surface-2 border-border text-text-dim hover:text-text'
+                  }`}
+                >
+                  Sim, primeira consulta
+                </button>
+                <button
+                  onClick={() => setPrimeiraConsulta(false)}
+                  className={`flex-1 text-sm font-semibold rounded-[var(--radius-control,12px)] border px-4 py-3 transition-colors ${
+                    primeiraConsulta === false ? 'bg-text border-text text-bg' : 'bg-surface-2 border-border text-text-dim hover:text-text'
+                  }`}
+                >
+                  Não, é retorno
+                </button>
+              </div>
+            </div>
+
+            {primeiraConsulta != null && (
+              <>
+                {/* ============ ANAMNESE ============ */}
+
+                <Secao titulo="Antecedentes" icone={ClipboardList}>
               <div className="flex flex-col gap-3">
                 <Campo label="DUM (relatada, pro cabeçalho da anamnese)">
                   <input
@@ -625,6 +708,8 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                 {textoFinal}
               </pre>
             </div>
+              </>
+            )}
           </>
         )}
       </div>
@@ -634,6 +719,15 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
 
 const inputCls =
   'bg-surface-2 border border-border focus:border-text rounded-[var(--radius-input,9px)] px-2.5 py-1.5 text-sm text-text outline-none transition-colors'
+
+function Stat({ label, valor, destaque }: { label: string; valor: string; destaque?: boolean }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[11px] font-semibold text-text-dim uppercase tracking-wide">{label}</span>
+      <span className={`font-display text-xl font-semibold tabular-nums ${destaque ? 'text-accent' : ''}`}>{valor}</span>
+    </div>
+  )
+}
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -653,7 +747,7 @@ function ToggleChip({ ativo, onClick, label, alerta }: { ativo: boolean; onClick
         ativo
           ? alerta
             ? 'bg-warn-dim border-warn text-warn'
-            : 'bg-accent-dim border-accent text-accent'
+            : 'bg-text border-text text-bg'
           : 'bg-surface-2 border-border text-text-dim hover:text-text'
       }`}
     >
