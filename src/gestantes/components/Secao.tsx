@@ -18,7 +18,7 @@ export function Secao({
 }) {
   const corIcone = tom === 'danger' ? 'text-danger' : tom === 'ok' ? 'text-ok' : tom === 'warn' ? 'text-warn' : 'text-text-dim'
   return (
-    <div className="border border-border rounded-xl bg-surface p-4">
+    <div className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-text mb-3">
         <Icone className={`w-[18px] h-[18px] ${corIcone}`} />
         {titulo}
@@ -32,7 +32,7 @@ export function Secao({
  *  esquema de tétano da Vacinação, antes cada uma com sua própria cópia. */
 export function Tabela({ cabecalho, linhas }: { cabecalho: string[]; linhas: string[][] }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
+    <div className="overflow-x-auto rounded-[var(--radius-item,11px)] border border-border">
       <table className="w-full text-sm border-collapse">
         <thead>
           <tr className="bg-surface-2">
