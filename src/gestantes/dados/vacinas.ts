@@ -58,3 +58,25 @@ export const VACINA_HPV_OBSERVACAO =
   'HPV: não recomendada — se o esquema vacinal já tiver sido iniciado, adiar sua continuação para o pós-parto.'
 
 export const NOTA_VACINAS_CONTRAINDICADAS = 'Se tomar as vacinas que não são permitidas, aguardar pelo menos 30 dias para engravidar.'
+
+interface JanelaVacina {
+  nome: string
+  semanaInicio: number // 0 = disponível desde o início da gestação
+}
+
+/** Mesmos nomes de VACINAS_INDICADAS, com a semana a partir da qual cada uma passa a
+ *  fazer sentido perguntar — usado no Guia de Consulta pra montar o checklist vacinal
+ *  contextual (ex: com 19 semanas não pergunta dTpa, com 20 já pergunta). */
+const JANELA_VACINAS: JanelaVacina[] = [
+  { nome: 'Hepatite B', semanaInicio: 0 },
+  { nome: 'Influenza (Gripe A / H1N1)', semanaInicio: 0 },
+  { nome: 'COVID-19', semanaInicio: 0 },
+  { nome: 'dTpa (Tétano, Coqueluche e Difteria)', semanaInicio: 20 },
+  { nome: 'Vírus Sincicial Respiratório (VSR)', semanaInicio: 24 },
+]
+
+/** Vacinas que já fazem sentido conferir pra uma IG em semanas — cumulativo (quem já
+ *  passou de uma janela continua aparecendo, não some depois). */
+export function vacinasAplicaveis(semanas: number): string[] {
+  return JANELA_VACINAS.filter((v) => semanas >= v.semanaInicio).map((v) => v.nome)
+}

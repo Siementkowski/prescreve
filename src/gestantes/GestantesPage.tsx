@@ -1,5 +1,6 @@
-import { FileText, Pill, Syringe, AlertTriangle } from 'lucide-react'
+import { FileText, Pill, Syringe, AlertTriangle, Hammer } from 'lucide-react'
 import { useGestantesStore, type AbaGestantes } from './store'
+import { GuiaConsulta } from './GuiaConsulta'
 import { CalculadoraGestacional } from './CalculadoraGestacional'
 import { Suplementacao } from './Suplementacao'
 import { Vacinacao } from './Vacinacao'
@@ -10,6 +11,7 @@ const ABAS: { id: AbaGestantes; label: string; icone: typeof FileText }[] = [
   { id: 'suplementacao', label: 'Suplementação', icone: Pill },
   { id: 'vacinacao', label: 'Vacinação', icone: Syringe },
   { id: 'intercorrencias', label: 'Intercorrências comuns', icone: AlertTriangle },
+  { id: 'guia_consulta', label: 'Em construção', icone: Hammer },
 ]
 
 /** Casca do módulo de Gestantes — mesmo padrão do PediatriaPage.tsx: sub-nav entre os
@@ -43,6 +45,7 @@ export function GestantesPage() {
         {abaAberta === 'suplementacao' && <Suplementacao />}
         {abaAberta === 'vacinacao' && <Vacinacao />}
         {abaAberta === 'intercorrencias' && <Intercorrencias />}
+        {abaAberta === 'guia_consulta' && <GuiaConsulta />}
       </div>
     </div>
   )

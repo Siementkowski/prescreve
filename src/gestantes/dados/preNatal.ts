@@ -247,3 +247,45 @@ export const PRE_NATAL: BlocoTrimestre[] = [
     ],
   },
 ]
+
+/** Painel de exames pra uma consulta — usado no Guia de Consulta (checklist "o que fazer
+ *  nessa consulta"). Consulta de retorno: só os exames do trimestre atual, de rotina.
+ *  Primeira consulta: sempre inclui o painel inicial completo (bloco do 1º trimestre,
+ *  onde vive a bateria "1ª consulta" — antenatal, sorologias etc.), mesmo se a gestante
+ *  já estiver num trimestre mais avançado (início tardio de pré-natal); some ao painel os
+ *  exames do trimestre atual que ainda não apareceram, sem duplicar por nome. */
+export function examesDaConsulta(trimestreAtual: BlocoTrimestre['trimestre'], primeiraConsulta: boolean): ExamePreNatal[] {
+  const blocoAtual = PRE_NATAL.find((b) => b.trimestre === trimestreAtual) ?? PRE_NATAL[0]
+  if (!primeiraConsulta) return blocoAtual.exames
+
+  const blocoInicial = PRE_NATAL[0]
+  if (trimestreAtual === 1) return blocoInicial.exames
+
+  const jaIncluidos = new Set(blocoInicial.exames.map((e) => e.nome))
+  const extras = blocoAtual.exames.filter((e) => !jaIncluidos.has(e.nome))
+  return [...blocoInicial.exames, ...extras]
+}
+
+/** Agenda dos exames de imagem — mesmos nomes usados em PRE_NATAL, mas com faixa de
+ *  semana numérica (lá é texto livre) pra dar pra calcular "qual é o próximo exame de
+ *  imagem dela" no Guia de Consulta. */
+export interface JanelaImagem {
+  nome: string
+  semanaInicio: number
+  semanaFim: number
+}
+
+export const AGENDA_IMAGEM: JanelaImagem[] = [
+  { nome: 'USG obstétrica inicial', semanaInicio: 6, semanaFim: 9 },
+  { nome: 'USG morfológica de 1º trimestre', semanaInicio: 11, semanaFim: 14 },
+  { nome: 'USG morfológica de 2º trimestre', semanaInicio: 18, semanaFim: 24 },
+  { nome: 'Ecocardiograma fetal', semanaInicio: 22, semanaFim: 28 },
+  { nome: 'USG obstétrica de 3º trimestre', semanaInicio: 34, semanaFim: 36 },
+]
+
+/** Próximo exame de imagem ainda não vencido pra semana atual — se já passou de todos,
+ *  devolve o último (obstétrica de 3º trimestre), que é o que ainda cabe pedir de novo
+ *  perto do parto. */
+export function proximoExameImagem(semanas: number): JanelaImagem {
+  return AGENDA_IMAGEM.find((j) => semanas < j.semanaFim) ?? AGENDA_IMAGEM[AGENDA_IMAGEM.length - 1]
+}

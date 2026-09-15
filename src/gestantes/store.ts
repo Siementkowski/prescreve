@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { calcularIGPorDUM, calcularIGPorUSG, type IdadeGestacional } from './idade'
 
-export type AbaGestantes = 'pre_natal' | 'suplementacao' | 'vacinacao' | 'intercorrencias'
+export type AbaGestantes = 'guia_consulta' | 'pre_natal' | 'suplementacao' | 'vacinacao' | 'intercorrencias'
 export type MetodoIG = 'dum' | 'usg'
 
 // Estado da calculadora de idade gestacional — compartilhado entre as sub-abas do módulo
