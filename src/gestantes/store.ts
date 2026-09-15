@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { create } from 'zustand'
 import { calcularIGPorDUM, calcularIGPorUSG, type IdadeGestacional } from './idade'
 
@@ -45,7 +46,9 @@ export const useGestantesStore = create<GestantesState>((set) => ({
   setIgUsgDias: (igUsgDias) => set({ igUsgDias }),
 }))
 
-function dataDeInput(iso: string): Date {
+/** yyyy-mm-dd (de <input type="date">) → Date local — exportada pra quem precisa da data
+ *  "crua" além da IG já calculada (ex: montar a DPP, ou citar a data no texto final). */
+export function dataDeInputISO(iso: string): Date {
   const [ano, mes, dia] = iso.split('-').map(Number)
   return new Date(ano, mes - 1, dia)
 }
@@ -66,11 +69,27 @@ export interface ContextoIG {
 export function calcularIGDoContexto(ctx: ContextoIG): IdadeGestacional | null {
   if (ctx.metodo === 'dum') {
     if (!ctx.dum) return null
-    return calcularIGPorDUM(dataDeInput(ctx.dum))
+    return calcularIGPorDUM(dataDeInputISO(ctx.dum))
   }
   if (!ctx.dataExameUSG || ctx.igUsgSemanas === '') return null
-  return calcularIGPorUSG(dataDeInput(ctx.dataExameUSG), {
+  return calcularIGPorUSG(dataDeInputISO(ctx.dataExameUSG), {
     semanas: Number(ctx.igUsgSemanas) || 0,
     dias: Number(ctx.igUsgDias) || 0,
   })
+}
+
+/** IG atual, direto — cobre o caso comum (Suplementação/Vacinação só precisam do
+ *  resultado, não dos campos crus). Quem também precisa dos campos individuais (Pré-natal
+ *  pro formulário, Guia de Consulta pro cabeçalho da anamnese) continua selecionando cada
+ *  um à parte e pode usar `calcularIGDoContexto` diretamente. */
+export function useIGAtual(): IdadeGestacional | null {
+  const metodo = useGestantesStore((s) => s.metodo)
+  const dum = useGestantesStore((s) => s.dum)
+  const dataExameUSG = useGestantesStore((s) => s.dataExameUSG)
+  const igUsgSemanas = useGestantesStore((s) => s.igUsgSemanas)
+  const igUsgDias = useGestantesStore((s) => s.igUsgDias)
+  return useMemo(
+    () => calcularIGDoContexto({ metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias }),
+    [metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias]
+  )
 }

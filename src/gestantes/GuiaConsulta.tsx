@@ -1,11 +1,23 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, ArrowRight } from 'lucide-react'
+import {
+  AlertTriangle,
+  ArrowRight,
+  Info,
+  ClipboardList,
+  Pill,
+  MessageCircleQuestion,
+  Stethoscope,
+  ClipboardCheck,
+  ListChecks,
+  FileCheck,
+} from 'lucide-react'
 import { CopyButton } from '../consulta/components/CopyButton'
-import { useGestantesStore, calcularIGDoContexto } from './store'
+import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
 import { calcularDPP, dppCorrigidaPorUSG, formatarIG, formatarData, trimestreDaIG } from './idade'
 import { PRE_NATAL, PERGUNTAS_ESSENCIAIS, examesDaConsulta, proximoExameImagem, PERIODICIDADE_CONSULTAS } from './dados/preNatal'
 import { calcularAcidoFolico, calcularFerro, calcularCalcio, calcularAAS, calcularB12D } from './dados/suplementacao'
 import { vacinasAplicaveis } from './dados/vacinas'
+import { Secao } from './components/Secao'
 
 type StatusSorologia = 'desconhecido' | 'imune' | 'suscetivel'
 const ROTULO_SOROLOGIA: Record<StatusSorologia, string> = { desconhecido: '?', imune: 'imune', suscetivel: 'suscetível' }
@@ -27,11 +39,6 @@ const ACHADOS_ADICIONAIS = [
   'Diástase de músculos retos abdominais',
 ]
 
-function dataDeInput(iso: string): Date {
-  const [ano, mes, dia] = iso.split('-').map(Number)
-  return new Date(ano, mes - 1, dia)
-}
-
 const SEMANAS_POR_INTERVALO: Record<string, number> = { Mensal: 4, Quinzenal: 2, Semanal: 1 }
 
 /** Guia de consulta — checklist + construtor de anamnese que se adapta ao contexto (IG,
@@ -46,15 +53,12 @@ export function GuiaConsulta() {
   const igUsgSemanas = useGestantesStore((s) => s.igUsgSemanas)
   const igUsgDias = useGestantesStore((s) => s.igUsgDias)
   const setAbaAberta = useGestantesStore((s) => s.setAbaAberta)
-  const ig = useMemo(
-    () => calcularIGDoContexto({ metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias }),
-    [metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias]
-  )
+  const ig = useIGAtual()
   const dpp = useMemo(() => {
     if (!ig) return null
     return metodo === 'dum'
-      ? calcularDPP(dataDeInput(dum))
-      : dppCorrigidaPorUSG(dataDeInput(dataExameUSG), { semanas: Number(igUsgSemanas) || 0, dias: Number(igUsgDias) || 0 })
+      ? calcularDPP(dataDeInputISO(dum))
+      : dppCorrigidaPorUSG(dataDeInputISO(dataExameUSG), { semanas: Number(igUsgSemanas) || 0, dias: Number(igUsgDias) || 0 })
   }, [ig, metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias])
 
   const [primeiraConsulta, setPrimeiraConsulta] = useState<boolean | null>(null)
@@ -126,8 +130,8 @@ export function GuiaConsulta() {
 
     const igHeader =
       metodo === 'usg'
-        ? `IG (USG ${dataExameUSG ? formatarData(dataDeInput(dataExameUSG)) : '___'} com ${igUsgSemanas || '0'}s${igUsgDias ? igUsgDias + 'd' : ''})`
-        : `IG (DUM ${dum ? formatarData(dataDeInput(dum)) : '___'})`
+        ? `IG (USG ${dataExameUSG ? formatarData(dataDeInputISO(dataExameUSG)) : '___'} com ${igUsgSemanas || '0'}s${igUsgDias ? igUsgDias + 'd' : ''})`
+        : `IG (DUM ${dum ? formatarData(dataDeInputISO(dum)) : '___'})`
 
     const referidas = PERGUNTAS_ESSENCIAIS.filter((p) => queixas[p.titulo])
     const textoQueixas =
@@ -267,8 +271,12 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto flex flex-col gap-4 pb-16">
-        <div className="text-xs text-text-dim bg-surface-2 border border-border rounded-lg px-3 py-2.5">
-          🚧 Em construção — idade gestacional atual: {formatarIG(ig)}, {trimestreAtual}º trimestre (calculada em Pré-natal).
+        <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-lg px-3 py-2.5">
+          <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <span>
+            Em construção — idade gestacional atual: {formatarIG(ig)}, {trimestreAtual}º trimestre (calculada em
+            Pré-natal).
+          </span>
         </div>
 
         {/* ---- gate: 1ª consulta ou retorno ---- */}
@@ -298,7 +306,8 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
           <>
             {/* ============ ANAMNESE ============ */}
 
-            <Card titulo="Antecedentes">
+            <Secao titulo="Antecedentes" icone={ClipboardList}>
+              <div className="flex flex-col gap-3">
               <div className="grid grid-cols-3 gap-2.5">
                 <Campo label="G"><input value={g} onChange={(e) => setG(e.target.value)} className={inputCls} /></Campo>
                 <Campo label="C"><input value={c} onChange={(e) => setC(e.target.value)} className={inputCls} /></Campo>
@@ -333,9 +342,11 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
               </div>
 
               <SorologiaCampo label="Toxoplasmose" valor={toxoplasmose} onChange={setToxoplasmose} />
-            </Card>
+              </div>
+            </Secao>
 
-            <Card titulo="Medicamentos em uso">
+            <Secao titulo="Medicamentos em uso" icone={Pill}>
+              <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 {suplementos.map((s) => (
                   <label
@@ -358,9 +369,11 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
               <Campo label="Outros (vazio = nenhum)">
                 <input value={outrosMedicamentos} onChange={(e) => setOutrosMedicamentos(e.target.value)} className={inputCls + ' w-full'} />
               </Campo>
-            </Card>
+              </div>
+            </Secao>
 
-            <Card titulo="Subjetivo">
+            <Secao titulo="Subjetivo" icone={MessageCircleQuestion}>
+              <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2 flex-wrap">
                 <ToggleChip ativo={!acompanhada} onClick={() => setAcompanhada(false)} label="Desacompanhada" />
                 <ToggleChip ativo={acompanhada} onClick={() => setAcompanhada(true)} label="Acompanhada" />
@@ -423,9 +436,11 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                   ))}
                 </div>
               </div>
-            </Card>
+              </div>
+            </Secao>
 
-            <Card titulo="Objetivo — exame físico">
+            <Secao titulo="Objetivo — exame físico" icone={Stethoscope}>
+              <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-2.5">
                 <Campo label="Peso (kg)"><input value={peso} onChange={(e) => setPeso(e.target.value)} className={inputCls} /></Campo>
                 <Campo label="Estatura (m)"><input value={estatura} onChange={(e) => setEstatura(e.target.value)} className={inputCls} /></Campo>
@@ -486,10 +501,11 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                   ))}
                 </div>
               </div>
-            </Card>
+              </div>
+            </Secao>
 
             {/* ---- exames a solicitar ---- */}
-            <Card titulo={`Exames ${primeiraConsulta ? '— painel inicial' : `— rotina do ${trimestreAtual}º trimestre`}`}>
+            <Secao titulo={`Exames ${primeiraConsulta ? '— painel inicial' : `— rotina do ${trimestreAtual}º trimestre`}`} icone={ClipboardCheck}>
               <div className="flex flex-col gap-2">
                 {exames.map((e) => (
                   <label
@@ -509,10 +525,10 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                   </label>
                 ))}
               </div>
-            </Card>
+            </Secao>
 
             {blocoAtual && blocoAtual.condutas.length > 0 && (
-              <Card titulo="Conduta desse trimestre">
+              <Secao titulo="Conduta desse trimestre" icone={ListChecks}>
                 <div className="flex flex-col gap-1.5">
                   {blocoAtual.condutas.map((cd) =>
                     cd.alerta ? (
@@ -530,10 +546,11 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                     )
                   )}
                 </div>
-              </Card>
+              </Secao>
             )}
 
-            <Card titulo="Avaliação e plano">
+            <Secao titulo="Avaliação e plano" icone={FileCheck}>
+              <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-text-dim shrink-0">Risco gestacional:</span>
                 <ToggleChip ativo={!riscoAlto} onClick={() => setRiscoAlto(false)} label="Habitual" />
@@ -547,7 +564,8 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                   className={inputCls + ' w-full resize-none'}
                 />
               </Campo>
-            </Card>
+              </div>
+            </Secao>
 
             {/* ============ TEXTO FINAL ============ */}
             <div className="bg-surface border-2 border-accent/40 rounded-2xl p-4 flex flex-col gap-2.5">
@@ -568,15 +586,6 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
 
 const inputCls =
   'bg-surface-2 border border-border focus:border-accent rounded-lg px-2.5 py-1.5 text-sm text-text outline-none transition-colors'
-
-function Card({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  return (
-    <div className="border border-border rounded-xl bg-surface p-4 flex flex-col gap-3">
-      <span className="text-[11px] font-bold text-text-dim uppercase tracking-wide">{titulo}</span>
-      {children}
-    </div>
-  )
-}
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (

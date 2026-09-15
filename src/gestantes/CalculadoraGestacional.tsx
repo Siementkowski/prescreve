@@ -1,13 +1,7 @@
-import { useMemo } from 'react'
 import { Calendar, Info, AlertTriangle, ClipboardCheck, CalendarClock, MessageCircleQuestion, Activity } from 'lucide-react'
 import { calcularDPP, dppCorrigidaPorUSG, trimestreDaIG, formatarIG, formatarData } from './idade'
 import { PRE_NATAL, AVALIAR_SEMPRE, PERIODICIDADE_CONSULTAS, PERGUNTAS_ESSENCIAIS, ATIVIDADE_FISICA, type BlocoTrimestre } from './dados/preNatal'
-import { useGestantesStore, calcularIGDoContexto } from './store'
-
-function dataDeInput(iso: string): Date {
-  const [ano, mes, dia] = iso.split('-').map(Number)
-  return new Date(ano, mes - 1, dia)
-}
+import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
 
 const FAIXA_TRIMESTRE: Record<BlocoTrimestre['trimestre'], string> = {
   1: 'até 13s 6d',
@@ -32,16 +26,13 @@ export function CalculadoraGestacional() {
   const igUsgDias = useGestantesStore((s) => s.igUsgDias)
   const setIgUsgDias = useGestantesStore((s) => s.setIgUsgDias)
 
-  const ig = useMemo(
-    () => calcularIGDoContexto({ metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias }),
-    [metodo, dum, dataExameUSG, igUsgSemanas, igUsgDias]
-  )
+  const ig = useIGAtual()
   const dpp =
     ig == null
       ? null
       : metodo === 'dum'
-        ? calcularDPP(dataDeInput(dum))
-        : dppCorrigidaPorUSG(dataDeInput(dataExameUSG), { semanas: Number(igUsgSemanas) || 0, dias: Number(igUsgDias) || 0 })
+        ? calcularDPP(dataDeInputISO(dum))
+        : dppCorrigidaPorUSG(dataDeInputISO(dataExameUSG), { semanas: Number(igUsgSemanas) || 0, dias: Number(igUsgDias) || 0 })
 
   const trimestreAtual = ig ? trimestreDaIG(ig.semanas) : null
   const periodicidadeAtual = ig ? PERIODICIDADE_CONSULTAS.find((f) => ig.semanas >= f.semanaInicio && (f.semanaFim == null || ig.semanas < f.semanaFim)) : null

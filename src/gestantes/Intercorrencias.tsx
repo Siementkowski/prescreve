@@ -1,4 +1,5 @@
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Droplet, FlaskConical, Biohazard, Microscope, Droplets, Frown } from 'lucide-react'
+import { Secao, Tabela } from './components/Secao'
 
 /** Intercorrências comuns do pré-natal — conteúdo majoritariamente estático (mesmo
  *  espírito de Aleitamento.tsx na Pediatria): prosa + tabelas de interpretação, sem
@@ -8,7 +9,7 @@ export function Intercorrencias() {
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto flex flex-col gap-4 pb-16">
-        <Secao titulo="Anemia na gravidez">
+        <Secao titulo="Anemia na gravidez" icone={Droplet}>
           <SubTitulo>Interpretação do hemograma</SubTitulo>
           <div className="flex flex-col gap-2.5">
             <Item titulo="Hb ≥ 11 g/dL">
@@ -21,13 +22,13 @@ export function Intercorrencias() {
           </div>
 
           <SubTitulo className="mt-4">Definição técnica de anemia na gestação</SubTitulo>
-          <ul className="list-disc pl-5 flex flex-col gap-1">
+          <ul className="list-disc pl-5 flex flex-col gap-1 text-sm text-text-dim">
             <li>1º e 3º trimestre: Hb &lt; 11 g/dL ou ferritina &lt; 30 ng/mL.</li>
             <li>2º trimestre: Hb &lt; 10,7 g/dL.</li>
           </ul>
         </Secao>
 
-        <Secao titulo="Aloimunização Rh">
+        <Secao titulo="Aloimunização Rh" icone={FlaskConical}>
           <div className="flex flex-col gap-3">
             <Item titulo="Rh positivo e Coombs indireto negativo">
               Não há risco de aloimunização Rh. Conduta: pré-natal de rotina.
@@ -62,7 +63,7 @@ export function Intercorrencias() {
           </ul>
         </Secao>
 
-        <Secao titulo="Sífilis">
+        <Secao titulo="Sífilis" icone={Biohazard}>
           <div className="flex flex-col gap-2.5">
             <Item titulo="Diagnóstico">Teste positivo para sífilis (testes treponêmico e não treponêmico).</Item>
             <Item titulo="Conduta imediata" alerta>Não aguardar confirmação diagnóstica para iniciar tratamento.</Item>
@@ -78,7 +79,7 @@ export function Intercorrencias() {
           />
         </Secao>
 
-        <Secao titulo="Toxoplasmose">
+        <Secao titulo="Toxoplasmose" icone={Microscope}>
           <SubTitulo>Interpretação sorológica</SubTitulo>
           <Tabela
             cabecalho={['IgM', 'IgG', 'Interpretação', 'Conduta']}
@@ -97,7 +98,7 @@ export function Intercorrencias() {
           </div>
         </Secao>
 
-        <Secao titulo="Infecção urinária (ITU)">
+        <Secao titulo="Infecção urinária (ITU)" icone={Droplets}>
           <SubTitulo>Aspectos gerais</SubTitulo>
           <ul className="list-disc pl-5 flex flex-col gap-1 text-sm text-text-dim">
             <li>Comum na gestação devido a alterações fisiológicas.</li>
@@ -161,7 +162,7 @@ export function Intercorrencias() {
           </ul>
         </Secao>
 
-        <Secao titulo="Hiperêmese gravídica">
+        <Secao titulo="Hiperêmese gravídica" icone={Frown}>
           <SubTitulo>Diagnóstico clínico</SubTitulo>
           <ul className="list-disc pl-5 flex flex-col gap-1 text-sm text-text-dim mb-2.5">
             <li>Náuseas e vômitos persistentes → desidratação, distúrbio hidroeletrolítico, distúrbio ácido-básico, deficiência nutricional.</li>
@@ -190,15 +191,6 @@ export function Intercorrencias() {
   )
 }
 
-function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  return (
-    <div className="border border-border rounded-xl bg-surface p-4">
-      <h2 className="font-display text-lg font-semibold text-text mb-3">{titulo}</h2>
-      <div className="text-sm text-text-dim leading-relaxed">{children}</div>
-    </div>
-  )
-}
-
 function SubTitulo({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return <p className={`text-[11px] font-bold text-text-dim uppercase tracking-wide mb-2 ${className}`}>{children}</p>
 }
@@ -211,35 +203,6 @@ function Item({ titulo, alerta, children }: { titulo: string; alerta?: boolean; 
         {titulo}
       </p>
       <p className={`text-sm mt-0.5 ${alerta ? 'text-warn/90' : 'text-text-dim'}`}>{children}</p>
-    </div>
-  )
-}
-
-function Tabela({ cabecalho, linhas }: { cabecalho: string[]; linhas: string[][] }) {
-  return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="bg-surface-2">
-            {cabecalho.map((c) => (
-              <th key={c} className="text-left font-semibold text-text px-3 py-2 border-b border-border whitespace-nowrap">
-                {c}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {linhas.map((linha, i) => (
-            <tr key={i} className={i % 2 === 1 ? 'bg-surface-2/40' : ''}>
-              {linha.map((celula, j) => (
-                <td key={j} className="text-text-dim px-3 py-2.5 align-top border-b border-border last:border-b-0">
-                  {celula}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   )
 }
