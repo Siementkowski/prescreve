@@ -1,11 +1,14 @@
 import { create } from 'zustand'
+import type { FaixaId } from './dados/guiaPuericultura'
 
 export type AbaPediatria = 'calculadora' | 'puericultura' | 'condutas' | 'sinais_alerta_tea'
 
-// Sub-abas de dentro de Puericultura — mesmo espírito de agrupar "acompanhamento de
-// rotina da criança saudável" num só lugar, análogo ao que Gestantes fez consigo mesma
-// (Pré-natal/Suplementação/Vacinação/Intercorrências viraram sub-abas de um módulo).
-export type AbaPuericultura = 'calendario_vacinal' | 'marcos_desenvolvimento' | 'suplementacao' | 'aleitamento' | 'exames'
+// Puericultura virou um guia de consulta por faixa etária (mesmo espírito do Guia de
+// Consulta do Gestantes) em vez de 5 abas soltas empilhadas numa segunda barra. As 5 telas
+// antigas (Calendário vacinal, Marcos, Suplementação, Aleitamento, Exames) continuam
+// existindo e acessíveis via "ver completo" dentro de cada bloco do guia — por isso ainda
+// precisam de um jeito de saber qual delas está em tela cheia.
+export type TelaReferenciaPuericultura = 'calendario_vacinal' | 'marcos_desenvolvimento' | 'suplementacao' | 'aleitamento' | 'exames'
 
 // Estado da calculadora pediátrica. Não usa `persist` (localStorage) de propósito —
 // peso é específico do paciente que está na sua frente agora, não deve sobreviver
@@ -18,10 +21,16 @@ interface PediatriaState {
   abaAberta: AbaPediatria
   setAbaAberta: (v: AbaPediatria) => void
 
-  // Sub-aba aberta dentro de Puericultura — mesmo raciocínio: não persiste, começa
-  // sempre no Calendário vacinal quando o app é recarregado.
-  abaPuericultura: AbaPuericultura
-  setAbaPuericultura: (v: AbaPuericultura) => void
+  // Faixa etária escolhida no guia de Puericultura — null = tela de cards. Fica na store
+  // (não useState local) pra sobreviver a sair pra outra aba de Pediatria (Calculadora,
+  // Condutas, TEA) e voltar sem perder a consulta em andamento.
+  faixaPuericultura: FaixaId | null
+  setFaixaPuericultura: (v: FaixaId | null) => void
+
+  // Qual tela antiga está em modo "ver completo" dentro de Puericultura — null = nenhuma
+  // (mostrando o guia normalmente).
+  telaReferenciaPuericultura: TelaReferenciaPuericultura | null
+  setTelaReferenciaPuericultura: (v: TelaReferenciaPuericultura | null) => void
 
   // Data de nascimento — compartilhada entre Calendário vacinal e Marcos do
   // desenvolvimento, pra não pedir duas vezes ao trocar de aba na mesma consulta.
@@ -43,8 +52,11 @@ export const usePediatriaStore = create<PediatriaState>((set) => ({
   abaAberta: 'calculadora',
   setAbaAberta: (abaAberta) => set({ abaAberta }),
 
-  abaPuericultura: 'calendario_vacinal',
-  setAbaPuericultura: (abaPuericultura) => set({ abaPuericultura }),
+  faixaPuericultura: null,
+  setFaixaPuericultura: (faixaPuericultura) => set({ faixaPuericultura }),
+
+  telaReferenciaPuericultura: null,
+  setTelaReferenciaPuericultura: (telaReferenciaPuericultura) => set({ telaReferenciaPuericultura }),
 
   dataNascimento: null,
   setDataNascimento: (dataNascimento) => set({ dataNascimento }),
