@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Calendar, Info, AlertTriangle, ChevronDown } from 'lucide-react'
-import { calcularDPP, dppCorrigidaPorUSG, trimestreDaIG, formatarIG, formatarData } from './idade'
+import { Info, AlertTriangle, ChevronDown, ArrowRight } from 'lucide-react'
+import { trimestreDaIG, formatarIG } from './idade'
 import { PRE_NATAL, AVALIAR_SEMPRE, PERIODICIDADE_CONSULTAS, PERGUNTAS_ESSENCIAIS, ATIVIDADE_FISICA, type BlocoTrimestre } from './dados/preNatal'
-import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
+import { useGestantesStore, useIGAtual } from './store'
 
 const FAIXA_TRIMESTRE: Record<BlocoTrimestre['trimestre'], string> = {
   1: 'até 13s 6d',
@@ -10,14 +10,11 @@ const FAIXA_TRIMESTRE: Record<BlocoTrimestre['trimestre'], string> = {
   3: '28s em diante',
 }
 
-const inputClass =
-  'bg-surface border border-border rounded-[var(--radius-input,9px)] px-3.5 py-3 text-sm font-semibold text-text outline-none focus:border-text transition-colors w-full'
-
-/** Calculadora de idade gestacional (DUM ou USG) + conteúdo de rotina do pré-natal por
- *  trimestre — mesmo espírito das calculadoras da Pediatria: lógica isolada em idade.ts,
- *  aqui só orquestra estado de formulário e decide qual trimestre destacar. Estado vive na
- *  store (gestantes/store.ts), compartilhado com Suplementação/Vacinação. Sem cálculo
- *  feito, os 3 trimestres ficam visíveis mas neutros — não trava quem só quer consultar.
+/** Conteúdo de rotina do pré-natal por trimestre (exames/condutas) + referência rápida —
+ *  a calculadora de idade gestacional em si mora no Guia de Consulta (Em construção),
+ *  que é o ponto de entrada da consulta; aqui só se lê a IG já calculada, via a mesma
+ *  store compartilhada (gestantes/store.ts). Sem cálculo feito ainda em lugar nenhum, os
+ *  3 trimestres ficam visíveis mas neutros — não trava quem só quer consultar.
  *
  *  Trimestres em acordeão (só um aberto por vez) — cada bloco tem exame a exame de um
  *  trimestre inteiro, os três abertos ao mesmo tempo é informação demais pra uma consulta
@@ -25,31 +22,11 @@ const inputClass =
  *  cálculo); um número explícito (inclusive 0 = "nenhum") é o que a pessoa escolheu na mão,
  *  e continua valendo até ela clicar de novo — não é sobrescrito a cada recálculo de IG. */
 export function CalculadoraGestacional() {
-  const metodo = useGestantesStore((s) => s.metodo)
-  const setMetodo = useGestantesStore((s) => s.setMetodo)
-  const dum = useGestantesStore((s) => s.dum)
-  const setDum = useGestantesStore((s) => s.setDum)
-  const dataReferencia = useGestantesStore((s) => s.dataReferencia)
-  const setDataReferencia = useGestantesStore((s) => s.setDataReferencia)
-  const igReferenciaSemanas = useGestantesStore((s) => s.igReferenciaSemanas)
-  const setIgReferenciaSemanas = useGestantesStore((s) => s.setIgReferenciaSemanas)
-  const igReferenciaDias = useGestantesStore((s) => s.igReferenciaDias)
-  const setIgReferenciaDias = useGestantesStore((s) => s.setIgReferenciaDias)
-
+  const setAbaAberta = useGestantesStore((s) => s.setAbaAberta)
   const [referenciaAberta, setReferenciaAberta] = useState(false)
   const [trimestreAberto, setTrimestreAberto] = useState<number | null>(null)
 
   const ig = useIGAtual()
-  const dpp =
-    ig == null
-      ? null
-      : metodo === 'dum'
-        ? calcularDPP(dataDeInputISO(dum))
-        : dppCorrigidaPorUSG(dataDeInputISO(dataReferencia), {
-            semanas: Number(igReferenciaSemanas) || 0,
-            dias: Number(igReferenciaDias) || 0,
-          })
-
   const trimestreAtual = ig ? trimestreDaIG(ig.semanas) : null
   const periodicidadeAtual = ig ? PERIODICIDADE_CONSULTAS.find((f) => ig.semanas >= f.semanaInicio && (f.semanaFim == null || ig.semanas < f.semanaFim)) : null
   const trimestreEfetivo = trimestreAberto ?? trimestreAtual ?? 1
@@ -57,100 +34,8 @@ export function CalculadoraGestacional() {
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto flex flex-col gap-4 pb-16">
-        {/* ---- calculadora ---- */}
-        <div className="bg-surface border border-border rounded-[var(--radius-panel,18px)] p-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2.5">
-              <Calendar className="w-[18px] h-[18px] text-accent" />
-              <h2 className="font-display text-[17px] font-semibold">Idade gestacional</h2>
-            </div>
-            <div className="inline-flex p-[3px] rounded-[var(--radius-pill,999px)] bg-surface-2 border border-border">
-              <button
-                onClick={() => setMetodo('dum')}
-                className={`text-xs font-semibold px-3.5 py-1.5 rounded-[var(--radius-pill,999px)] transition-colors ${
-                  metodo === 'dum' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
-                }`}
-              >
-                Por DUM
-              </button>
-              <button
-                onClick={() => setMetodo('usg')}
-                className={`text-xs font-semibold px-3.5 py-1.5 rounded-[var(--radius-pill,999px)] transition-colors ${
-                  metodo === 'usg' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
-                }`}
-              >
-                Por USG
-              </button>
-              <button
-                onClick={() => setMetodo('previa')}
-                className={`text-xs font-semibold px-3.5 py-1.5 rounded-[var(--radius-pill,999px)] transition-colors ${
-                  metodo === 'previa' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
-                }`}
-              >
-                IG prévia
-              </button>
-            </div>
-          </div>
-
-          {metodo === 'dum' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Campo label="Data da última menstruação">
-                <input
-                  type="date"
-                  value={dum}
-                  onChange={(e) => setDum(e.target.value)}
-                  max={new Date().toISOString().slice(0, 10)}
-                  className={inputClass}
-                />
-              </Campo>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Campo label={metodo === 'usg' ? 'Data do exame' : 'Data em que a IG foi registrada'}>
-                <input
-                  type="date"
-                  value={dataReferencia}
-                  onChange={(e) => setDataReferencia(e.target.value)}
-                  max={new Date().toISOString().slice(0, 10)}
-                  className={inputClass}
-                />
-              </Campo>
-              <Campo label={metodo === 'usg' ? 'IG no exame — semanas' : 'IG prévia — semanas'}>
-                <input
-                  type="number"
-                  min={0}
-                  max={42}
-                  value={igReferenciaSemanas}
-                  onChange={(e) => setIgReferenciaSemanas(e.target.value)}
-                  placeholder="0"
-                  className={inputClass}
-                />
-              </Campo>
-              <Campo label={metodo === 'usg' ? 'IG no exame — dias' : 'IG prévia — dias'}>
-                <input
-                  type="number"
-                  min={0}
-                  max={6}
-                  value={igReferenciaDias}
-                  onChange={(e) => setIgReferenciaDias(e.target.value)}
-                  placeholder="0"
-                  className={inputClass}
-                />
-              </Campo>
-            </div>
-          )}
-
-          {ig && dpp && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-dashed border-border">
-              <Stat label="Idade gestacional" valor={formatarIG(ig)} destaque />
-              <Stat label={metodo === 'dum' ? 'DPP (Naegele)' : 'DPP corrigida'} valor={formatarData(dpp)} />
-              <Stat label="Trimestre" valor={`${trimestreAtual}º`} />
-            </div>
-          )}
-        </div>
-
         {/* ---- banner contextual ---- */}
-        {ig && trimestreAtual && (
+        {ig && trimestreAtual ? (
           <div className="flex items-start gap-3 bg-accent-dim border border-accent/30 rounded-[var(--radius-card,14px)] px-4 py-3.5">
             <Info className="w-[17px] h-[17px] text-accent shrink-0 mt-0.5" />
             <div className="text-sm">
@@ -162,6 +47,18 @@ export function CalculadoraGestacional() {
                 {periodicidadeAtual && ` Periodicidade recomendada agora: consultas ${periodicidadeAtual.intervalo.toLowerCase()}.`}
               </p>
             </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-3 flex-wrap bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-4 py-3">
+            <span className="text-sm text-text-dim">
+              Sem idade gestacional calculada ainda — os 3 trimestres abaixo ficam neutros até lá.
+            </span>
+            <button
+              onClick={() => setAbaAberta('guia_consulta')}
+              className="flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline shrink-0"
+            >
+              Calcular em Em construção <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
 
@@ -349,24 +246,6 @@ export function CalculadoraGestacional() {
           Conteúdo de referência — protocolo Ministério da Saúde / Febrasgo, pré-natal de baixo risco. Não substitui avaliação clínica individual.
         </p>
       </div>
-    </div>
-  )
-}
-
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold text-text-dim">{label}</span>
-      {children}
-    </label>
-  )
-}
-
-function Stat({ label, valor, destaque }: { label: string; valor: string; destaque?: boolean }) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] font-semibold text-text-dim uppercase tracking-wide">{label}</span>
-      <span className={`font-display text-xl font-semibold tabular-nums ${destaque ? 'text-accent' : ''}`}>{valor}</span>
     </div>
   )
 }
