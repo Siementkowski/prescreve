@@ -1,14 +1,11 @@
 import { create } from 'zustand'
 
-export type AbaPediatria =
-  | 'calculadora'
-  | 'calendario_vacinal'
-  | 'marcos_desenvolvimento'
-  | 'condutas'
-  | 'exames'
-  | 'suplementacao'
-  | 'aleitamento'
-  | 'sinais_alerta_tea'
+export type AbaPediatria = 'calculadora' | 'puericultura' | 'condutas' | 'sinais_alerta_tea'
+
+// Sub-abas de dentro de Puericultura — mesmo espírito de agrupar "acompanhamento de
+// rotina da criança saudável" num só lugar, análogo ao que Gestantes fez consigo mesma
+// (Pré-natal/Suplementação/Vacinação/Intercorrências viraram sub-abas de um módulo).
+export type AbaPuericultura = 'calendario_vacinal' | 'marcos_desenvolvimento' | 'suplementacao' | 'aleitamento' | 'exames'
 
 // Estado da calculadora pediátrica. Não usa `persist` (localStorage) de propósito —
 // peso é específico do paciente que está na sua frente agora, não deve sobreviver
@@ -20,6 +17,11 @@ interface PediatriaState {
   // raciocínio do peso: começa sempre na Calculadora quando o app é recarregado.
   abaAberta: AbaPediatria
   setAbaAberta: (v: AbaPediatria) => void
+
+  // Sub-aba aberta dentro de Puericultura — mesmo raciocínio: não persiste, começa
+  // sempre no Calendário vacinal quando o app é recarregado.
+  abaPuericultura: AbaPuericultura
+  setAbaPuericultura: (v: AbaPuericultura) => void
 
   // Data de nascimento — compartilhada entre Calendário vacinal e Marcos do
   // desenvolvimento, pra não pedir duas vezes ao trocar de aba na mesma consulta.
@@ -40,6 +42,9 @@ interface PediatriaState {
 export const usePediatriaStore = create<PediatriaState>((set) => ({
   abaAberta: 'calculadora',
   setAbaAberta: (abaAberta) => set({ abaAberta }),
+
+  abaPuericultura: 'calendario_vacinal',
+  setAbaPuericultura: (abaPuericultura) => set({ abaPuericultura }),
 
   dataNascimento: null,
   setDataNascimento: (dataNascimento) => set({ dataNascimento }),

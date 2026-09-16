@@ -1,28 +1,21 @@
-import { Calculator, Syringe, ListChecks, Workflow, ClipboardList, Pill, Heart, AlertTriangle } from 'lucide-react'
+import { Calculator, Workflow, Baby, AlertTriangle } from 'lucide-react'
 import { usePediatriaStore, type AbaPediatria } from './store'
 import { CalculadoraDose } from './CalculadoraDose'
-import { CalendarioVacinal } from './CalendarioVacinal'
-import { MarcosDesenvolvimento } from './MarcosDesenvolvimento'
+import { PuericulturaPage } from './PuericulturaPage'
 import { CondutasPediatricas } from './CondutasPediatricas'
-import { ExamesPorIdade } from './ExamesPorIdade'
-import { Suplementacao } from './Suplementacao'
-import { Aleitamento } from './Aleitamento'
 import { SinaisAlertaTEA } from './SinaisAlertaTEA'
 
 const ABAS: { id: AbaPediatria; label: string; icone: typeof Calculator }[] = [
   { id: 'calculadora', label: 'Calculadora', icone: Calculator },
-  { id: 'calendario_vacinal', label: 'Calendário vacinal', icone: Syringe },
-  { id: 'marcos_desenvolvimento', label: 'Marcos do desenvolvimento', icone: ListChecks },
-  { id: 'exames', label: 'Exames', icone: ClipboardList },
-  { id: 'suplementacao', label: 'Suplementação', icone: Pill },
-  { id: 'aleitamento', label: 'Aleitamento', icone: Heart },
-  { id: 'sinais_alerta_tea', label: 'Sinais de alerta (TEA)', icone: AlertTriangle },
+  { id: 'puericultura', label: 'Puericultura', icone: Baby },
   { id: 'condutas', label: 'Condutas', icone: Workflow },
+  { id: 'sinais_alerta_tea', label: 'Sinais de alerta (TEA)', icone: AlertTriangle },
 ]
 
-/** Casca do módulo de Pediatria — sub-nav entre os módulos. Cada aba nova é independente
- *  (dado próprio em dados/*.ts) — "organizar depois" é sobre agrupar visualmente, não
- *  sobre arquitetura: adicionar mais uma aba aqui não exige tocar nas outras. */
+/** Casca do módulo de Pediatria — sub-nav entre os módulos. Puericultura agrupa o
+ *  acompanhamento de rotina da criança saudável (calendário vacinal, marcos do
+ *  desenvolvimento, suplementação, aleitamento, exames) numa aba só, com seu próprio
+ *  sub-nav — ver PuericulturaPage.tsx. */
 export function PediatriaPage() {
   const abaAberta = usePediatriaStore((s) => s.abaAberta)
   const setAbaAberta = usePediatriaStore((s) => s.setAbaAberta)
@@ -46,13 +39,9 @@ export function PediatriaPage() {
 
       <div className="flex-1 min-h-0">
         {abaAberta === 'calculadora' && <CalculadoraDose />}
-        {abaAberta === 'calendario_vacinal' && <CalendarioVacinal />}
-        {abaAberta === 'marcos_desenvolvimento' && <MarcosDesenvolvimento />}
-        {abaAberta === 'exames' && <ExamesPorIdade />}
-        {abaAberta === 'suplementacao' && <Suplementacao />}
-        {abaAberta === 'aleitamento' && <Aleitamento />}
-        {abaAberta === 'sinais_alerta_tea' && <SinaisAlertaTEA />}
+        {abaAberta === 'puericultura' && <PuericulturaPage />}
         {abaAberta === 'condutas' && <CondutasPediatricas />}
+        {abaAberta === 'sinais_alerta_tea' && <SinaisAlertaTEA />}
       </div>
     </div>
   )
