@@ -44,7 +44,7 @@ export function Suplementacao() {
           value={dataNascimento ?? ''}
           onChange={(e) => setDataNascimento(e.target.value || null)}
           max={new Date().toISOString().slice(0, 10)}
-          className="bg-surface-2 border-2 border-accent/40 focus:border-accent rounded-lg px-3 py-1.5 text-sm font-semibold text-text outline-none transition-colors"
+          className="bg-surface border border-border focus:border-text rounded-[var(--radius-input,9px)] px-3 py-1.5 text-sm font-semibold text-text outline-none transition-colors"
         />
         {idadeMeses != null && <span className="text-sm text-text-dim">{formatarIdade(idadeMeses)} de idade</span>}
       </div>
@@ -54,7 +54,7 @@ export function Suplementacao() {
           <p className="text-sm text-text-dim px-1 py-4">Informe a data de nascimento pra ver as recomendações.</p>
         ) : (
           <div className="max-w-2xl mx-auto flex flex-col gap-4">
-            <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-lg px-3 py-2.5">
+            <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2.5">
               <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <span>
                 Regra geral pra maioria das crianças — prematuridade extrema e patologias de
@@ -62,7 +62,7 @@ export function Suplementacao() {
               </span>
             </div>
 
-            <div className="border border-border rounded-xl bg-surface p-4 flex flex-col gap-3">
+            <div className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-4 flex flex-col gap-3">
               <p className="text-sm font-semibold text-text">Fatores de contexto</p>
               <label className="flex items-center gap-2.5 text-sm cursor-pointer">
                 <input
@@ -89,7 +89,7 @@ export function Suplementacao() {
               {recomendacoes?.map((r) => {
                 const Icone = ICONE_STATUS[r.status]
                 return (
-                  <div key={r.nome} className="border border-border rounded-xl bg-surface p-4 flex flex-col gap-2">
+                  <div key={r.nome} className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-4 flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-display text-base font-semibold text-text">{r.nome}</p>
                       <span className={`flex items-center gap-1.5 text-xs font-semibold ${COR_STATUS[r.status]}`}>

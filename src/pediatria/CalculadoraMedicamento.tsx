@@ -23,7 +23,7 @@ export function CalculadoraMedicamento({ medicamento, pesoKg }: { medicamento: M
 
   return (
     <div
-      className={`border rounded-xl p-4 flex flex-col gap-3 ${
+      className={`border rounded-[var(--radius-card,14px)] p-4 flex flex-col gap-3 ${
         calc.atingiuTeto ? 'border-danger/50 bg-danger-dim' : 'border-border bg-surface'
       }`}
     >
@@ -43,7 +43,7 @@ export function CalculadoraMedicamento({ medicamento, pesoKg }: { medicamento: M
           <select
             value={tomadas}
             onChange={(e) => setTomadasPorMedicamento(medicamento.id, Number(e.target.value))}
-            className="appearance-none bg-surface-2 border border-border rounded-lg pl-2.5 pr-7 py-1.5 text-sm text-text outline-none focus:border-accent"
+            className="appearance-none bg-surface border border-border rounded-[var(--radius-input,9px)] pl-2.5 pr-7 py-1.5 text-sm text-text outline-none focus:border-text"
           >
             {OPCOES_TOMADAS.map((n) => (
               <option key={n} value={n}>
@@ -56,7 +56,7 @@ export function CalculadoraMedicamento({ medicamento, pesoKg }: { medicamento: M
       </div>
 
       {calc.atingiuTeto && (
-        <div className="flex items-start gap-2 text-sm text-white bg-danger border border-danger rounded-lg px-3 py-2.5 font-medium">
+        <div className="flex items-start gap-2 text-sm text-white bg-danger border border-danger rounded-[var(--radius-item,11px)] px-3 py-2.5 font-medium">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             Dose calculada ({formatarNumero(calc.doseDiariaCalculadaMg)} mg/dia) ultrapassa o teto de{' '}
@@ -91,7 +91,7 @@ export function CalculadoraMedicamento({ medicamento, pesoKg }: { medicamento: M
 
 function Resultado({ rotulo, valor, destaque }: { rotulo: string; valor: string; destaque?: boolean }) {
   return (
-    <div className={`rounded-lg px-3 py-2 ${destaque ? 'bg-accent-dim border border-accent/30' : 'bg-surface-2'}`}>
+    <div className={`rounded-[var(--radius-item,11px)] px-3 py-2 ${destaque ? 'bg-accent-dim border border-accent/30' : 'bg-surface-2'}`}>
       <p className="text-[11px] text-text-dim uppercase tracking-wide">{rotulo}</p>
       <p className={`tabular text-[15px] font-semibold ${destaque ? 'text-accent' : 'text-text'}`}>{valor}</p>
     </div>

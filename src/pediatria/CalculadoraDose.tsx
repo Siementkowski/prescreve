@@ -55,7 +55,7 @@ export function CalculadoraDose() {
               value={pesoKg ?? ''}
               onChange={(e) => setPesoKg(e.target.value === '' ? null : Number(e.target.value))}
               placeholder="0,0"
-              className="tabular w-28 bg-surface-2 border-2 border-accent/40 focus:border-accent rounded-lg pl-3 pr-9 py-1.5 text-base font-semibold text-text outline-none transition-colors"
+              className="tabular w-28 bg-surface border border-border focus:border-text rounded-[var(--radius-input,9px)] pl-3 pr-9 py-1.5 text-base font-semibold text-text outline-none transition-colors"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-dim pointer-events-none">
               kg

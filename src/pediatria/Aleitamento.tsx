@@ -71,7 +71,7 @@ export function Aleitamento() {
                 resultados.map((m) => (
                   <div
                     key={m.id}
-                    className="flex items-center justify-between gap-2 border border-border rounded-lg px-3 py-2"
+                    className="flex items-center justify-between gap-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2"
                   >
                     <span className="text-sm text-text truncate">{m.nome}</span>
                     <StatusRiscoBadge status={m.lactacao_status} />
@@ -99,7 +99,7 @@ export function Aleitamento() {
 
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <div className="border border-border rounded-xl bg-surface p-4">
+    <div className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-4">
       <h2 className="font-display text-lg font-semibold text-text mb-3">{titulo}</h2>
       <div className="text-sm text-text-dim leading-relaxed">{children}</div>
     </div>
@@ -117,7 +117,7 @@ function Item({ titulo, children }: { titulo: string; children: React.ReactNode 
 
 function CardArmazenamento({ titulo, valor, nota }: { titulo: string; valor: string; nota: string }) {
   return (
-    <div className="rounded-lg bg-surface-2 border border-border p-3">
+    <div className="rounded-[var(--radius-item,11px)] bg-surface-2 border border-border p-3">
       <p className="text-[11px] text-text-dim uppercase tracking-wide">{titulo}</p>
       <p className="text-base font-semibold text-text mt-0.5">{valor}</p>
       <p className="text-xs text-text-dim mt-1">{nota}</p>

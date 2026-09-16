@@ -59,7 +59,7 @@ export function ExamesPorIdade() {
           value={dataNascimento ?? ''}
           onChange={(e) => setDataNascimento(e.target.value || null)}
           max={new Date().toISOString().slice(0, 10)}
-          className="bg-surface-2 border-2 border-accent/40 focus:border-accent rounded-lg px-3 py-1.5 text-sm font-semibold text-text outline-none transition-colors"
+          className="bg-surface border border-border focus:border-text rounded-[var(--radius-input,9px)] px-3 py-1.5 text-sm font-semibold text-text outline-none transition-colors"
         />
         {idadeMeses != null && <span className="text-sm text-text-dim">{formatarIdade(idadeMeses)} de idade</span>}
         {selecionados.size > 0 && (
@@ -74,7 +74,7 @@ export function ExamesPorIdade() {
           <p className="text-sm text-text-dim px-1 py-4">Nenhum exame com indicação pra essa idade ainda.</p>
         ) : (
           <div className="max-w-3xl mx-auto flex flex-col gap-5">
-            <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-lg px-3 py-2.5">
+            <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2.5">
               <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <span>
                 Lista de referência por idade — não substitui avaliação clínica individual.
@@ -90,7 +90,7 @@ export function ExamesPorIdade() {
                   {exames.map((e) => (
                     <label
                       key={e.nome}
-                      className="flex items-start gap-2.5 border border-border rounded-xl bg-surface p-3.5 cursor-pointer hover:border-text-dim transition-colors"
+                      className="flex items-start gap-2.5 border border-border rounded-[var(--radius-card,14px)] bg-surface p-3.5 cursor-pointer hover:border-text-dim transition-colors"
                     >
                       <input
                         type="checkbox"
@@ -103,7 +103,7 @@ export function ExamesPorIdade() {
                         <span className="block text-xs text-text-dim mt-0.5">{e.periodicidade}</span>
                         <span className="block text-xs text-text-dim mt-1">{e.justificativa}</span>
                         {e.restricao && (
-                          <span className="block text-xs text-warn mt-1 bg-warn-dim border border-warn/30 rounded px-2 py-1">
+                          <span className="block text-xs text-warn mt-1 bg-warn-dim border border-warn/30 rounded-[var(--radius-xs,6px)] px-2 py-1">
                             {e.restricao}
                           </span>
                         )}

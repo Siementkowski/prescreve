@@ -49,7 +49,7 @@ export function MarcosDesenvolvimento() {
           value={dataNascimento ?? ''}
           onChange={(e) => setDataNascimento(e.target.value || null)}
           max={new Date().toISOString().slice(0, 10)}
-          className="bg-surface-2 border-2 border-accent/40 focus:border-accent rounded-lg px-3 py-1.5 text-sm font-semibold text-text outline-none transition-colors"
+          className="bg-surface border border-border focus:border-text rounded-[var(--radius-input,9px)] px-3 py-1.5 text-sm font-semibold text-text outline-none transition-colors"
         />
         {idadeMeses != null && <span className="text-sm text-text-dim">{formatarIdade(idadeMeses)} de idade</span>}
       </div>
@@ -63,7 +63,7 @@ export function MarcosDesenvolvimento() {
           </p>
         ) : (
           <div className="max-w-2xl mx-auto flex flex-col gap-4">
-            <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-lg px-3 py-2.5">
+            <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2.5">
               <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <span>
                 Referência pra triagem rápida — cada criança tem seu ritmo, ausência de um
@@ -71,7 +71,7 @@ export function MarcosDesenvolvimento() {
               </span>
             </div>
 
-            <div className="border border-border rounded-xl bg-surface p-4 flex flex-col gap-3">
+            <div className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-4 flex flex-col gap-3">
               <p className="font-display text-lg font-semibold text-text">
                 Marcos esperados até {faixaAtual.rotulo}
               </p>
@@ -82,7 +82,7 @@ export function MarcosDesenvolvimento() {
                   return (
                     <label
                       key={chave}
-                      className="flex items-start gap-2.5 text-sm cursor-pointer px-2 py-1.5 rounded-lg hover:bg-surface-2 transition-colors"
+                      className="flex items-start gap-2.5 text-sm cursor-pointer px-2 py-1.5 rounded-[var(--radius-item,11px)] hover:bg-surface-2 transition-colors"
                     >
                       <input
                         type="checkbox"
@@ -103,7 +103,7 @@ export function MarcosDesenvolvimento() {
             </div>
 
             {faixaProxima && (
-              <div className="border border-dashed border-border rounded-xl p-4">
+              <div className="border border-dashed border-border rounded-[var(--radius-card,14px)] p-4">
                 <p className="text-xs text-text-dim uppercase tracking-wide font-medium mb-2">
                   Próxima faixa — {faixaProxima.rotulo}
                 </p>
