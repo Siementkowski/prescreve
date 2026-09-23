@@ -5,9 +5,10 @@ function pct(semanas: number): number {
   return Math.min(100, Math.max(0, (semanas / SEMANA_MAX_LINHA_DO_TEMPO) * 100))
 }
 
-/** Linha do tempo visual de IG (0–42 semanas) — trilho branco, indicador da IG atual
- *  branco e cintilante (se diferencia do trilho por brilho, não por cor), marcos como
- *  marcações discretas em preto, sem texto visível por padrão. Passar o mouse na linha
+/** Linha do tempo visual de IG (0–42 semanas) — variante "passado e futuro": o trecho já
+ *  percorrido (0 até a IG atual) fica levemente mais escuro que o trilho neutro à frente,
+ *  e o indicador da IG atual (branco, cintilante) marca a transição entre os dois. Marcos
+ *  são marcações discretas em preto, sem texto visível por padrão. Passar o mouse na linha
  *  acende o trilho; passar exatamente sobre um marco revela um card com o nome e a janela
  *  de semanas, acima da linha. Só itera `MARCOS_IG` (dados/marcosIG.ts): adicionar/editar
  *  um marco é mexer só nos dados, nunca neste componente. */
@@ -47,6 +48,16 @@ export function LinhaDoTempoIG({ semanaAtual }: { semanaAtual: number | null }) 
               : 'border-[var(--color-border-strong)]'
           }`}
         >
+          {/* ---- trecho já percorrido (0 até a IG atual) — mesma cor, levemente mais
+              escuro que o resto do trilho; o indicador da IG atual é a própria transição
+              entre passado (aqui) e futuro (trilho neutro adiante). ---- */}
+          {semanaAtual != null && (
+            <div
+              className="absolute inset-y-0 left-0 rounded-l-full bg-black/10 pointer-events-none"
+              style={{ width: `${pct(semanaAtual)}%` }}
+            />
+          )}
+
           {/* ---- marcos — discretos, em preto ---- */}
           {MARCOS_IG.map((m) => {
             const inicio = pct(m.semanaInicio)
