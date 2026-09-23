@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 export type StatusSorologia = 'desconhecido' | 'imune' | 'suscetivel'
 export type MetodoBCF = 'nao_informado' | 'sonar_doppler' | 'pinard'
-export type MovimentacaoFetal = 'nao_avaliado' | 'presente' | 'reduzida' | 'ausente'
+export type StatusLabs = 'nao_avaliado' | 'normais' | 'alterados'
 
 /** Estado do formulário do Guia de Consulta — separado da store de Gestantes (que só
  *  guarda a IG, compartilhada por todas as sub-abas) porque esse aqui é bem maior e é
@@ -10,15 +10,18 @@ export type MovimentacaoFetal = 'nao_avaliado' | 'presente' | 'reduzida' | 'ause
  *  sub-aba (Pré-natal/Suplementação/...) sem perder o que já foi preenchido — o
  *  componente do Guia desmonta a cada troca de aba, useState local se perderia. Segue a
  *  mesma regra das outras stores do módulo: sem `persist`, é a paciente na cadeira agora,
- *  não deve sobreviver a um F5 amanhã com outra. */
+ *  não deve sobreviver a um F5 amanhã com outra.
+ *
+ *  Estrutura segue o modelo SOAP fornecido: cabeçalho (antecedentes + status de labs),
+ *  S (queixas fixas de rotina, nega/refere), O (exame físico objetivo), P (vacinas,
+ *  orientações e exames a solicitar). LABS no cabeçalho é só um marcador rápido
+ *  (avaliado/normal/alterado) — o que de fato entra em "Solicito X, Y" no Plano vem do
+ *  checklist de exames do trimestre (`examesMarcados`, dados em dados/preNatal.ts). */
 interface GuiaConsultaState {
   primeiraConsulta: boolean | null
   setPrimeiraConsulta: (v: boolean | null) => void
 
   // ---- cabeçalho / antecedentes ----
-  // DUM que entra no cabeçalho da anamnese — campo livre, preenchido por quem está
-  // digitando (não é calculado a partir da IG: o método de cálculo em Pré-natal pode ser
-  // por USG/IG prévia sem que a DUM relatada pela paciente seja conhecida ou coincida).
   dumAnamnese: string
   setDumAnamnese: (v: string) => void
   g: string
@@ -39,6 +42,8 @@ interface GuiaConsultaState {
   setMedsSelecionados: (v: Set<string>) => void
   outrosMedicamentos: string
   setOutrosMedicamentos: (v: string) => void
+  vacinasTomadas: Set<string>
+  setVacinasTomadas: (v: Set<string>) => void
   alergias: string
   setAlergias: (v: string) => void
   negaVicios: boolean
@@ -50,29 +55,31 @@ interface GuiaConsultaState {
   atividadeLaboral: string
   setAtividadeLaboral: (v: string) => void
 
-  // ---- subjetivo ----
-  acompanhada: boolean
-  setAcompanhada: (v: boolean) => void
-  acompanhantePor: string
-  setAcompanhantePor: (v: string) => void
-  encaminhadaPor: string
-  setEncaminhadaPor: (v: string) => void
-  jaRealizouExames: boolean
-  setJaRealizouExames: (v: boolean) => void
-  queixas: Record<string, boolean>
-  setQueixas: (v: Record<string, boolean>) => void
+  // Marcador rápido de LABS pro cabeçalho — não é o checklist de exames a pedir, é "os
+  // resultados que ela já trouxe estão normais ou alterados". Ver `examesMarcados` pro
+  // que efetivamente vai ser solicitado nessa consulta.
+  labsStatus: StatusLabs
+  setLabsStatus: (v: StatusLabs) => void
+  labsAlteradosDetalhe: string
+  setLabsAlteradosDetalhe: (v: string) => void
+
+  // ---- subjetivo (S) — perguntas fixas de rotina, nega/refere ----
+  queixasRotina: Set<string>
+  setQueixasRotina: (v: Set<string>) => void
   queixasDetalhe: string
   setQueixasDetalhe: (v: string) => void
-  vacinasTomadas: Set<string>
-  setVacinasTomadas: (v: Set<string>) => void
 
-  // ---- objetivo / exame físico ----
+  // ---- objetivo (O) ----
   peso: string
   setPeso: (v: string) => void
   estatura: string
   setEstatura: (v: string) => void
-  abdomeGravidico: boolean
-  setAbdomeGravidico: (v: boolean) => void
+  pas: string
+  setPas: (v: string) => void
+  pad: string
+  setPad: (v: string) => void
+  fc: string
+  setFc: (v: string) => void
   au: string
   setAu: (v: string) => void
   bcfBpm: string
@@ -81,20 +88,18 @@ interface GuiaConsultaState {
   setBcfMetodo: (v: MetodoBCF) => void
   bcfAusente: boolean
   setBcfAusente: (v: boolean) => void
-  movimentacaoFetal: MovimentacaoFetal
-  setMovimentacaoFetal: (v: MovimentacaoFetal) => void
-  achados: Set<string>
-  setAchados: (v: Set<string>) => void
 
-  // ---- avaliação / plano ----
+  // ---- avaliação / plano (P) ----
   riscoAlto: boolean
   setRiscoAlto: (v: boolean) => void
+  orientacoesMarcadas: Set<string>
+  setOrientacoesMarcadas: (v: Set<string>) => void
   planoExtra: string
   setPlanoExtra: (v: string) => void
 
-  // ---- exames a solicitar (checklist) ----
-  marcados: Set<string>
-  setMarcados: (v: Set<string>) => void
+  // ---- exames a solicitar nessa consulta (checklist por trimestre) ----
+  examesMarcados: Set<string>
+  setExamesMarcados: (v: Set<string>) => void
 }
 
 export const useGuiaConsultaStore = create<GuiaConsultaState>((set) => ({
@@ -121,6 +126,8 @@ export const useGuiaConsultaStore = create<GuiaConsultaState>((set) => ({
   setMedsSelecionados: (medsSelecionados) => set({ medsSelecionados }),
   outrosMedicamentos: '',
   setOutrosMedicamentos: (outrosMedicamentos) => set({ outrosMedicamentos }),
+  vacinasTomadas: new Set(),
+  setVacinasTomadas: (vacinasTomadas) => set({ vacinasTomadas }),
   alergias: '',
   setAlergias: (alergias) => set({ alergias }),
   negaVicios: true,
@@ -132,27 +139,26 @@ export const useGuiaConsultaStore = create<GuiaConsultaState>((set) => ({
   atividadeLaboral: '',
   setAtividadeLaboral: (atividadeLaboral) => set({ atividadeLaboral }),
 
-  acompanhada: false,
-  setAcompanhada: (acompanhada) => set({ acompanhada }),
-  acompanhantePor: '',
-  setAcompanhantePor: (acompanhantePor) => set({ acompanhantePor }),
-  encaminhadaPor: '',
-  setEncaminhadaPor: (encaminhadaPor) => set({ encaminhadaPor }),
-  jaRealizouExames: false,
-  setJaRealizouExames: (jaRealizouExames) => set({ jaRealizouExames }),
-  queixas: {},
-  setQueixas: (queixas) => set({ queixas }),
+  labsStatus: 'nao_avaliado',
+  setLabsStatus: (labsStatus) => set({ labsStatus }),
+  labsAlteradosDetalhe: '',
+  setLabsAlteradosDetalhe: (labsAlteradosDetalhe) => set({ labsAlteradosDetalhe }),
+
+  queixasRotina: new Set(),
+  setQueixasRotina: (queixasRotina) => set({ queixasRotina }),
   queixasDetalhe: '',
   setQueixasDetalhe: (queixasDetalhe) => set({ queixasDetalhe }),
-  vacinasTomadas: new Set(),
-  setVacinasTomadas: (vacinasTomadas) => set({ vacinasTomadas }),
 
   peso: '',
   setPeso: (peso) => set({ peso }),
   estatura: '',
   setEstatura: (estatura) => set({ estatura }),
-  abdomeGravidico: false,
-  setAbdomeGravidico: (abdomeGravidico) => set({ abdomeGravidico }),
+  pas: '',
+  setPas: (pas) => set({ pas }),
+  pad: '',
+  setPad: (pad) => set({ pad }),
+  fc: '',
+  setFc: (fc) => set({ fc }),
   au: '',
   setAu: (au) => set({ au }),
   bcfBpm: '',
@@ -161,16 +167,14 @@ export const useGuiaConsultaStore = create<GuiaConsultaState>((set) => ({
   setBcfMetodo: (bcfMetodo) => set({ bcfMetodo }),
   bcfAusente: false,
   setBcfAusente: (bcfAusente) => set({ bcfAusente }),
-  movimentacaoFetal: 'nao_avaliado',
-  setMovimentacaoFetal: (movimentacaoFetal) => set({ movimentacaoFetal }),
-  achados: new Set(),
-  setAchados: (achados) => set({ achados }),
 
   riscoAlto: false,
   setRiscoAlto: (riscoAlto) => set({ riscoAlto }),
+  orientacoesMarcadas: new Set(),
+  setOrientacoesMarcadas: (orientacoesMarcadas) => set({ orientacoesMarcadas }),
   planoExtra: '',
   setPlanoExtra: (planoExtra) => set({ planoExtra }),
 
-  marcados: new Set(),
-  setMarcados: (marcados) => set({ marcados }),
+  examesMarcados: new Set(),
+  setExamesMarcados: (examesMarcados) => set({ examesMarcados }),
 }))

@@ -72,7 +72,7 @@ const JANELA_VACINAS: JanelaVacina[] = [
   { nome: 'Influenza (Gripe A / H1N1)', semanaInicio: 0 },
   { nome: 'COVID-19', semanaInicio: 0 },
   { nome: 'dTpa (Tétano, Coqueluche e Difteria)', semanaInicio: 20 },
-  { nome: 'Vírus Sincicial Respiratório (VSR)', semanaInicio: 24 },
+  { nome: 'Vírus Sincicial Respiratório (VSR)', semanaInicio: 28 },
 ]
 
 /** Vacinas que já fazem sentido conferir pra uma IG em semanas — cumulativo (quem já
