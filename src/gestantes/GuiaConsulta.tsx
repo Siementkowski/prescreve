@@ -290,8 +290,9 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
 
   return (
     <div className="h-full overflow-y-auto p-6">
-      <div className="max-w-4xl mx-auto flex flex-col gap-4 pb-16">
-        {/* ---- calculadora de IG (compacta) + linha do tempo, lado a lado ---- */}
+      <div className="flex flex-col gap-4 pb-16">
+        {/* ---- calculadora de IG (compacta, canto superior esquerdo) + linha do tempo
+            ocupando o resto da largura, lado a lado ---- */}
         <div className="flex flex-col sm:flex-row gap-3 items-start">
           <div className="w-full sm:w-[300px] shrink-0 flex flex-col gap-3">
             <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-3.5 flex flex-col gap-3">
@@ -412,6 +413,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
           <LinhaDoTempoIG semanaAtual={ig ? ig.semanas : null} />
         </div>
 
+        <div className="max-w-3xl w-full flex flex-col gap-4">
         {!ig && <p className="text-sm text-text-dim px-0.5">Calcule a idade gestacional acima pra continuar o guia.</p>}
 
         {ig && primeiraConsulta == null && (
@@ -666,6 +668,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
             </div>
           </>
         )}
+        </div>
       </div>
     </div>
   )
