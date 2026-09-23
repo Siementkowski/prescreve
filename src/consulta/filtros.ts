@@ -105,6 +105,37 @@ export function medicamentoPorId(medicamentos: Medicamento[], id: number | null)
   return medicamentos.find((m) => m.id === id) ?? null
 }
 
+/** Todas as patologias em que um medicamento aparece — direto (tratamento principal, que
+ *  já tem patologia_id fixo) ou via complemento (patologia_id null, vinculado a N patologias
+ *  pela tabela patologia_complementos). Usada pela busca global: clicar num medicamento
+ *  nunca deve "não fazer nada" só porque ele só existe dentro de um complemento. */
+export function patologiasDoMedicamento(
+  medicamentoId: number,
+  itens: TratamentoItem[],
+  tratamentos: Tratamento[],
+  links: PatologiaComplemento[],
+  patologias: Patologia[]
+): Patologia[] {
+  const idsTratamentos = new Set(
+    itens.filter((i) => i.medicamento_id === medicamentoId).map((i) => i.tratamento_id)
+  )
+  const idsPatologias = new Set<number>()
+  for (const tId of idsTratamentos) {
+    const tratamento = tratamentos.find((t) => t.id === tId)
+    if (!tratamento) continue
+    if (tratamento.patologia_id != null) {
+      idsPatologias.add(tratamento.patologia_id)
+    } else {
+      for (const link of links) {
+        if (link.tratamento_id === tId) idsPatologias.add(link.patologia_id)
+      }
+    }
+  }
+  return patologias
+    .filter((p) => idsPatologias.has(p.id))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+}
+
 export function apresentacaoPorId(apresentacoes: Apresentacao[], id: number | null): Apresentacao | null {
   if (id == null) return null
   return apresentacoes.find((a) => a.id === id) ?? null

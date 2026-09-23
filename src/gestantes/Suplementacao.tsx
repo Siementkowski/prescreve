@@ -27,7 +27,7 @@ const COR_STATUS: Record<RecomendacaoSuplementoGestante['status'], string> = {
 }
 
 /** Suplementação de rotina no pré-natal — Ácido Fólico, Ferro, Cálcio, AAS e Vitaminas
- *  B12/D. Usa a IG calculada na aba Em construção (store compartilhada — ver gestantes/store.ts),
+ *  B12/D. Usa a IG calculada na aba Pré-natal (store compartilhada — ver gestantes/store.ts),
  *  então quem já calculou lá não precisa informar a DUM de novo aqui. Regra puramente da
  *  semana + fatores de risco marcados abaixo — ver dados/suplementacao.ts pro racional de
  *  cada janela. Não substitui julgamento clínico individual. */
@@ -56,8 +56,8 @@ export function Suplementacao() {
           <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             {ig
-              ? `Idade gestacional atual: ${formatarIG(ig)} (calculada na aba Em construção).`
-              : 'Sem idade gestacional calculada ainda — abra Em construção e calcule por DUM, USG ou IG prévia pra ver o status de cada suplemento por semana.'}{' '}
+              ? `Idade gestacional atual: ${formatarIG(ig)} (calculada na aba Pré-natal).`
+              : 'Sem idade gestacional calculada ainda — abra Pré-natal e calcule por DUM, USG ou IG prévia pra ver o status de cada suplemento por semana.'}{' '}
             Regra geral — casos individuais sempre podem mudar a conduta.
           </span>
         </div>

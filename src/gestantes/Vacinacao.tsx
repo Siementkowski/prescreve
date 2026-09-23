@@ -11,7 +11,7 @@ import { formatarIG } from './idade'
 import { Secao, Tabela } from './components/Secao'
 
 /** Vacinação na gestação — conteúdo majoritariamente estático (mesmo espírito de
- *  Aleitamento na Pediatria). Só a semana atual (se já calculada na aba Em construção, via store
+ *  Aleitamento na Pediatria). Só a semana atual (se já calculada na aba Pré-natal, via store
  *  compartilhada) contextualiza o aviso da dTpa/tétano, que tem janela ideal marcada. */
 export function Vacinacao() {
   const ig = useIGAtual()
@@ -43,7 +43,7 @@ export function Vacinacao() {
           {ig && (
             <p className="text-xs text-text-dim mb-2.5 flex items-start gap-1.5">
               <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              Idade gestacional atual: {formatarIG(ig)} (calculada na aba Em construção)
+              Idade gestacional atual: {formatarIG(ig)} (calculada na aba Pré-natal)
               {ig.semanas === 20 ? ' — na semana ideal de aplicação da dTpa.' : ''}
             </p>
           )}

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { create } from 'zustand'
 import { calcularIGPorDUM, calcularIGPorUSG, type IdadeGestacional } from './idade'
 
-export type AbaGestantes = 'guia_consulta' | 'pre_natal' | 'suplementacao' | 'vacinacao' | 'intercorrencias'
+export type AbaGestantes = 'guia_consulta' | 'suplementacao' | 'vacinacao' | 'intercorrencias'
 export type MetodoIG = 'dum' | 'usg' | 'previa'
 
 // Estado da calculadora de idade gestacional — compartilhado entre as sub-abas do módulo
@@ -34,7 +34,7 @@ interface GestantesState {
 }
 
 export const useGestantesStore = create<GestantesState>((set) => ({
-  abaAberta: 'pre_natal',
+  abaAberta: 'guia_consulta',
   setAbaAberta: (abaAberta) => set({ abaAberta }),
 
   metodo: 'dum',
