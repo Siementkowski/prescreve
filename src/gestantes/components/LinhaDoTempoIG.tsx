@@ -190,10 +190,13 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
         >
           {ga != null && (
             <div
-              className="absolute inset-0"
+              className="absolute left-0 rounded-[var(--radius-pill,999px)]"
               style={{
+                top: '50%',
+                height: '50%',
+                transform: 'translateY(-50%)',
                 width: loaded ? pct(ga) : '0%',
-                background: 'color-mix(in oklab, var(--color-text) 26%, var(--color-surface-3))',
+                background: '#000',
                 transition: `width 1.1s ${EASE}`,
               }}
             />
@@ -303,15 +306,13 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
         })}
 
         {/* ---- card de detalhe (hover) ---- */}
-        {hoveredMarco && hoveredItem && ga != null && (
-          <CardMarco marco={hoveredMarco} indiceEmpilhado={hoveredItem.i} ga={ga} />
-        )}
+        {hoveredMarco && ga != null && <CardMarco marco={hoveredMarco} ga={ga} />}
       </div>
     </div>
   )
 }
 
-function CardMarco({ marco, indiceEmpilhado, ga }: { marco: MarcoIG; indiceEmpilhado: number; ga: number }) {
+function CardMarco({ marco, ga }: { marco: MarcoIG; ga: number }) {
   const c = CORES_CATEGORIA_MARCO[marco.categoria]
   const { rotulo, status } = statusDoMarco(marco, ga)
   const x = marco.semanaInicio / MAX
@@ -324,8 +325,10 @@ function CardMarco({ marco, indiceEmpilhado, ga }: { marco: MarcoIG; indiceEmpil
       className="absolute bg-surface border border-border rounded-[var(--radius-card,14px)] shadow-[var(--shadow-popover,0_14px_32px_rgba(0,0,0,.2))] pointer-events-none z-10"
       style={{
         left: `calc(${pct(marco.semanaInicio)} + ${deslocamento}px)`,
-        top: TRACK_Y - indiceEmpilhado * GAP - 16,
-        transform: `translate(${alinhamento}, -100%)`,
+        // Abre pra baixo do trilho/réguas (não pra cima) — perto do topo da página, um
+        // card que sobe pode ficar atrás da topbar fixa do app.
+        top: TRACK_Y + 54,
+        transform: `translateX(${alinhamento})`,
         width: 256,
         padding: '13px 15px 14px',
       }}
