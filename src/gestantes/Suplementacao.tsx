@@ -9,6 +9,7 @@ import {
   calcularCalcio,
   calcularAAS,
   calcularB12D,
+  calcularIodo,
   type RecomendacaoSuplementoGestante,
 } from './dados/suplementacao'
 
@@ -37,6 +38,7 @@ export function Suplementacao() {
   const [anemiaConfirmada, setAnemiaConfirmada] = useState(false)
   const [riscoPreEclampsia, setRiscoPreEclampsia] = useState(false)
   const [dietaRestritivaOuHipovitaminose, setDietaRestritivaOuHipovitaminose] = useState(false)
+  const [baixaIngestaLaticinios, setBaixaIngestaLaticinios] = useState(false)
 
   const recomendacoes = useMemo(() => {
     const ctx = {
@@ -45,9 +47,10 @@ export function Suplementacao() {
       anemiaConfirmada,
       riscoPreEclampsia,
       dietaRestritivaOuHipovitaminose,
+      baixaIngestaLaticinios,
     }
-    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularCalcio(ctx), calcularAAS(ctx), calcularB12D(ctx)]
-  }, [ig, riscoFolatoAlto, anemiaConfirmada, riscoPreEclampsia, dietaRestritivaOuHipovitaminose])
+    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularCalcio(ctx), calcularAAS(ctx), calcularB12D(ctx), calcularIodo()]
+  }, [ig, riscoFolatoAlto, anemiaConfirmada, riscoPreEclampsia, dietaRestritivaOuHipovitaminose, baixaIngestaLaticinios])
 
   return (
     <div className="h-full overflow-y-auto p-6">
@@ -71,9 +74,9 @@ export function Suplementacao() {
                 onChange={(e) => setRiscoFolatoAlto(e.target.checked)}
                 className="w-4 h-4 accent-[var(--color-accent)]"
               />
-              Antecedente pessoal/familiar de defeito do tubo neural, epilepsia, uso de anticonvulsivantes, diabetes,
-              obesidade, polimorfismos genéticos, doença inflamatória intestinal ou cirurgia bariátrica (eleva dose de
-              ácido fólico)
+              Antecedente de filho com defeito de tubo neural, obesidade, uso de anticonvulsivantes, má absorção/doença
+              celíaca, diabetes insulinodependente, alcoolismo, cirurgia bariátrica ou medicamentos que interferem no
+              metabolismo do folato (eleva dose de ácido fólico)
             </label>
             <label className="flex items-center gap-2.5 text-sm cursor-pointer">
               <input
@@ -101,6 +104,15 @@ export function Suplementacao() {
                 className="w-4 h-4 accent-[var(--color-accent)]"
               />
               Dieta vegana estrita ou hipovitaminose identificada (B12/D)
+            </label>
+            <label className="flex items-center gap-2.5 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={baixaIngestaLaticinios}
+                onChange={(e) => setBaixaIngestaLaticinios(e.target.checked)}
+                className="w-4 h-4 accent-[var(--color-accent)]"
+              />
+              Baixa ingesta de laticínios (indica suplementação de cálcio)
             </label>
           </div>
         </Secao>

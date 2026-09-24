@@ -1,14 +1,14 @@
-// Suplementação de rotina no pré-natal — Ácido Fólico, Ferro, Cálcio, AAS e Vitaminas
-// B12/D, conteúdo fornecido pelo usuário (Ministério da Saúde / Febrasgo).
+// Suplementação de rotina no pré-natal — Ácido Fólico, Ferro, Cálcio, AAS, Vitaminas B12/D
+// e Iodo, conteúdo fornecido pelo usuário (Ministério da Saúde / Febrasgo).
 
 export type StatusSuplementoGestante = 'aguardar' | 'iniciar' | 'concluido' | 'nao_aplicavel'
 
 export interface ContextoSuplementacaoGestante {
   semanasIG: number | null
-  /** Antecedente pessoal/familiar de defeito do tubo neural, epilepsia, uso de
-   *  anticonvulsivantes, diabetes, obesidade, polimorfismos genéticos, doença
-   *  inflamatória intestinal ou cirurgia bariátrica — eleva a dose de ácido fólico de
-   *  400 mcg/dia pra 4-5 mg/dia. */
+  /** Antecedente de filho com defeito de tubo neural, obesidade, uso de
+   *  anticonvulsivantes, má absorção/doença celíaca, diabetes insulinodependente,
+   *  alcoolismo, cirurgia bariátrica ou medicamentos que interferem no metabolismo do
+   *  folato — eleva a dose de ácido fólico de 400 mcg/dia pra 4-5 mg/dia. */
   riscoFolatoAlto: boolean
   /** Anemia confirmada (Hb < 11) — eleva a dose de ferro elementar. */
   anemiaConfirmada: boolean
@@ -16,6 +16,9 @@ export interface ContextoSuplementacaoGestante {
   riscoPreEclampsia: boolean
   /** Dieta vegana estrita ou hipovitaminose já identificada — indica B12/D. */
   dietaRestritivaOuHipovitaminose: boolean
+  /** Baixa ingesta de laticínios — indica suplementação de cálcio (600 mg/dia), sobretudo
+   *  quando associada a risco de pré-eclâmpsia. */
+  baixaIngestaLaticinios: boolean
 }
 
 export interface RecomendacaoSuplementoGestante {
@@ -32,13 +35,13 @@ export function calcularAcidoFolico(ctx: ContextoSuplementacaoGestante): Recomen
   const { semanasIG, riscoFolatoAlto } = ctx
   const dose = riscoFolatoAlto ? '4 a 5 mg/dia' : '400 mcg/dia'
   const indicacao =
-    'Todas as gestantes (profilaxia universal, evita defeitos de fechamento do tubo neural) — 4 a 5 mg/dia em: antecedente pessoal/familiar de defeito do tubo neural, uso de anticonvulsivantes, diabetes, obesidade, polimorfismos genéticos, doença inflamatória intestinal ou cirurgia bariátrica'
-  const janela = 'Mínimo 30 dias antes da concepção até o final do 1º trimestre'
+    'Todas as gestantes (profilaxia universal, evita defeitos de fechamento do tubo neural) — 4 a 5 mg/dia em: antecedente de filho com defeito de tubo neural, obesidade, uso de anticonvulsivantes, má absorção/doença celíaca, diabetes insulinodependente, alcoolismo, cirurgia bariátrica ou medicamentos que interferem no metabolismo do folato'
+  const janela = '1 mês antes da concepção até a 12ª semana de gestação'
 
   if (semanasIG == null) {
     return { nome: 'Ácido Fólico', status: 'iniciar', rotuloStatus: 'Rotina', dose, janela, indicacao }
   }
-  if (semanasIG <= 13) {
+  if (semanasIG <= 12) {
     return { nome: 'Ácido Fólico', status: 'iniciar', rotuloStatus: 'Em uso', dose, janela, indicacao }
   }
   return {
@@ -46,7 +49,7 @@ export function calcularAcidoFolico(ctx: ContextoSuplementacaoGestante): Recomen
     status: 'concluido',
     rotuloStatus: 'Janela encerrada',
     dose: '—',
-    janela: 'A janela de suplementação (até o final do 1º trimestre) já passou.',
+    janela: 'A janela de suplementação (até a 12ª semana) já passou.',
     indicacao,
   }
 }
@@ -74,15 +77,42 @@ export function calcularFerro(ctx: ContextoSuplementacaoGestante): RecomendacaoS
 }
 
 export function calcularCalcio(ctx: ContextoSuplementacaoGestante): RecomendacaoSuplementoGestante {
-  const { semanasIG } = ctx
-  const dose = '1 g/dia de Carbonato de Cálcio'
-  const indicacao = 'Todas as gestantes (Ministério da Saúde)'
+  const { baixaIngestaLaticinios, riscoPreEclampsia } = ctx
+  const dose = '600 mg/dia'
+  const indicacao = 'Baixa ingesta de laticínios — sobretudo relevante se associada a risco de pré-eclâmpsia'
   const observacao = 'Não ingerir junto com o ferro — respeitar intervalo de 2 horas entre eles.'
 
-  if (semanasIG == null || semanasIG < 12) {
-    return { nome: 'Cálcio (Carbonato de Cálcio)', status: 'aguardar', rotuloStatus: 'Aguardar', dose, janela: 'A partir da 12ª semana de gestação até o parto', indicacao, observacao }
+  if (!baixaIngestaLaticinios) {
+    return {
+      nome: 'Cálcio',
+      status: 'nao_aplicavel',
+      rotuloStatus: 'Não indicado',
+      dose,
+      janela: 'Durante a gestação, se indicado',
+      indicacao,
+      observacao: 'Marque "baixa ingesta de laticínios" acima se for o caso.',
+    }
   }
-  return { nome: 'Cálcio (Carbonato de Cálcio)', status: 'iniciar', rotuloStatus: 'Em uso', dose, janela: 'Até o parto', indicacao, observacao }
+  return {
+    nome: 'Cálcio',
+    status: 'iniciar',
+    rotuloStatus: 'Em uso',
+    dose,
+    janela: 'Durante a gestação',
+    indicacao,
+    observacao: riscoPreEclampsia ? `${observacao} Também contribui pra redução do risco de pré-eclâmpsia.` : observacao,
+  }
+}
+
+export function calcularIodo(): RecomendacaoSuplementoGestante {
+  return {
+    nome: 'Iodo',
+    status: 'iniciar',
+    rotuloStatus: 'Rotina',
+    dose: '150 a 250 µg/dia',
+    janela: 'Durante toda a gestação e a lactação',
+    indicacao: 'Todas as gestantes e lactantes',
+  }
 }
 
 export function calcularAAS(ctx: ContextoSuplementacaoGestante): RecomendacaoSuplementoGestante {

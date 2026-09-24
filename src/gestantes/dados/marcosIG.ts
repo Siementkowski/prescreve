@@ -14,13 +14,15 @@ export interface MarcoIG {
 }
 
 export const MARCOS_IG: MarcoIG[] = [
+  { chave: 'exames_1t', titulo: 'Exames laboratoriais — 1º trimestre', semanaInicio: 0, semanaFim: 12 },
+  { chave: 'acido_folico', titulo: 'Ácido fólico (pré-concepcional até 12s)', semanaInicio: 0, semanaFim: 12 },
   { chave: 'aas', titulo: 'AAS — profilaxia pré-eclâmpsia', semanaInicio: 12, semanaFim: 16 },
   { chave: 'usg_morfologico_2t', titulo: 'USG morfológico 2º tri', semanaInicio: 20, semanaFim: 24 },
   { chave: 'dtpa', titulo: 'dTpa', semanaInicio: 20, semanaFim: null, textoAberto: true },
   { chave: 'totg', titulo: 'TOTG', semanaInicio: 24, semanaFim: 28 },
-  { chave: 'anti_d', titulo: 'Imunoglobulina anti-D (se Rh−)', semanaInicio: 28, semanaFim: null },
+  { chave: 'coombs_anti_d', titulo: 'Coombs indireto mensal + Imunoglobulina anti-D (se Rh−)', semanaInicio: 28, semanaFim: null },
   { chave: 'vsr', titulo: 'VSR', semanaInicio: 28, semanaFim: null, textoAberto: true },
-  { chave: 'egb', titulo: 'EGB (swab vaginal/retal)', semanaInicio: 35, semanaFim: 37 },
+  { chave: 'egb', titulo: 'EGB (swab anal/vaginal)', semanaInicio: 35, semanaFim: 37 },
 ]
 
 export const SEMANA_MAX_LINHA_DO_TEMPO = 42

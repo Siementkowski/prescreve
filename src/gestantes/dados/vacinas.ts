@@ -9,8 +9,8 @@ export interface VacinaIndicada {
 export const VACINAS_INDICADAS: VacinaIndicada[] = [
   {
     nome: 'Hepatite B',
-    observacao: 'Indicada para toda gestante que apresente sorologia negativa para Hepatite B (e que não tenha sido vacinada)',
-    esquema: ['1ª dose na primeira consulta', '2ª dose 30 dias após', '3ª dose 6 meses após'],
+    observacao: 'Esquema completo já feito → não vacinar. Incompleto → completar as doses faltantes. Não vacinada ou suscetível → iniciar esquema completo.',
+    esquema: ['Não vacinada/suscetível: 3 doses no esquema 0-1-6 meses'],
   },
   {
     nome: 'Influenza (Gripe A / H1N1)',
@@ -43,14 +43,19 @@ export interface LinhaEsquemaTetano {
 
 /** Doses com componente tetânico: DTP, DT ou dT. */
 export const ESQUEMA_TETANO: LinhaEsquemaTetano[] = [
-  { historico: '3 doses prévias (DT, DT, DT)', conduta: 'dTpa às 20 semanas de gestação' },
-  { historico: '2 doses prévias (DT, DT)', conduta: 'dTpa às 20 semanas de gestação' },
-  { historico: '1 dose prévia (DT)', conduta: 'DT + dTpa, com intervalo de 30 a 60 dias entre elas' },
-  { historico: 'Desconhecido', conduta: 'DT antes de 20 semanas → dTpa com 20 semanas → DT após 60 dias' },
+  { historico: '2–3 doses prévias', conduta: '1 dose de dTpa a partir de 20 semanas de gestação' },
+  { historico: 'Apenas 1 dose prévia', conduta: '1 dT + 1 dTpa (intervalo de 1 mês) — dTpa a partir de 20 semanas' },
+  { historico: 'Não vacinada / desconhecido', conduta: '2 dT + 1 dTpa (intervalo de 1 mês entre cada) — dTpa a partir de 20 semanas' },
 ]
 
-/** Vacinas de vírus atenuado ou sem dados suficientes — contraindicadas na gestação. */
-export const VACINAS_CONTRAINDICADAS: string[] = ['Sarampo, caxumba e rubéola', 'Varicela-Zóster', 'Dengue']
+/** Vacinas de vírus vivo atenuado — contraindicadas na gestação. */
+export const VACINAS_CONTRAINDICADAS: string[] = [
+  'Sarampo, caxumba e rubéola (tríplice viral)',
+  'Varicela-Zóster',
+  'Poliomielite oral (VOP)',
+  'BCG',
+  'Dengue',
+]
 
 /** HPV não é vírus atenuado, mas também não é recomendada na gestação — regra própria,
  *  por isso fica separada das contraindicadas de vírus atenuado. */

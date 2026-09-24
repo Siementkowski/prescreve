@@ -15,7 +15,7 @@ import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
 import { useGuiaConsultaStore, type StatusSorologia, type MetodoBCF, type StatusLabs } from './guiaConsultaStore'
 import { calcularDPP, dppCorrigidaPorUSG, formatarIG, formatarData, trimestreDaIG } from './idade'
 import { PERIODICIDADE_CONSULTAS, examesDaConsulta } from './dados/preNatal'
-import { calcularAcidoFolico, calcularFerro, calcularCalcio, calcularAAS, calcularB12D } from './dados/suplementacao'
+import { calcularAcidoFolico, calcularFerro, calcularCalcio, calcularAAS, calcularB12D, calcularIodo } from './dados/suplementacao'
 import { vacinasAplicaveis } from './dados/vacinas'
 import { QUEIXAS_ROTINA, ORIENTACOES_PLANO, TEXTO_SINAIS_ALERTA } from './dados/anamnese'
 import { Secao } from './components/Secao'
@@ -132,8 +132,15 @@ export function GuiaConsulta() {
 
   const suplementos = useMemo(() => {
     if (!ig) return []
-    const ctx = { semanasIG: ig.semanas, riscoFolatoAlto: false, anemiaConfirmada: false, riscoPreEclampsia: false, dietaRestritivaOuHipovitaminose: false }
-    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularCalcio(ctx), calcularAAS(ctx), calcularB12D(ctx)]
+    const ctx = {
+      semanasIG: ig.semanas,
+      riscoFolatoAlto: false,
+      anemiaConfirmada: false,
+      riscoPreEclampsia: false,
+      dietaRestritivaOuHipovitaminose: false,
+      baixaIngestaLaticinios: false,
+    }
+    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularCalcio(ctx), calcularAAS(ctx), calcularB12D(ctx), calcularIodo()]
   }, [ig])
 
   function alternar<T>(set: Set<T>, valor: T, setter: (s: Set<T>) => void) {
