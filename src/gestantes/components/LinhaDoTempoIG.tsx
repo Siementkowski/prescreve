@@ -1,24 +1,67 @@
 import { useState } from 'react'
-import { MARCOS_IG, SEMANA_MAX_LINHA_DO_TEMPO, rotuloSemanasMarco } from '../dados/marcosIG'
+import {
+  MARCOS_IG,
+  SEMANA_MAX_LINHA_DO_TEMPO,
+  rotuloSemanasMarco,
+  LABEL_CATEGORIA_MARCO,
+  type CategoriaMarco,
+} from '../dados/marcosIG'
 
 function pct(semanas: number): number {
   return Math.min(100, Math.max(0, (semanas / SEMANA_MAX_LINHA_DO_TEMPO) * 100))
 }
+
+const CATEGORIAS = Object.keys(LABEL_CATEGORIA_MARCO) as CategoriaMarco[]
 
 /** Linha do tempo visual de IG (0–42 semanas) — variante "passado e futuro": o trecho já
  *  percorrido (0 até a IG atual) fica levemente mais escuro que o trilho neutro à frente,
  *  e o indicador da IG atual (branco, cintilante) marca a transição entre os dois. Marcos
  *  são marcações discretas em preto, sem texto visível por padrão. Passar o mouse na linha
  *  acende o trilho; passar exatamente sobre um marco revela um card com o nome e a janela
- *  de semanas, acima da linha. Só itera `MARCOS_IG` (dados/marcosIG.ts): adicionar/editar
- *  um marco é mexer só nos dados, nunca neste componente. */
+ *  de semanas, acima da linha. Toggle list à direita do título filtra os marcos por
+ *  categoria (Exames/Vacinações/Suplementações/Profilaxia) — todas ativas por padrão. Só
+ *  itera `MARCOS_IG` (dados/marcosIG.ts): adicionar/editar um marco é mexer só nos dados,
+ *  nunca neste componente. */
 export function LinhaDoTempoIG({ semanaAtual }: { semanaAtual: number | null }) {
   const [hoverLinha, setHoverLinha] = useState(false)
   const [marcoAtivo, setMarcoAtivo] = useState<string | null>(null)
+  const [categoriasAtivas, setCategoriasAtivas] = useState<Set<CategoriaMarco>>(new Set(CATEGORIAS))
+
+  function alternarCategoria(cat: CategoriaMarco) {
+    setCategoriasAtivas((atuais) => {
+      const novo = new Set(atuais)
+      if (novo.has(cat)) novo.delete(cat)
+      else novo.add(cat)
+      return novo
+    })
+  }
+
+  const marcosVisiveis = MARCOS_IG.filter((m) => categoriasAtivas.has(m.categoria))
 
   return (
     <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-3.5 flex flex-col gap-5 flex-1 min-w-0">
-      <h2 className="font-display text-[13px] font-semibold">Linha do tempo — 0 a 42 semanas</h2>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <h2 className="font-display text-[13px] font-semibold shrink-0">Linha do tempo — 0 a 42 semanas</h2>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {CATEGORIAS.map((cat) => {
+            const ativo = categoriasAtivas.has(cat)
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => alternarCategoria(cat)}
+                className={`text-[10.5px] font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] border transition-colors ${
+                  ativo
+                    ? 'bg-text border-text text-bg'
+                    : 'bg-surface-2 border-border text-text-dim hover:text-text'
+                }`}
+              >
+                {LABEL_CATEGORIA_MARCO[cat]}
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       <div className="relative pt-8 pb-1">
         {/* ---- indicador da IG atual — branco, cintilante ---- */}
@@ -59,7 +102,7 @@ export function LinhaDoTempoIG({ semanaAtual }: { semanaAtual: number | null }) 
           )}
 
           {/* ---- marcos — discretos, em preto ---- */}
-          {MARCOS_IG.map((m) => {
+          {marcosVisiveis.map((m) => {
             const inicio = pct(m.semanaInicio)
             const fim = m.semanaFim != null ? pct(m.semanaFim) : inicio
             const ehFaixa = fim > inicio
