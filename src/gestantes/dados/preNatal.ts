@@ -84,7 +84,7 @@ export interface BlocoTrimestre {
   condutas: CondutaPreNatal[]
 }
 
-// LABS por trimestre — versão definitiva fornecida pelo usuário (2026-09-24), substitui
+// LABS por trimestre — versão completa fornecida pelo usuário (2026-09-24), substitui
 // qualquer conteúdo anterior sobre exames laboratoriais de rotina do pré-natal.
 export const PRE_NATAL: BlocoTrimestre[] = [
   {
@@ -93,8 +93,7 @@ export const PRE_NATAL: BlocoTrimestre[] = [
     semanaFim: 13,
     exames: [
       { nome: 'Hemograma', periodicidade: '1ª consulta' },
-      { nome: 'Tipagem sanguínea + Fator Rh', periodicidade: '1ª consulta' },
-      { nome: 'Coombs indireto (PAI)', periodicidade: '1ª consulta — se Rh negativo' },
+      { nome: 'Tipagem sanguínea + Fator Rh + Coombs indireto/PAI', periodicidade: '1ª consulta — Coombs/PAI se Rh negativo' },
       {
         nome: 'Glicemia de jejum',
         periodicidade: '1ª consulta',
@@ -104,7 +103,7 @@ export const PRE_NATAL: BlocoTrimestre[] = [
           { texto: 'GJ ≥ 126 mg/dL → DM diagnosticado na gestação (DM prévio)', alerta: true },
         ],
       },
-      { nome: 'Sífilis (teste rápido / VDRL / RPR)', periodicidade: '1ª consulta' },
+      { nome: 'Sífilis (teste rápido de triagem e/ou VDRL/RPR)', periodicidade: '1ª consulta' },
       { nome: 'HIV (teste rápido ou sorologia)', periodicidade: '1ª consulta' },
       {
         nome: 'Toxoplasmose IgM + IgG',
@@ -145,9 +144,12 @@ export const PRE_NATAL: BlocoTrimestre[] = [
     semanaInicio: 14,
     semanaFim: 27,
     exames: [
+      { nome: 'Hemograma', periodicidade: '24–28 semanas' },
+      { nome: 'VDRL', periodicidade: '24–28 semanas' },
+      { nome: 'EAS + Urocultura', periodicidade: '24–28 semanas' },
       {
         nome: 'TOTG 75g',
-        periodicidade: '24–28 semanas — só se a glicemia de jejum inicial foi normal (< 92 mg/dL)',
+        periodicidade: '24–28 semanas — padrão-ouro para DMG, só se a GJ do 1º tri foi normal (< 92 mg/dL)',
         notas: [
           { texto: 'Diagnóstico de DMG: 1 único valor alterado — jejum ≥ 92, 1h ≥ 180, 2h ≥ 153 mg/dL' },
           { texto: '2h ≥ 200 mg/dL = DM diagnosticado na gestação (não DMG)', alerta: true },
@@ -159,12 +161,13 @@ export const PRE_NATAL: BlocoTrimestre[] = [
         periodicidade: 'Se suscetível',
         notas: [{ texto: 'Repetir durante toda a gestação — a cada 2 meses (alta prevalência local) ou mensal (protocolo HC-FMUSP)' }],
       },
-      { nome: 'Coombs indireto', periodicidade: 'Mensal — se Rh negativo com risco de aloimunização' },
+      { nome: 'HIV', periodicidade: 'Repetir no 2º ou 3º trimestre, conforme protocolo local' },
       {
         nome: 'USG morfológico',
         periodicidade: '20 a 24 semanas',
-        notas: [{ texto: 'Morfologia fetal, medida do colo uterino, avaliação da placenta' }],
+        notas: [{ texto: 'Avaliação completa da anatomia fetal' }],
       },
+      { nome: 'Coombs indireto', periodicidade: 'Mensal — se Rh negativo com risco de aloimunização' },
     ],
     condutas: [],
   },
@@ -173,34 +176,35 @@ export const PRE_NATAL: BlocoTrimestre[] = [
     semanaInicio: 28,
     semanaFim: null,
     exames: [
-      { nome: 'HIV', periodicidade: 'Após 28 semanas' },
-      { nome: 'Sífilis (VDRL / RPR ou teste rápido)', periodicidade: 'Após 28 semanas' },
-      { nome: 'Urocultura', periodicidade: 'Após 28 semanas' },
+      { nome: 'Hemograma', periodicidade: '28–36 semanas' },
+      { nome: 'Sífilis (VDRL/RPR ou teste rápido)', periodicidade: 'Após 28 semanas' },
+      { nome: 'EAS + Urocultura', periodicidade: 'Após 28 semanas' },
+      { nome: 'Glicemia de jejum', periodicidade: 'Se TOTG não foi realizado' },
       {
         nome: 'Toxoplasmose IgM + IgG',
         periodicidade: 'Se suscetível',
         notas: [{ texto: 'Repetir durante toda a gestação — a cada 2 meses (alta prevalência local) ou mensal (protocolo HC-FMUSP)' }],
       },
-      { nome: 'Coombs indireto', periodicidade: 'Mensal — se Rh negativo com risco de aloimunização' },
+      {
+        nome: 'HIV',
+        periodicidade: 'Obrigatório no 3º trimestre e na internação para o parto',
+        notas: [{ texto: 'Obrigatório mesmo se já negativo antes', alerta: true }],
+      },
       { nome: 'Anti-HCV (Hepatite C)', periodicidade: 'Solicitar também no 3º trimestre (além do 1º)' },
+      { nome: 'Coombs indireto', periodicidade: 'Mensal — se Rh negativo com risco de aloimunização' },
       {
         nome: 'EGB — Streptococcus agalactiae',
-        periodicidade: 'Swab anal/vaginal entre 35–37 semanas — rastreamento universal',
+        periodicidade: 'Swab vaginal/retal entre 35–37 semanas — rastreamento universal',
         notas: [{ texto: 'Positivo: profilaxia intraparto com penicilina G ou ampicilina', alerta: true }],
         subitens: [
           {
-            titulo: 'Cultura materna positiva para EGB',
-            descricao: 'Swab anal/vaginal positivo entre 35–37 semanas, independente de outros fatores de risco.',
-            absoluta: true,
-          },
-          {
             titulo: 'Bacteriúria por EGB em qualquer momento da gestação',
-            descricao: 'Sintomática ou assintomática, mesmo que tratada adequadamente — indicação absoluta de profilaxia.',
+            descricao: 'Sintomática ou assintomática, mesmo que tratada adequadamente — indicação absoluta de profilaxia, mesmo sem cultura 35–37s positiva.',
             absoluta: true,
           },
           {
             titulo: 'Filho prévio com infecção neonatal por EGB',
-            descricao: 'Sepse, pneumonia ou meningite por EGB em gestação anterior — indicação absoluta de profilaxia.',
+            descricao: 'Sepse, pneumonia ou meningite por EGB em gestação anterior — indicação absoluta de profilaxia, mesmo sem cultura 35–37s positiva.',
             absoluta: true,
           },
           {
