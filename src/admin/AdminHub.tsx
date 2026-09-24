@@ -51,11 +51,7 @@ export function AdminHub() {
             ações à direita */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8 mb-11">
           <div className="min-w-0">
-            <span className="ed-pill inline-flex items-center gap-1.5 border border-[var(--line-strong)] bg-surface px-2.5 py-1.5 text-[11px] font-semibold">
-              <span className="ed-eyebrow-dot bg-cat-areas" aria-hidden="true" />
-              Prescreve
-            </span>
-            <h1 className="font-display text-[clamp(30px,4.2vw,48px)] leading-[0.98] tracking-[-.045em] mt-4 mb-3">
+            <h1 className="font-display text-[clamp(30px,4.2vw,48px)] leading-[0.98] tracking-[-.045em] mb-3">
               Oi, {primeiroNome} — vamos cuidar da sua base?
             </h1>
             <p className="max-w-md text-text-dim text-[15px] leading-relaxed">
@@ -146,17 +142,8 @@ export function AdminHub() {
         </div>
 
         {/* acesso rápido — áreas clínicas */}
-        <div className="flex items-end justify-between gap-4 mt-14 mb-4.5">
-          <div>
-            <span className="ed-pill inline-flex items-center gap-1.5 border border-[var(--line-strong)] bg-surface px-2.5 py-1.5 text-[11px] font-semibold">
-              <span className="ed-eyebrow-dot bg-accent" aria-hidden="true" />
-              Acesso rápido
-            </span>
-            <h2 className="font-display text-[28px] tracking-[-1px] mt-3">Áreas clínicas</h2>
-          </div>
-          <span className="text-xs text-text-dim shrink-0 pb-1">
-            {areas.length} área{areas.length === 1 ? '' : 's'}
-          </span>
+        <div className="mt-14 mb-4.5">
+          <h2 className="font-display text-[28px] tracking-[-1px]">Áreas clínicas</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
