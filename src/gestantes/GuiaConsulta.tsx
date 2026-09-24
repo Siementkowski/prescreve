@@ -417,7 +417,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
             )}
           </div>
 
-          <LinhaDoTempoIG semanaAtual={ig ? ig.semanas : null} />
+          <LinhaDoTempoIG semanas={ig ? ig.semanas : null} dias={ig?.dias} />
         </div>
 
         <div className="max-w-3xl w-full flex flex-col gap-4">
