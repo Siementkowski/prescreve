@@ -14,14 +14,38 @@ import {
 const MAX = SEMANA_MAX_LINHA_DO_TEMPO
 const CATEGORIAS = Object.keys(LABEL_CATEGORIA_MARCO) as CategoriaMarco[]
 const TRIMESTRES = [
-  { rotulo: '1º trimestre', de: 0, ate: 13 },
-  { rotulo: '2º trimestre', de: 14, ate: 27 },
-  { rotulo: '3º trimestre', de: 28, ate: MAX },
+  { rotulo: '1º trimestre', de: 0, ate: 14, faixa: '0s-13s6d' },
+  { rotulo: '2º trimestre', de: 14, ate: 27, faixa: '14s-26s6d' },
+  { rotulo: '3º trimestre', de: 27, ate: MAX, faixa: '27s-41s6d' },
 ]
 const TRACK_Y = 66
 const DOT = 10
-const GAP = 13
+const ALTURA_LINHA_MARCO = 20
+const NUDGE_MARCO_X = 1
 const EASE = 'cubic-bezier(.2,.7,.2,1)'
+
+// Em telas com escala fracionária (125%/150% no Windows, comum em notebook), 1px de CSS
+// não corresponde a 1 pixel físico — uma linha de 1px cai num sub-pixel do monitor
+// diferente dependendo de onde ela está na tela, e cada posição fica com uma nitidez/
+// espessura ligeiramente diferente depois do antialiasing. `snapPx` arredonda pro pixel
+// físico mais próximo (via devicePixelRatio) antes de voltar pra CSS px, garantindo que a
+// linha caia sempre num número inteiro de pixels físicos — mesma espessura em qualquer
+// posição da linha do tempo.
+const DPR = typeof window !== 'undefined' && window.devicePixelRatio ? window.devicePixelRatio : 1
+function snapPx(valorCss: number): number {
+  return Math.round(valorCss * DPR) / DPR
+}
+// Deslocamento pra centralizar um elemento de `larguraCss` sobre o ponto 0 do pai — usar
+// isso em vez de `transform: translateX(-50%)` é o que garante que a linha (centralizada
+// pela própria largura, já em px físico) e o círculo (centralizado pela largura do botão,
+// 22px, que sozinha não cai num múltiplo de pixel físico) acabem exatamente no mesmo
+// pixel físico. Com -50% cada um arredondava pro pixel físico mais próximo por conta
+// própria — quase sempre o mesmo, mas não sempre, daí a linha parecer "desalinhada" do
+// centro do círculo em alguns marcos.
+function deslocamentoCentralizado(larguraCss: number): number {
+  return -snapPx(larguraCss / 2)
+}
+const LARGURA_LINHA_MARCO = Math.max(1, Math.round(1 * DPR)) / DPR
 
 function pctNum(semanas: number): number {
   return (Math.max(0, Math.min(MAX, semanas)) / MAX) * 100
@@ -97,6 +121,15 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
   const hoveredItem = hover ? placed.find((p) => p.m.chave === hover) : undefined
   const hoveredMarco = hoveredItem?.m
 
+  // Posição em px físico (não %, nem só px de CSS) pras linhas finas dos marcos — em % +
+  // translateX(-50%), cada marco cai num sub-pixel diferente (e isso muda com a largura
+  // exata do container, ex: F12 aberto encolhendo a viewport) e o navegador antialiasa
+  // cada um de um jeito, fazendo a mesma linha de 1.5px parecer com espessuras diferentes
+  // de marco pra marco. `snapPx` trava no pixel físico da tela, sempre.
+  function pctPx(semanas: number): number {
+    return snapPx((pctNum(semanas) / 100) * largura)
+  }
+
   return (
     <div
       className="bg-surface border border-border rounded-[var(--radius-panel,18px)] flex-1 min-w-0"
@@ -148,22 +181,7 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
         </div>
       </header>
 
-      <div ref={stageRef} className="relative mx-1.5" style={{ height: 128 }} onMouseLeave={() => setHover(null)}>
-        {/* ---- zonas de trimestre ---- */}
-        {TRIMESTRES.map((t, i) => (
-          <div
-            key={t.rotulo}
-            className="absolute"
-            style={{
-              top: 32,
-              height: TRACK_Y - 32 + 4,
-              left: pct(t.de),
-              width: `calc(${pct(t.ate - t.de + (i < 2 ? 1 : 0))})`,
-              borderLeft: i ? '1px dashed var(--color-border)' : 'none',
-            }}
-          />
-        ))}
-
+      <div ref={stageRef} className="relative mx-1.5" style={{ height: 144 }} onMouseLeave={() => setHover(null)}>
         {/* ---- pino "hoje" ---- */}
         {ga != null && (
           <div
@@ -214,36 +232,76 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
           )}
         </div>
 
-        {/* ---- marcos ---- */}
+        {/* ---- linhas dos marcos — sempre atrás de TODOS os círculos (2 passadas: linhas
+            primeiro, círculos depois), senão a linha mais alta de um marco empilhado
+            passa visualmente por cima dos círculos dos marcos abaixo dele na mesma
+            semana. Altura de 20px (fixa) + 10px por marco empilhado na mesma semana. ---- */}
         {placed.map(({ m, i }) => {
-          const c = CORES_CATEGORIA_MARCO[m.categoria]
-          const fim = semanaFimEfetiva(m)
-          const passado = ga != null && ga > fim
-          const atual = ga != null && ga >= m.semanaInicio && ga <= fim
-          const isHover = hover === m.chave
-          const tamanho = isHover ? DOT + 4 : DOT
+          const alturaLinha = ALTURA_LINHA_MARCO + i * 10
+          const topoLinha = TRACK_Y - 4 - alturaLinha
+          const offsetLinha = deslocamentoCentralizado(LARGURA_LINHA_MARCO)
           return (
-            <button
+            <div
               key={m.chave}
-              type="button"
-              aria-label={`${m.titulo}, ${rotuloSemanasMarco(m)}`}
-              onMouseEnter={() => setHover(m.chave)}
-              onFocus={() => setHover(m.chave)}
-              onBlur={() => setHover(null)}
-              className="absolute -translate-x-1/2 -translate-y-1/2 w-[22px] h-[22px] p-0 border-0 bg-transparent grid place-items-center outline-none"
-              style={{ left: pct(m.semanaInicio), top: TRACK_Y - i * GAP, zIndex: isHover ? 5 : 2 }}
+              className="absolute pointer-events-none"
+              style={{ left: pctPx(m.semanaInicio) + NUDGE_MARCO_X, top: 0, zIndex: 1 }}
             >
-              <span
-                className="rounded-full transition-all"
+              <div
+                className="absolute"
                 style={{
-                  width: tamanho,
-                  height: tamanho,
-                  background: passado ? c.cor : 'var(--color-surface)',
-                  boxShadow: `0 0 0 2px var(--color-surface), inset 0 0 0 2px ${c.cor}${atual ? `, 0 0 0 5px ${c.suave}` : ''}`,
-                  opacity: passado && !isHover ? 0.55 : 1,
+                  left: offsetLinha,
+                  top: topoLinha,
+                  height: alturaLinha,
+                  width: LARGURA_LINHA_MARCO,
+                  background: 'var(--color-border-strong)',
                 }}
               />
-            </button>
+            </div>
+          )
+        })}
+
+        {/* ---- círculos dos marcos — sempre preenchidos com a cor da categoria.
+            Selecionado (hover): ganha um contorno preto de 1px por fora do halo branco.
+            O centro se alinha ao centro REAL da linha (que já é arredondada pro pixel
+            físico pra ficar nítida — isso desloca o centro dela em meio pixel, inerente a
+            uma linha de largura ímpar nítida — recalcular o centro do zero aqui deixaria
+            os dois "certos" isoladamente mas desencontrados um do outro). ---- */}
+        {placed.map(({ m, i }) => {
+          const c = CORES_CATEGORIA_MARCO[m.categoria]
+          const isHover = hover === m.chave
+          const tamanho = isHover ? DOT + 4 : DOT
+          const alturaLinha = ALTURA_LINHA_MARCO + i * 10
+          const topoLinha = TRACK_Y - 4 - alturaLinha
+          const offsetLinha = deslocamentoCentralizado(LARGURA_LINHA_MARCO)
+          const centroX = offsetLinha + LARGURA_LINHA_MARCO / 2
+          return (
+            <div
+              key={m.chave}
+              className="absolute pointer-events-none"
+              style={{ left: pctPx(m.semanaInicio) + NUDGE_MARCO_X, top: 0, zIndex: isHover ? 5 : 2 }}
+            >
+              <button
+                type="button"
+                aria-label={`${m.titulo}, ${rotuloSemanasMarco(m)}`}
+                onMouseEnter={() => setHover(m.chave)}
+                onFocus={() => setHover(m.chave)}
+                onBlur={() => setHover(null)}
+                className="absolute -translate-y-1/2 w-[22px] h-[22px] p-0 border-0 bg-transparent grid place-items-center outline-none pointer-events-auto"
+                style={{ left: centroX - 11, top: topoLinha }}
+              >
+                <span
+                  className="rounded-full transition-all"
+                  style={{
+                    width: tamanho,
+                    height: tamanho,
+                    background: c.cor,
+                    boxShadow: isHover
+                      ? '0 0 0 2px var(--color-surface), 0 0 0 3px #000'
+                      : '0 0 0 2px var(--color-surface)',
+                  }}
+                />
+              </button>
+            </div>
           )
         })}
 
@@ -251,9 +309,9 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
         {Array.from({ length: MAX + 1 }, (_, w) => (
           <div
             key={w}
-            className="absolute"
+            className="absolute -translate-x-1/2"
             style={{
-              left: pct(w),
+              left: pctPx(w),
               top: TRACK_Y + 8,
               width: 1,
               height: w % 2 ? 3 : 5,
@@ -283,24 +341,24 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
           )
         })}
 
-        {/* ---- rótulos de trimestre ---- */}
+        {/* ---- rótulos de trimestre — centralizados na própria faixa, com a janela de
+            semanas entre parênteses embaixo ---- */}
         {TRIMESTRES.map((t) => {
           const atual = ga != null && ga >= t.de && ga < t.ate + 1
           return (
             <div
               key={t.rotulo}
-              className="absolute whitespace-nowrap uppercase"
+              className="absolute -translate-x-1/2 whitespace-nowrap text-center"
               style={{
-                left: pct(t.de),
+                left: pct((t.de + t.ate) / 2),
                 top: TRACK_Y + 40,
-                paddingLeft: t.de ? 6 : 0,
-                fontSize: 10,
-                letterSpacing: '1.2px',
                 color: atual ? 'var(--color-text)' : 'var(--color-text-dim)',
-                fontWeight: atual ? 600 : 400,
               }}
             >
-              {t.rotulo}
+              <div className="uppercase" style={{ fontSize: 10, letterSpacing: '1.2px', fontWeight: atual ? 600 : 400 }}>
+                {t.rotulo}
+              </div>
+              <div style={{ fontSize: 10, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>({t.faixa})</div>
             </div>
           )
         })}
