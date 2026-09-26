@@ -236,8 +236,12 @@ export interface CampoResultadoExame {
 }
 
 /** Campos de resultado por exame — granularidade dos valores que de fato compõem cada
- *  exame do painel de LABS por trimestre (ver PRE_NATAL acima). Exame sem entrada aqui
- *  cai no fallback de um único campo "Resultado" (ver uso em GuiaConsulta.tsx). */
+ *  exame do painel de LABS por trimestre (ver PRE_NATAL acima). Renderizados como grade
+ *  única e contínua (sem agrupar visualmente por exame — ver GuiaConsulta.tsx), por isso
+ *  cada `label` precisa ser autoexplicativo sozinho, sem depender do nome do exame ao
+ *  lado (daí exame de resultado único usar o próprio nome do exame como label, em vez de
+ *  um genérico "Resultado"). Exame sem entrada aqui cai no fallback de um campo com o
+ *  próprio nome do exame como label (ver uso em GuiaConsulta.tsx). */
 export const CAMPOS_RESULTADO_EXAME: Record<string, CampoResultadoExame[]> = {
   Hemograma: [
     { label: 'Hb (g/dL)', placeholder: 'ex: 12,5' },
@@ -246,34 +250,34 @@ export const CAMPOS_RESULTADO_EXAME: Record<string, CampoResultadoExame[]> = {
     { label: 'Plaquetas', placeholder: 'ex: 250.000' },
   ],
   'Tipagem sanguínea + Fator Rh': [{ label: 'Tipo sanguíneo', placeholder: 'ex: A+' }],
-  'Coombs indireto': [{ label: 'Resultado', placeholder: 'ex: Negativo' }],
-  'Eletroforese de hemoglobina': [{ label: 'Resultado', placeholder: 'ex: AA' }],
+  'Coombs indireto': [{ label: 'Coombs indireto', placeholder: 'ex: Negativo' }],
+  'Eletroforese de hemoglobina': [{ label: 'Eletroforese de Hb', placeholder: 'ex: AA' }],
   'Glicemia de jejum': [{ label: 'GJ (mg/dL)', placeholder: 'ex: 92' }],
-  EAS: [{ label: 'Resultado', placeholder: 'ex: Normal' }],
-  'Urocultura com TSA (antibiograma)': [{ label: 'Resultado', placeholder: 'ex: Negativa' }],
+  EAS: [{ label: 'EAS', placeholder: 'ex: Normal' }],
+  'Urocultura com TSA (antibiograma)': [{ label: 'Urocultura (TSA)', placeholder: 'ex: Negativa' }],
   'Toxoplasmose IgG/IgM': [
-    { label: 'IgG', placeholder: 'ex: Reagente' },
-    { label: 'IgM', placeholder: 'ex: Não reagente' },
+    { label: 'Toxoplasmose IgG', placeholder: 'ex: Reagente' },
+    { label: 'Toxoplasmose IgM', placeholder: 'ex: Não reagente' },
   ],
-  HIV: [{ label: 'Resultado', placeholder: 'ex: Não reagente' }],
+  HIV: [{ label: 'HIV', placeholder: 'ex: Não reagente' }],
   Sífilis: [{ label: 'VDRL', placeholder: 'ex: Não reagente' }],
   'Hepatite B e C (HBsAg + Anti-HCV)': [
     { label: 'HBsAg', placeholder: 'ex: Não reagente' },
     { label: 'Anti-HCV', placeholder: 'ex: Não reagente' },
   ],
-  'HTLV 1 e 2': [{ label: 'Resultado', placeholder: 'ex: Não reagente' }],
+  'HTLV 1 e 2': [{ label: 'HTLV 1 e 2', placeholder: 'ex: Não reagente' }],
   TSH: [{ label: 'TSH (mUI/L)', placeholder: 'ex: 2,10' }],
-  'Preventivo (citopatológico de colo uterino)': [{ label: 'Resultado', placeholder: 'ex: Normal' }],
+  'Preventivo (citopatológico de colo uterino)': [{ label: 'Preventivo', placeholder: 'ex: Normal' }],
   'Vitamina D': [{ label: 'Vitamina D (ng/mL)', placeholder: 'ex: 32' }],
-  'Clamídia / Gonococo': [{ label: 'Resultado', placeholder: 'ex: Negativo' }],
+  'Clamídia / Gonococo': [{ label: 'Clamídia / Gonococo', placeholder: 'ex: Negativo' }],
   'TOTG 75g': [
-    { label: 'Jejum (mg/dL)', placeholder: 'ex: 88' },
-    { label: '1h (mg/dL)', placeholder: 'ex: 160' },
-    { label: '2h (mg/dL)', placeholder: 'ex: 140' },
+    { label: 'TOTG jejum (mg/dL)', placeholder: 'ex: 88' },
+    { label: 'TOTG 1h (mg/dL)', placeholder: 'ex: 160' },
+    { label: 'TOTG 2h (mg/dL)', placeholder: 'ex: 140' },
   ],
-  Urocultura: [{ label: 'Resultado', placeholder: 'ex: Negativa' }],
+  Urocultura: [{ label: 'Urocultura', placeholder: 'ex: Negativa' }],
   'Hepatite B': [{ label: 'HBsAg', placeholder: 'ex: Não reagente' }],
-  'Pesquisa de estreptococo (EGB) — Streptococcus agalactiae': [{ label: 'Resultado', placeholder: 'ex: Negativo' }],
+  'Pesquisa de estreptococo (EGB) — Streptococcus agalactiae': [{ label: 'EGB', placeholder: 'ex: Negativo' }],
 }
 
 /** Agenda dos USG — categoria própria, fora do checklist de labs (PRE_NATAL) — com faixa

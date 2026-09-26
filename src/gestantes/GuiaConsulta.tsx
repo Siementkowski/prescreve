@@ -25,7 +25,6 @@ const ROTULO_SOROLOGIA: Record<StatusSorologia, string> = { desconhecido: '?', i
 const ROTULO_LABS: Record<StatusLabs, string> = { nao_avaliado: 'não avaliados', normais: 'normais', alterados: 'alterados' }
 
 const SEMANAS_POR_INTERVALO: Record<string, number> = { Mensal: 4, Quinzenal: 2, Semanal: 1 }
-const FALLBACK_CAMPO_EXAME = [{ label: 'Resultado', placeholder: 'ex: valor' }]
 
 /** Pré-natal — calculadora de IG + linha do tempo (compactas, topo) e o roteiro de
  *  anamnese que se adapta ao contexto (IG, 1ª consulta ou retorno). Reaproveita os dados
@@ -152,7 +151,7 @@ export function GuiaConsulta() {
   }
 
   function camposDoExame(nomeExame: string) {
-    return CAMPOS_RESULTADO_EXAME[nomeExame] ?? FALLBACK_CAMPO_EXAME
+    return CAMPOS_RESULTADO_EXAME[nomeExame] ?? [{ label: nomeExame, placeholder: 'ex: valor' }]
   }
   function chaveResultado(nomeExame: string, campoLabel: string) {
     return `${nomeExame}::${campoLabel}`
@@ -609,25 +608,19 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                   <input type="date" value={dataExames} onChange={(e) => setDataExames(e.target.value)} className={inputCls + ' w-full'} />
                 </Campo>
 
-                <div className="flex flex-col gap-3">
-                  {exames.map((e) => (
-                    <div key={e.nome} className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-3">
-                      <span className="block text-sm font-semibold text-text">{e.nome}</span>
-                      <span className="block text-xs text-text-dim mt-0.5 mb-2.5">{e.periodicidade}</span>
-                      <div className="grid grid-cols-2 gap-2.5">
-                        {camposDoExame(e.nome).map((campo) => (
-                          <Campo key={campo.label} label={campo.label}>
-                            <input
-                              value={valorResultado(e.nome, campo.label)}
-                              onChange={(ev) => setValorResultado(e.nome, campo.label, ev.target.value)}
-                              placeholder={campo.placeholder}
-                              className={inputCls + ' w-full'}
-                            />
-                          </Campo>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
+                  {exames.flatMap((e) =>
+                    camposDoExame(e.nome).map((campo) => (
+                      <Campo key={`${e.nome}::${campo.label}`} label={campo.label}>
+                        <input
+                          value={valorResultado(e.nome, campo.label)}
+                          onChange={(ev) => setValorResultado(e.nome, campo.label, ev.target.value)}
+                          placeholder={campo.placeholder}
+                          className={inputCls + ' w-full'}
+                        />
+                      </Campo>
+                    ))
+                  )}
                 </div>
               </div>
             </Secao>
