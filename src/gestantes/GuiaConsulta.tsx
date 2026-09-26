@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import {
-  AlertTriangle,
   Calendar,
   ClipboardList,
   Pill,
@@ -17,7 +16,7 @@ import { calcularDPP, dppCorrigidaPorUSG, formatarIG, formatarData, trimestreDaI
 import { PERIODICIDADE_CONSULTAS, examesDaConsulta, CAMPOS_RESULTADO_EXAME } from './dados/preNatal'
 import { calcularAcidoFolico, calcularFerro, calcularAAS, calcularVitaminaD } from './dados/suplementacao'
 import { vacinasAplicaveis } from './dados/vacinas'
-import { QUEIXAS_ROTINA, ORIENTACOES_PLANO, TEXTO_SINAIS_ALERTA } from './dados/anamnese'
+import { QUEIXAS_ROTINA, TEXTO_SINAIS_ALERTA } from './dados/anamnese'
 import { Secao } from './components/Secao'
 import { LinhaDoTempoIG } from './components/LinhaDoTempoIG'
 
@@ -112,8 +111,6 @@ export function GuiaConsulta() {
 
   const riscoAlto = useGuiaConsultaStore((s) => s.riscoAlto)
   const setRiscoAlto = useGuiaConsultaStore((s) => s.setRiscoAlto)
-  const orientacoesMarcadas = useGuiaConsultaStore((s) => s.orientacoesMarcadas)
-  const setOrientacoesMarcadas = useGuiaConsultaStore((s) => s.setOrientacoesMarcadas)
   const planoExtra = useGuiaConsultaStore((s) => s.planoExtra)
   const setPlanoExtra = useGuiaConsultaStore((s) => s.setPlanoExtra)
 
@@ -220,10 +217,6 @@ export function GuiaConsulta() {
 
     const linhaVacinasPlano = vacinasFaltando.length > 0 ? `Vacinas pendentes: ${vacinasFaltando.join(', ')}.` : ''
 
-    const orientacoesTexto = ORIENTACOES_PLANO.filter((o) => orientacoesMarcadas.has(o.chave))
-      .map((o) => o.titulo)
-      .join(', ')
-
     const semanasRetorno = periodicidade ? SEMANAS_POR_INTERVALO[periodicidade.intervalo] ?? 4 : 4
 
     const linhaLabs =
@@ -259,7 +252,6 @@ P
 ${linhaSolicitacao}
 ${TEXTO_SINAIS_ALERTA}
 ${linhaVacinasPlano}
-${orientacoesTexto ? `Orientações reforçadas: ${orientacoesTexto}.` : ''}
 Retorno em ${semanasRetorno} semana${semanasRetorno === 1 ? '' : 's'}.
 ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a conduta.`
       .split('\n')
@@ -304,7 +296,6 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
     bcfBpm,
     bcfAusente,
     riscoAlto,
-    orientacoesMarcadas,
     planoExtra,
     exames,
     resultadosExame,
@@ -631,25 +622,6 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                   <span className="text-xs font-semibold text-text-dim shrink-0">Risco gestacional:</span>
                   <ToggleChip ativo={!riscoAlto} onClick={() => setRiscoAlto(false)} label="Habitual" />
                   <ToggleChip ativo={riscoAlto} onClick={() => setRiscoAlto(true)} label="Alto risco" alerta={riscoAlto} />
-                </div>
-
-                <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2.5">
-                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                  {TEXTO_SINAIS_ALERTA}
-                </div>
-
-                <div>
-                  <span className="text-xs font-semibold text-text-dim">Orientações dadas nessa consulta</span>
-                  <div className="flex flex-wrap gap-1.5 mt-1.5">
-                    {ORIENTACOES_PLANO.map((o) => (
-                      <ToggleChip
-                        key={o.chave}
-                        ativo={orientacoesMarcadas.has(o.chave)}
-                        onClick={() => alternar(orientacoesMarcadas, o.chave, setOrientacoesMarcadas)}
-                        label={o.titulo}
-                      />
-                    ))}
-                  </div>
                 </div>
 
                 <Campo label="Plano extra (opcional — entra antes do fechamento)">

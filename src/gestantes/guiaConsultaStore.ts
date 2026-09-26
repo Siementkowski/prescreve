@@ -87,8 +87,6 @@ interface GuiaConsultaState {
   // ---- avaliação / plano (P) ----
   riscoAlto: boolean
   setRiscoAlto: (v: boolean) => void
-  orientacoesMarcadas: Set<string>
-  setOrientacoesMarcadas: (v: Set<string>) => void
   planoExtra: string
   setPlanoExtra: (v: string) => void
 
@@ -165,8 +163,6 @@ export const useGuiaConsultaStore = create<GuiaConsultaState>((set) => ({
 
   riscoAlto: false,
   setRiscoAlto: (riscoAlto) => set({ riscoAlto }),
-  orientacoesMarcadas: new Set(),
-  setOrientacoesMarcadas: (orientacoesMarcadas) => set({ orientacoesMarcadas }),
   planoExtra: '',
   setPlanoExtra: (planoExtra) => set({ planoExtra }),
 
