@@ -15,7 +15,7 @@ import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
 import { useGuiaConsultaStore, type StatusSorologia, type MetodoBCF, type StatusLabs } from './guiaConsultaStore'
 import { calcularDPP, dppCorrigidaPorUSG, formatarIG, formatarData, trimestreDaIG } from './idade'
 import { PERIODICIDADE_CONSULTAS, examesDaConsulta } from './dados/preNatal'
-import { calcularAcidoFolico, calcularFerro, calcularCalcio, calcularAAS, calcularB12D, calcularIodo } from './dados/suplementacao'
+import { calcularAcidoFolico, calcularFerro, calcularCalcio, calcularAAS, calcularVitaminaD, calcularB12, calcularIodo } from './dados/suplementacao'
 import { vacinasAplicaveis } from './dados/vacinas'
 import { QUEIXAS_ROTINA, ORIENTACOES_PLANO, TEXTO_SINAIS_ALERTA } from './dados/anamnese'
 import { Secao } from './components/Secao'
@@ -139,8 +139,17 @@ export function GuiaConsulta() {
       riscoPreEclampsia: false,
       dietaRestritivaOuHipovitaminose: false,
       baixaIngestaLaticinios: false,
+      deficienciaVitaminaD: false,
     }
-    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularCalcio(ctx), calcularAAS(ctx), calcularB12D(ctx), calcularIodo()]
+    return [
+      calcularAcidoFolico(ctx),
+      calcularFerro(ctx),
+      calcularCalcio(ctx),
+      calcularAAS(ctx),
+      calcularVitaminaD(ctx),
+      calcularB12(ctx),
+      calcularIodo(),
+    ]
   }, [ig])
 
   function alternar<T>(set: Set<T>, valor: T, setter: (s: Set<T>) => void) {
@@ -420,7 +429,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
           <LinhaDoTempoIG semanas={ig ? ig.semanas : null} dias={ig?.dias} />
         </div>
 
-        <div className="max-w-3xl w-full flex flex-col gap-4">
+        <div className="w-full flex flex-col gap-4">
         {!ig && <p className="text-sm text-text-dim px-0.5">Calcule a idade gestacional acima pra continuar o guia.</p>}
 
         {ig && primeiraConsulta == null && (
@@ -429,6 +438,8 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
 
         {ig && primeiraConsulta != null && (
           <>
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
+            <div className="w-full sm:w-[30%]">
             <Secao titulo="Antecedentes" icone={ClipboardList}>
               <div className="flex flex-col gap-3">
                 <Campo label="DUM (relatada, pro cabeçalho da anamnese)">
@@ -460,8 +471,8 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                   <Campo label="Tipo sanguíneo (TS)"><input value={tipoSanguineo} onChange={(e) => setTipoSanguineo(e.target.value)} className={inputCls} /></Campo>
                   <Campo label="Atividade laboral"><input value={atividadeLaboral} onChange={(e) => setAtividadeLaboral(e.target.value)} className={inputCls} /></Campo>
                 </div>
-                <Campo label="Comorbidades (vazio = nega)"><input value={comorbidades} onChange={(e) => setComorbidades(e.target.value)} className={inputCls + ' w-full'} /></Campo>
-                <Campo label="Alergias (vazio = nega)"><input value={alergias} onChange={(e) => setAlergias(e.target.value)} className={inputCls + ' w-full'} /></Campo>
+                <CampoComNega label="Comorbidades" valor={comorbidades} onChange={setComorbidades} />
+                <CampoComNega label="Alergias" valor={alergias} onChange={setAlergias} />
 
                 <div>
                   <span className="text-xs font-semibold text-text-dim">Vícios</span>
@@ -494,7 +505,22 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                 </div>
               </div>
             </Secao>
+            </div>
 
+            <div className="w-full sm:w-[70%] sm:sticky sm:top-4">
+              <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-text-dim uppercase tracking-wide">Preview</span>
+                  <CopyButton texto={textoFinal} label="Copiar" variant="solid" />
+                </div>
+                <pre className="text-[11px] text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-[var(--radius-item,11px)] p-3 max-h-[70vh] overflow-y-auto">
+                  {textoFinal}
+                </pre>
+              </div>
+            </div>
+            </div>
+
+            <div className="max-w-3xl w-full flex flex-col gap-4">
             <Secao titulo="Medicamentos em uso" icone={Pill}>
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1.5">
@@ -673,6 +699,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                 {textoFinal}
               </pre>
             </div>
+            </div>
           </>
         )}
         </div>
@@ -698,6 +725,29 @@ function Campo({ label, children }: { label: string; children: React.ReactNode }
     <label className="flex flex-col gap-1">
       <span className="text-[10px] font-semibold text-text-dim">{label}</span>
       {children}
+    </label>
+  )
+}
+
+/** Campo de texto com um botão "Nega" à direita do rótulo — clicar limpa o campo (vazio
+ *  já significa nega no texto final) e destaca o botão enquanto o campo estiver vazio. */
+function CampoComNega({ label, valor, onChange }: { label: string; valor: string; onChange: (v: string) => void }) {
+  const negado = valor.trim() === ''
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="flex items-center justify-between gap-2">
+        <span className="text-[10px] font-semibold text-text-dim">{label}</span>
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          className={`text-[10px] font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] border transition-colors ${
+            negado ? 'bg-text border-text text-bg' : 'bg-surface-2 border-border text-text-dim hover:text-text'
+          }`}
+        >
+          Nega
+        </button>
+      </span>
+      <input value={valor} onChange={(e) => onChange(e.target.value)} className={inputCls + ' w-full'} />
     </label>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronDown, Check } from 'lucide-react'
 import {
   MARCOS_IG,
   SEMANA_MAX_LINHA_DO_TEMPO,
@@ -66,12 +67,23 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
   const [hover, setHover] = useState<string | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [largura, setLargura] = useState(900)
+  const [menuAberto, setMenuAberto] = useState(false)
   const stageRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const t = setTimeout(() => setLoaded(true), 30)
     return () => clearTimeout(t)
   }, [])
+
+  useEffect(() => {
+    if (!menuAberto) return
+    function aoClicarFora(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuAberto(false)
+    }
+    document.addEventListener('mousedown', aoClicarFora)
+    return () => document.removeEventListener('mousedown', aoClicarFora)
+  }, [menuAberto])
 
   useEffect(() => {
     if (!stageRef.current) return
@@ -101,14 +113,21 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
     [categoriasAtivas]
   )
 
+  // Marcos sem posição fixa na régua (sob indicação clínica, tipo 3º USG, ou "qualquer
+  // momento", tipo Influenza) não entram no trilho — iam cair todos na semana 0 empilhados
+  // com os marcos reais dali, e "qualquer momento" fica errado representado como um ponto
+  // fixo. Viram uma lista à parte, abaixo da régua.
+  const visiveisPosicionados = useMemo(() => visiveis.filter((m) => !m.semFaixaFixa && !m.sempreDisponivel), [visiveis])
+  const visiveisSemPosicao = useMemo(() => visiveis.filter((m) => m.semFaixaFixa || m.sempreDisponivel), [visiveis])
+
   const placed = useMemo(() => {
     const stackIdx: Record<number, number> = {}
-    return visiveis.map((m) => {
+    return visiveisPosicionados.map((m) => {
       const key = Math.round(m.semanaInicio)
       const i = (stackIdx[key] = (stackIdx[key] ?? -1) + 1)
       return { m, i }
     })
-  }, [visiveis])
+  }, [visiveisPosicionados])
 
   const passo = largura < 520 ? 6 : largura < 820 ? 4 : 2
   const rotulos = useMemo(() => {
@@ -140,32 +159,58 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
           <h2 className="font-display text-[21px] font-semibold tracking-[-.7px] shrink-0 whitespace-nowrap m-0">
             Linha do tempo
           </h2>
-          <div role="group" aria-label="Filtrar marcos por categoria" className="flex flex-wrap gap-1.5">
-            {CATEGORIAS.map((cat) => {
-              const ativo = categoriasAtivas.has(cat)
-              const cor = CORES_CATEGORIA_MARCO[cat].cor
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  aria-pressed={ativo}
-                  onClick={() => alternarCategoria(cat)}
-                  className={`flex items-center gap-[7px] whitespace-nowrap rounded-[var(--radius-pill,999px)] border text-xs transition-colors ${
-                    ativo ? 'bg-text border-text text-bg' : 'border-border text-text-dim hover:text-text'
-                  }`}
-                  style={{ padding: '6px 11px 6px 9px' }}
-                >
-                  <span
-                    className="w-[7px] h-[7px] rounded-full shrink-0"
-                    style={{ background: ativo ? cor : 'transparent', boxShadow: `inset 0 0 0 1.5px ${cor}` }}
-                  />
-                  {LABEL_CATEGORIA_MARCO[cat]}
-                  <span className={ativo ? 'opacity-60' : 'opacity-80'} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {contagens[cat]}
-                  </span>
-                </button>
-              )
-            })}
+          <div ref={menuRef} className="relative">
+            <button
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded={menuAberto}
+              onClick={() => setMenuAberto((v) => !v)}
+              className={`flex items-center justify-between gap-2.5 rounded-[var(--radius-pill,999px)] border text-xs font-semibold px-3.5 py-2 min-w-[190px] transition-colors ${
+                menuAberto ? 'border-text' : 'border-border hover:border-text-dim'
+              }`}
+            >
+              <span className="text-text">
+                Categorias
+                <span className="text-text-dim font-normal ml-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  ({categoriasAtivas.size}/{CATEGORIAS.length})
+                </span>
+              </span>
+              <ChevronDown className={`w-3.5 h-3.5 text-text-dim shrink-0 transition-transform ${menuAberto ? 'rotate-180' : ''}`} />
+            </button>
+
+            {menuAberto && (
+              <div
+                role="listbox"
+                aria-label="Filtrar marcos por categoria"
+                className="absolute left-0 top-[calc(100%+6px)] z-20 w-[240px] bg-surface border border-border rounded-[var(--radius-card,14px)] shadow-[var(--shadow-popover,0_14px_32px_rgba(0,0,0,.2))] py-1.5"
+              >
+                {CATEGORIAS.map((cat) => {
+                  const ativo = categoriasAtivas.has(cat)
+                  const cor = CORES_CATEGORIA_MARCO[cat].cor
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      role="option"
+                      aria-selected={ativo}
+                      onClick={() => alternarCategoria(cat)}
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-left text-xs hover:bg-surface-2 transition-colors"
+                    >
+                      <span
+                        className="w-4 h-4 rounded-[4px] border flex items-center justify-center shrink-0"
+                        style={{ borderColor: ativo ? cor : 'var(--color-border)', background: ativo ? cor : 'transparent' }}
+                      >
+                        {ativo && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                      </span>
+                      <span className="flex-1 font-medium text-text">{LABEL_CATEGORIA_MARCO[cat]}</span>
+                      <span className="text-text-dim" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {contagens[cat]}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -366,6 +411,43 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
         {/* ---- card de detalhe (hover) ---- */}
         {hoveredMarco && ga != null && <CardMarco marco={hoveredMarco} ga={ga} />}
       </div>
+
+      {/* ---- marcos sem posição fixa — sob indicação clínica ou "qualquer momento" ---- */}
+      {visiveisSemPosicao.length > 0 && (
+        <div className="mt-3.5 pt-3.5 border-t border-border">
+          <p className="text-[10px] font-semibold text-text-dim uppercase tracking-wide mb-2">Sem posição fixa na régua</p>
+          <div className="flex flex-wrap gap-1.5">
+            {visiveisSemPosicao.map((m) => {
+              const c = CORES_CATEGORIA_MARCO[m.categoria]
+              const ativo = hover === m.chave
+              return (
+                <button
+                  key={m.chave}
+                  type="button"
+                  onMouseEnter={() => setHover(m.chave)}
+                  onMouseLeave={() => setHover(null)}
+                  onFocus={() => setHover(m.chave)}
+                  onBlur={() => setHover(null)}
+                  className="flex items-center gap-1.5 rounded-[var(--radius-pill,999px)] border px-2.5 py-1.5 text-xs transition-colors"
+                  style={{
+                    borderColor: ativo ? c.cor : 'var(--color-border)',
+                    background: ativo ? c.suave : 'transparent',
+                    color: ativo ? c.cor : 'var(--color-text-dim)',
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: c.cor }} />
+                  <span className="font-medium text-text">{m.titulo}</span>
+                  <span className="opacity-70">— {rotuloSemanasMarco(m)}</span>
+                </button>
+              )
+            })}
+          </div>
+          {(() => {
+            const ativo = visiveisSemPosicao.find((m) => m.chave === hover)
+            return ativo ? <p className="text-xs text-text-dim leading-relaxed mt-2">{ativo.descricao}</p> : null
+          })()}
+        </div>
+      )}
     </div>
   )
 }

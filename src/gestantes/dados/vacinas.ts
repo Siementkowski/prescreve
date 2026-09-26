@@ -10,7 +10,10 @@ export const VACINAS_INDICADAS: VacinaIndicada[] = [
   {
     nome: 'Hepatite B',
     observacao: 'Esquema completo já feito → não vacinar. Incompleto → completar as doses faltantes. Não vacinada ou suscetível → iniciar esquema completo.',
-    esquema: ['Não vacinada/suscetível: 3 doses no esquema 0-1-6 meses'],
+    esquema: [
+      'Não vacinada/sem comprovação de imunidade: 3 doses no esquema 0-1-6 meses',
+      'Revacinação: 1 dose se Anti-HBs negativo',
+    ],
   },
   {
     nome: 'Influenza (Gripe A / H1N1)',
@@ -32,7 +35,7 @@ export const VACINAS_INDICADAS: VacinaIndicada[] = [
   },
   {
     nome: 'dTpa (Tétano, Coqueluche e Difteria)',
-    observacao: 'Indicada para todas as gestantes — o esquema depende do histórico vacinal (ver tabela abaixo)',
+    observacao: 'Indicada para todas as gestantes a partir de 20 semanas, em cada gravidez — o esquema depende do histórico vacinal (ver tabela abaixo)',
   },
 ]
 

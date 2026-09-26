@@ -84,8 +84,10 @@ export interface BlocoTrimestre {
   condutas: CondutaPreNatal[]
 }
 
-// LABS por trimestre — versão completa fornecida pelo usuário (2026-09-24), substitui
-// qualquer conteúdo anterior sobre exames laboratoriais de rotina do pré-natal.
+// LABS por trimestre — versão FINAL e definitiva fornecida pelo usuário (2026-09-26),
+// substitui qualquer conteúdo anterior sobre exames laboratoriais de rotina do pré-natal.
+// USG deixou de entrar aqui — agora é categoria própria só na linha do tempo de IG
+// (dados/marcosIG.ts), não faz mais parte deste checklist de labs.
 export const PRE_NATAL: BlocoTrimestre[] = [
   {
     trimestre: 1,
@@ -93,7 +95,9 @@ export const PRE_NATAL: BlocoTrimestre[] = [
     semanaFim: 13,
     exames: [
       { nome: 'Hemograma', periodicidade: '1ª consulta' },
-      { nome: 'Tipagem sanguínea + Fator Rh + Coombs indireto/PAI', periodicidade: '1ª consulta — Coombs/PAI se Rh negativo' },
+      { nome: 'Tipagem sanguínea + Fator Rh', periodicidade: '1ª consulta' },
+      { nome: 'Coombs indireto', periodicidade: '1ª consulta — se Rh negativo' },
+      { nome: 'Eletroforese de hemoglobina', periodicidade: '1ª consulta — rastreamento de doença falciforme' },
       {
         nome: 'Glicemia de jejum',
         periodicidade: '1ª consulta',
@@ -103,10 +107,10 @@ export const PRE_NATAL: BlocoTrimestre[] = [
           { texto: 'GJ ≥ 126 mg/dL → DM diagnosticado na gestação (DM prévio)', alerta: true },
         ],
       },
-      { nome: 'Sífilis (teste rápido de triagem e/ou VDRL/RPR)', periodicidade: '1ª consulta' },
-      { nome: 'HIV (teste rápido ou sorologia)', periodicidade: '1ª consulta' },
+      { nome: 'EAS', periodicidade: '1ª consulta' },
+      { nome: 'Urocultura com TSA (antibiograma)', periodicidade: '1ª consulta' },
       {
-        nome: 'Toxoplasmose IgM + IgG',
+        nome: 'Toxoplasmose IgG/IgM',
         periodicidade: '1ª consulta',
         notas: [
           { texto: 'Suscetível (IgM−/IgG−): repetir durante toda a gestação (1º, 2º e 3º trimestres)' },
@@ -114,15 +118,11 @@ export const PRE_NATAL: BlocoTrimestre[] = [
           { texto: 'Infecção aguda: encaminhar para pré-natal de alto risco', alerta: true },
         ],
       },
-      { nome: 'HBsAg (Hepatite B)', periodicidade: '1ª consulta' },
-      { nome: 'Anti-HCV (Hepatite C)', periodicidade: 'Solicitar no 1º e no 3º trimestres' },
-      { nome: 'EAS / urina tipo I', periodicidade: '1ª consulta' },
-      { nome: 'Urocultura', periodicidade: '1ª consulta' },
-      { nome: 'Preventivo (citopatológico de colo uterino)', periodicidade: 'Se atrasado' },
-      { nome: 'TSH', periodicidade: '1ª consulta' },
-      { nome: 'Eletroforese de hemoglobina', periodicidade: '1ª consulta — rastreamento de doença falciforme' },
+      { nome: 'HIV', periodicidade: '1ª consulta' },
+      { nome: 'Sífilis', periodicidade: '1ª consulta' },
+      { nome: 'Hepatite B e C (HBsAg + Anti-HCV)', periodicidade: '1ª consulta' },
       {
-        nome: 'HTLV',
+        nome: 'HTLV 1 e 2',
         periodicidade: '1ª consulta — triagem sorológica (ELISA/CLIA/ECLIA)',
         subitens: [
           { titulo: 'Não reagente', descricao: 'Encerra investigação — sem HTLV.' },
@@ -131,11 +131,10 @@ export const PRE_NATAL: BlocoTrimestre[] = [
           { titulo: 'Confirmatório indeterminado', descricao: 'Segue para teste molecular (carga proviral) — define detectado ou não detectado.' },
         ],
       },
-      {
-        nome: 'USG 1º trimestre',
-        periodicidade: '11 a 14 semanas',
-        notas: [{ texto: 'Datação da gestação' }, { texto: 'Medida da translucência nucal' }],
-      },
+      { nome: 'TSH', periodicidade: '1ª consulta' },
+      { nome: 'Preventivo (citopatológico de colo uterino)', periodicidade: 'Se atrasado' },
+      { nome: 'Vitamina D', periodicidade: '1ª consulta' },
+      { nome: 'Clamídia / Gonococo', periodicidade: 'Conforme critérios clínicos' },
     ],
     condutas: [],
   },
@@ -145,8 +144,6 @@ export const PRE_NATAL: BlocoTrimestre[] = [
     semanaFim: 27,
     exames: [
       { nome: 'Hemograma', periodicidade: '24–28 semanas' },
-      { nome: 'VDRL', periodicidade: '24–28 semanas' },
-      { nome: 'EAS + Urocultura', periodicidade: '24–28 semanas' },
       {
         nome: 'TOTG 75g',
         periodicidade: '24–28 semanas — padrão-ouro para DMG, só se a GJ do 1º tri foi normal (< 92 mg/dL)',
@@ -156,18 +153,16 @@ export const PRE_NATAL: BlocoTrimestre[] = [
           { texto: 'Gestante bariátrica: não realizar TOTG (risco de hipoglicemia) — usar glicemia de jejum seriada', alerta: true },
         ],
       },
+      { nome: 'Coombs indireto', periodicidade: 'Se Rh negativo' },
       {
-        nome: 'Toxoplasmose IgM + IgG',
+        nome: 'Toxoplasmose IgG/IgM',
         periodicidade: 'Se suscetível',
         notas: [{ texto: 'Repetir durante toda a gestação — a cada 2 meses (alta prevalência local) ou mensal (protocolo HC-FMUSP)' }],
       },
-      { nome: 'HIV', periodicidade: 'Repetir no 2º ou 3º trimestre, conforme protocolo local' },
-      {
-        nome: 'USG morfológico',
-        periodicidade: '20 a 24 semanas',
-        notas: [{ texto: 'Avaliação completa da anatomia fetal' }],
-      },
-      { nome: 'Coombs indireto', periodicidade: 'Mensal — se Rh negativo com risco de aloimunização' },
+      { nome: 'EAS', periodicidade: '24–28 semanas' },
+      { nome: 'Urocultura', periodicidade: '24–28 semanas' },
+      { nome: 'HIV', periodicidade: '24–28 semanas' },
+      { nome: 'Sífilis', periodicidade: '24–28 semanas' },
     ],
     condutas: [],
   },
@@ -177,23 +172,24 @@ export const PRE_NATAL: BlocoTrimestre[] = [
     semanaFim: null,
     exames: [
       { nome: 'Hemograma', periodicidade: '28–36 semanas' },
-      { nome: 'Sífilis (VDRL/RPR ou teste rápido)', periodicidade: 'Após 28 semanas' },
-      { nome: 'EAS + Urocultura', periodicidade: 'Após 28 semanas' },
       { nome: 'Glicemia de jejum', periodicidade: 'Se TOTG não foi realizado' },
-      {
-        nome: 'Toxoplasmose IgM + IgG',
-        periodicidade: 'Se suscetível',
-        notas: [{ texto: 'Repetir durante toda a gestação — a cada 2 meses (alta prevalência local) ou mensal (protocolo HC-FMUSP)' }],
-      },
+      { nome: 'Coombs indireto', periodicidade: 'Se Rh negativo' },
+      { nome: 'EAS', periodicidade: 'Após 28 semanas' },
+      { nome: 'Urocultura', periodicidade: 'Após 28 semanas' },
+      { nome: 'Sífilis', periodicidade: 'Após 28 semanas' },
       {
         nome: 'HIV',
         periodicidade: 'Obrigatório no 3º trimestre e na internação para o parto',
         notas: [{ texto: 'Obrigatório mesmo se já negativo antes', alerta: true }],
       },
-      { nome: 'Anti-HCV (Hepatite C)', periodicidade: 'Solicitar também no 3º trimestre (além do 1º)' },
-      { nome: 'Coombs indireto', periodicidade: 'Mensal — se Rh negativo com risco de aloimunização' },
+      { nome: 'Hepatite B', periodicidade: 'Após 28 semanas' },
       {
-        nome: 'EGB — Streptococcus agalactiae',
+        nome: 'Toxoplasmose IgG/IgM',
+        periodicidade: 'Se suscetível',
+        notas: [{ texto: 'Repetir durante toda a gestação — a cada 2 meses (alta prevalência local) ou mensal (protocolo HC-FMUSP)' }],
+      },
+      {
+        nome: 'Pesquisa de estreptococo (EGB) — Streptococcus agalactiae',
         periodicidade: 'Swab vaginal/retal entre 35–37 semanas — rastreamento universal',
         notas: [{ texto: 'Positivo: profilaxia intraparto com penicilina G ou ampicilina', alerta: true }],
         subitens: [
@@ -243,9 +239,9 @@ export function examesDaConsulta(trimestreAtual: BlocoTrimestre['trimestre'], pr
   return [...blocoInicial.exames, ...extras]
 }
 
-/** Agenda dos exames de imagem — mesmos nomes usados em PRE_NATAL, mas com faixa de
- *  semana numérica (lá é texto livre) pra dar pra calcular "qual é o próximo exame de
- *  imagem dela" no Guia de Consulta. */
+/** Agenda dos USG — categoria própria, fora do checklist de labs (PRE_NATAL) — com faixa
+ *  de semana numérica pra dar pra calcular "qual é o próximo USG dela" no Guia de
+ *  Consulta. O 3º USG não entra aqui: não tem janela fixa (só sob indicação clínica). */
 export interface JanelaImagem {
   nome: string
   semanaInicio: number
@@ -253,7 +249,8 @@ export interface JanelaImagem {
 }
 
 export const AGENDA_IMAGEM: JanelaImagem[] = [
-  { nome: 'USG 1º trimestre', semanaInicio: 11, semanaFim: 14 },
+  { nome: '1º USG (translucência nucal)', semanaInicio: 11, semanaFim: 14 },
+  { nome: '2º USG obstétrico', semanaInicio: 20, semanaFim: 26 },
   { nome: 'USG morfológico', semanaInicio: 20, semanaFim: 24 },
 ]
 

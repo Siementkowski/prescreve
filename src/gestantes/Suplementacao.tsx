@@ -8,7 +8,8 @@ import {
   calcularFerro,
   calcularCalcio,
   calcularAAS,
-  calcularB12D,
+  calcularB12,
+  calcularVitaminaD,
   calcularIodo,
   type RecomendacaoSuplementoGestante,
 } from './dados/suplementacao'
@@ -39,6 +40,7 @@ export function Suplementacao() {
   const [riscoPreEclampsia, setRiscoPreEclampsia] = useState(false)
   const [dietaRestritivaOuHipovitaminose, setDietaRestritivaOuHipovitaminose] = useState(false)
   const [baixaIngestaLaticinios, setBaixaIngestaLaticinios] = useState(false)
+  const [deficienciaVitaminaD, setDeficienciaVitaminaD] = useState(false)
 
   const recomendacoes = useMemo(() => {
     const ctx = {
@@ -48,9 +50,18 @@ export function Suplementacao() {
       riscoPreEclampsia,
       dietaRestritivaOuHipovitaminose,
       baixaIngestaLaticinios,
+      deficienciaVitaminaD,
     }
-    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularCalcio(ctx), calcularAAS(ctx), calcularB12D(ctx), calcularIodo()]
-  }, [ig, riscoFolatoAlto, anemiaConfirmada, riscoPreEclampsia, dietaRestritivaOuHipovitaminose, baixaIngestaLaticinios])
+    return [
+      calcularAcidoFolico(ctx),
+      calcularFerro(ctx),
+      calcularCalcio(ctx),
+      calcularAAS(ctx),
+      calcularVitaminaD(ctx),
+      calcularB12(ctx),
+      calcularIodo(),
+    ]
+  }, [ig, riscoFolatoAlto, anemiaConfirmada, riscoPreEclampsia, dietaRestritivaOuHipovitaminose, baixaIngestaLaticinios, deficienciaVitaminaD])
 
   return (
     <div className="h-full overflow-y-auto p-6">
@@ -103,7 +114,7 @@ export function Suplementacao() {
                 onChange={(e) => setDietaRestritivaOuHipovitaminose(e.target.checked)}
                 className="w-4 h-4 accent-[var(--color-accent)]"
               />
-              Dieta vegana estrita ou hipovitaminose identificada (B12/D)
+              Dieta vegana estrita ou hipovitaminose identificada (B12)
             </label>
             <label className="flex items-center gap-2.5 text-sm cursor-pointer">
               <input
@@ -113,6 +124,15 @@ export function Suplementacao() {
                 className="w-4 h-4 accent-[var(--color-accent)]"
               />
               Baixa ingesta de laticínios (indica suplementação de cálcio)
+            </label>
+            <label className="flex items-center gap-2.5 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={deficienciaVitaminaD}
+                onChange={(e) => setDeficienciaVitaminaD(e.target.checked)}
+                className="w-4 h-4 accent-[var(--color-accent)]"
+              />
+              Deficiência de vitamina D comprovada por exame
             </label>
           </div>
         </Secao>
