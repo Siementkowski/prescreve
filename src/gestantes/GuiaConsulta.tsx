@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { CopyButton } from '../consulta/components/CopyButton'
 import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
-import { useGuiaConsultaStore, type StatusSorologia, type MetodoBCF, type StatusLabs } from './guiaConsultaStore'
+import { useGuiaConsultaStore, type StatusSorologia, type StatusLabs } from './guiaConsultaStore'
 import { calcularDPP, dppCorrigidaPorUSG, formatarIG, formatarData, trimestreDaIG } from './idade'
 import { PERIODICIDADE_CONSULTAS, examesDaConsulta } from './dados/preNatal'
 import { calcularAcidoFolico, calcularFerro, calcularAAS, calcularVitaminaD } from './dados/suplementacao'
@@ -22,7 +22,6 @@ import { Secao } from './components/Secao'
 import { LinhaDoTempoIG } from './components/LinhaDoTempoIG'
 
 const ROTULO_SOROLOGIA: Record<StatusSorologia, string> = { desconhecido: '?', imune: 'imune', suscetivel: 'suscetível' }
-const ROTULO_METODO_BCF: Record<MetodoBCF, string> = { nao_informado: '', sonar_doppler: 'sonar Doppler', pinard: 'Pinard' }
 const ROTULO_LABS: Record<StatusLabs, string> = { nao_avaliado: 'não avaliados', normais: 'normais', alterados: 'alterados' }
 
 const SEMANAS_POR_INTERVALO: Record<string, number> = { Mensal: 4, Quinzenal: 2, Semanal: 1 }
@@ -51,9 +50,6 @@ export function GuiaConsulta() {
       : dppCorrigidaPorUSG(dataDeInputISO(dataReferencia), { semanas: Number(igReferenciaSemanas) || 0, dias: Number(igReferenciaDias) || 0 })
   }, [ig, metodo, dum, dataReferencia, igReferenciaSemanas, igReferenciaDias])
   const trimestreAtual = ig ? trimestreDaIG(ig.semanas) : null
-
-  const primeiraConsulta = useGuiaConsultaStore((s) => s.primeiraConsulta)
-  const setPrimeiraConsulta = useGuiaConsultaStore((s) => s.setPrimeiraConsulta)
 
   const dumAnamnese = useGuiaConsultaStore((s) => s.dumAnamnese)
   const setDumAnamnese = useGuiaConsultaStore((s) => s.setDumAnamnese)
@@ -111,8 +107,6 @@ export function GuiaConsulta() {
   const setAu = useGuiaConsultaStore((s) => s.setAu)
   const bcfBpm = useGuiaConsultaStore((s) => s.bcfBpm)
   const setBcfBpm = useGuiaConsultaStore((s) => s.setBcfBpm)
-  const bcfMetodo = useGuiaConsultaStore((s) => s.bcfMetodo)
-  const setBcfMetodo = useGuiaConsultaStore((s) => s.setBcfMetodo)
   const bcfAusente = useGuiaConsultaStore((s) => s.bcfAusente)
   const setBcfAusente = useGuiaConsultaStore((s) => s.setBcfAusente)
 
@@ -126,7 +120,7 @@ export function GuiaConsulta() {
   const examesMarcados = useGuiaConsultaStore((s) => s.examesMarcados)
   const setExamesMarcados = useGuiaConsultaStore((s) => s.setExamesMarcados)
 
-  const exames = trimestreAtual != null && primeiraConsulta != null ? examesDaConsulta(trimestreAtual, primeiraConsulta) : []
+  const exames = trimestreAtual != null ? examesDaConsulta(trimestreAtual) : []
   const periodicidade = ig ? PERIODICIDADE_CONSULTAS.find((f) => ig.semanas >= f.semanaInicio && (f.semanaFim == null || ig.semanas < f.semanaFim)) : null
   const vacinasContexto = ig ? vacinasAplicaveis(ig.semanas) : []
 
@@ -150,7 +144,7 @@ export function GuiaConsulta() {
   }
 
   const textoFinal = useMemo(() => {
-    if (!ig || !dpp || primeiraConsulta == null) return ''
+    if (!ig || !dpp) return ''
 
     const dataRefTexto = dataReferencia ? formatarData(dataDeInputISO(dataReferencia)) : '___'
     const igNaRefTexto = `${igReferenciaSemanas || '0'}s${igReferenciaDias ? igReferenciaDias + 'd' : ''}`
@@ -182,12 +176,11 @@ export function GuiaConsulta() {
     if (fc) linhasObjetivo.push(`FC: ${fc} bpm.`)
     if (au) linhasObjetivo.push(`AU: ${au} cm.`)
     if (ig.semanas >= 12) {
-      const metodoTxt = bcfMetodo !== 'nao_informado' ? ` (${ROTULO_METODO_BCF[bcfMetodo]})` : ''
       linhasObjetivo.push(
         bcfAusente
           ? 'BCF ausente à ausculta — reavaliar com USG.'
           : bcfBpm
-            ? `BCF presente${metodoTxt}, FCF de ${bcfBpm} bpm.`
+            ? `BCF presente, FCF de ${bcfBpm} bpm.`
             : 'BCF não auscultado nessa consulta.'
       )
     }
@@ -248,7 +241,6 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
   }, [
     ig,
     dpp,
-    primeiraConsulta,
     metodo,
     dum,
     dataReferencia,
@@ -283,7 +275,6 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
     fc,
     au,
     bcfBpm,
-    bcfMetodo,
     bcfAusente,
     riscoAlto,
     orientacoesMarcadas,
@@ -390,30 +381,6 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                 </div>
               )}
             </div>
-
-            {ig && (
-              <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-3.5 flex flex-col gap-2">
-                <p className="font-display text-[12.5px] font-semibold">Primeira consulta de pré-natal?</p>
-                <div className="flex gap-1.5">
-                  <button
-                    onClick={() => setPrimeiraConsulta(true)}
-                    className={`flex-1 text-[11px] font-semibold rounded-[var(--radius-control,12px)] border px-2.5 py-2 transition-colors ${
-                      primeiraConsulta === true ? 'bg-text border-text text-bg' : 'bg-surface-2 border-border text-text-dim hover:text-text'
-                    }`}
-                  >
-                    Sim
-                  </button>
-                  <button
-                    onClick={() => setPrimeiraConsulta(false)}
-                    className={`flex-1 text-[11px] font-semibold rounded-[var(--radius-control,12px)] border px-2.5 py-2 transition-colors ${
-                      primeiraConsulta === false ? 'bg-text border-text text-bg' : 'bg-surface-2 border-border text-text-dim hover:text-text'
-                    }`}
-                  >
-                    Retorno
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           <LinhaDoTempoIG semanas={ig ? ig.semanas : null} dias={ig?.dias} />
@@ -422,11 +389,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
         <div className="w-full flex flex-col gap-4">
         {!ig && <p className="text-sm text-text-dim px-0.5">Calcule a idade gestacional acima pra continuar o guia.</p>}
 
-        {ig && primeiraConsulta == null && (
-          <p className="text-sm text-text-dim px-0.5">Responda se é 1ª consulta ou retorno acima pra abrir o roteiro.</p>
-        )}
-
-        {ig && primeiraConsulta != null && (
+        {ig && (
           <>
             <div className="flex flex-col sm:flex-row gap-4 items-start">
             <div className="w-full sm:w-[30%]">
@@ -583,14 +546,13 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                 {ig.semanas >= 12 && (
                   <div>
                     <span className="text-xs font-semibold text-text-dim">BCF — batimentos cardíacos fetais</span>
-                    <div className="grid grid-cols-2 gap-2.5 mt-1.5">
-                      <input value={bcfBpm} onChange={(e) => setBcfBpm(e.target.value)} placeholder="bpm" className={inputCls} disabled={bcfAusente} />
-                      <select value={bcfMetodo} onChange={(e) => setBcfMetodo(e.target.value as MetodoBCF)} className={inputCls} disabled={bcfAusente}>
-                        <option value="nao_informado">Método — não informar</option>
-                        <option value="sonar_doppler">Sonar Doppler</option>
-                        <option value="pinard">Pinard</option>
-                      </select>
-                    </div>
+                    <input
+                      value={bcfBpm}
+                      onChange={(e) => setBcfBpm(e.target.value)}
+                      placeholder="bpm"
+                      className={inputCls + ' w-full mt-1.5'}
+                      disabled={bcfAusente}
+                    />
                     <label className="flex items-center gap-2.5 text-sm cursor-pointer mt-2">
                       <input
                         type="checkbox"
@@ -605,7 +567,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
               </div>
             </Secao>
 
-            <Secao titulo={`Exames ${primeiraConsulta ? '— painel inicial' : `— rotina do ${trimestreAtual}º trimestre`}`} icone={ClipboardCheck}>
+            <Secao titulo={`Exames — rotina do ${trimestreAtual}º trimestre`} icone={ClipboardCheck}>
               <div className="flex flex-col gap-2">
                 {exames.map((e) => (
                   <label

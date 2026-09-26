@@ -222,21 +222,10 @@ export const PRE_NATAL: BlocoTrimestre[] = [
 ]
 
 /** Painel de exames pra uma consulta — usado no Guia de Consulta (checklist "o que fazer
- *  nessa consulta"). Consulta de retorno: só os exames do trimestre atual, de rotina.
- *  Primeira consulta: sempre inclui o painel inicial completo (bloco do 1º trimestre,
- *  onde vive a bateria "1ª consulta" — antenatal, sorologias etc.), mesmo se a gestante
- *  já estiver num trimestre mais avançado (início tardio de pré-natal); some ao painel os
- *  exames do trimestre atual que ainda não apareceram, sem duplicar por nome. */
-export function examesDaConsulta(trimestreAtual: BlocoTrimestre['trimestre'], primeiraConsulta: boolean): ExamePreNatal[] {
+ *  nessa consulta"). Sempre os exames de rotina do trimestre atual. */
+export function examesDaConsulta(trimestreAtual: BlocoTrimestre['trimestre']): ExamePreNatal[] {
   const blocoAtual = PRE_NATAL.find((b) => b.trimestre === trimestreAtual) ?? PRE_NATAL[0]
-  if (!primeiraConsulta) return blocoAtual.exames
-
-  const blocoInicial = PRE_NATAL[0]
-  if (trimestreAtual === 1) return blocoInicial.exames
-
-  const jaIncluidos = new Set(blocoInicial.exames.map((e) => e.nome))
-  const extras = blocoAtual.exames.filter((e) => !jaIncluidos.has(e.nome))
-  return [...blocoInicial.exames, ...extras]
+  return blocoAtual.exames
 }
 
 /** Agenda dos USG — categoria própria, fora do checklist de labs (PRE_NATAL) — com faixa

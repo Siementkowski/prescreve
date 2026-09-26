@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 
 export type StatusSorologia = 'desconhecido' | 'imune' | 'suscetivel'
-export type MetodoBCF = 'nao_informado' | 'sonar_doppler' | 'pinard'
 export type StatusLabs = 'nao_avaliado' | 'normais' | 'alterados'
 
 /** Estado do formulário do Guia de Consulta — separado da store de Gestantes (que só
@@ -18,9 +17,6 @@ export type StatusLabs = 'nao_avaliado' | 'normais' | 'alterados'
  *  (avaliado/normal/alterado) — o que de fato entra em "Solicito X, Y" no Plano vem do
  *  checklist de exames do trimestre (`examesMarcados`, dados em dados/preNatal.ts). */
 interface GuiaConsultaState {
-  primeiraConsulta: boolean | null
-  setPrimeiraConsulta: (v: boolean | null) => void
-
   // ---- cabeçalho / antecedentes ----
   dumAnamnese: string
   setDumAnamnese: (v: string) => void
@@ -84,8 +80,6 @@ interface GuiaConsultaState {
   setAu: (v: string) => void
   bcfBpm: string
   setBcfBpm: (v: string) => void
-  bcfMetodo: MetodoBCF
-  setBcfMetodo: (v: MetodoBCF) => void
   bcfAusente: boolean
   setBcfAusente: (v: boolean) => void
 
@@ -103,9 +97,6 @@ interface GuiaConsultaState {
 }
 
 export const useGuiaConsultaStore = create<GuiaConsultaState>((set) => ({
-  primeiraConsulta: null,
-  setPrimeiraConsulta: (primeiraConsulta) => set({ primeiraConsulta }),
-
   dumAnamnese: '',
   setDumAnamnese: (dumAnamnese) => set({ dumAnamnese }),
   g: '',
@@ -163,8 +154,6 @@ export const useGuiaConsultaStore = create<GuiaConsultaState>((set) => ({
   setAu: (au) => set({ au }),
   bcfBpm: '',
   setBcfBpm: (bcfBpm) => set({ bcfBpm }),
-  bcfMetodo: 'nao_informado',
-  setBcfMetodo: (bcfMetodo) => set({ bcfMetodo }),
   bcfAusente: false,
   setBcfAusente: (bcfAusente) => set({ bcfAusente }),
 
