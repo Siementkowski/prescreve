@@ -6,11 +6,8 @@ import { Secao } from './components/Secao'
 import {
   calcularAcidoFolico,
   calcularFerro,
-  calcularCalcio,
   calcularAAS,
-  calcularB12,
   calcularVitaminaD,
-  calcularIodo,
   type RecomendacaoSuplementoGestante,
 } from './dados/suplementacao'
 
@@ -28,8 +25,8 @@ const COR_STATUS: Record<RecomendacaoSuplementoGestante['status'], string> = {
   nao_aplicavel: 'text-text-dim',
 }
 
-/** Suplementação de rotina no pré-natal — Ácido Fólico, Ferro, Cálcio, AAS e Vitaminas
- *  B12/D. Usa a IG calculada na aba Pré-natal (store compartilhada — ver gestantes/store.ts),
+/** Suplementação de rotina no pré-natal — Ácido Fólico, Ferro, AAS e Vitamina D.
+ *  Usa a IG calculada na aba Pré-natal (store compartilhada — ver gestantes/store.ts),
  *  então quem já calculou lá não precisa informar a DUM de novo aqui. Regra puramente da
  *  semana + fatores de risco marcados abaixo — ver dados/suplementacao.ts pro racional de
  *  cada janela. Não substitui julgamento clínico individual. */
@@ -38,8 +35,6 @@ export function Suplementacao() {
   const [riscoFolatoAlto, setRiscoFolatoAlto] = useState(false)
   const [anemiaConfirmada, setAnemiaConfirmada] = useState(false)
   const [riscoPreEclampsia, setRiscoPreEclampsia] = useState(false)
-  const [dietaRestritivaOuHipovitaminose, setDietaRestritivaOuHipovitaminose] = useState(false)
-  const [baixaIngestaLaticinios, setBaixaIngestaLaticinios] = useState(false)
   const [deficienciaVitaminaD, setDeficienciaVitaminaD] = useState(false)
 
   const recomendacoes = useMemo(() => {
@@ -48,20 +43,10 @@ export function Suplementacao() {
       riscoFolatoAlto,
       anemiaConfirmada,
       riscoPreEclampsia,
-      dietaRestritivaOuHipovitaminose,
-      baixaIngestaLaticinios,
       deficienciaVitaminaD,
     }
-    return [
-      calcularAcidoFolico(ctx),
-      calcularFerro(ctx),
-      calcularCalcio(ctx),
-      calcularAAS(ctx),
-      calcularVitaminaD(ctx),
-      calcularB12(ctx),
-      calcularIodo(),
-    ]
-  }, [ig, riscoFolatoAlto, anemiaConfirmada, riscoPreEclampsia, dietaRestritivaOuHipovitaminose, baixaIngestaLaticinios, deficienciaVitaminaD])
+    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularAAS(ctx), calcularVitaminaD(ctx)]
+  }, [ig, riscoFolatoAlto, anemiaConfirmada, riscoPreEclampsia, deficienciaVitaminaD])
 
   return (
     <div className="h-full overflow-y-auto p-6">
@@ -106,24 +91,6 @@ export function Suplementacao() {
                 className="w-4 h-4 accent-[var(--color-accent)]"
               />
               Alto risco para pré-eclâmpsia (HAS crônica, DM, gestação múltipla, história de PE...)
-            </label>
-            <label className="flex items-center gap-2.5 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                checked={dietaRestritivaOuHipovitaminose}
-                onChange={(e) => setDietaRestritivaOuHipovitaminose(e.target.checked)}
-                className="w-4 h-4 accent-[var(--color-accent)]"
-              />
-              Dieta vegana estrita ou hipovitaminose identificada (B12)
-            </label>
-            <label className="flex items-center gap-2.5 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                checked={baixaIngestaLaticinios}
-                onChange={(e) => setBaixaIngestaLaticinios(e.target.checked)}
-                className="w-4 h-4 accent-[var(--color-accent)]"
-              />
-              Baixa ingesta de laticínios (indica suplementação de cálcio)
             </label>
             <label className="flex items-center gap-2.5 text-sm cursor-pointer">
               <input

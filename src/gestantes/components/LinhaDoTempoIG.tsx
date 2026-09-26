@@ -63,7 +63,7 @@ function pct(semanas: number): string {
  *  card de detalhe no hover com status (Período encerrado/atual/Em X semanas). Só itera
  *  `MARCOS_IG`: adicionar/editar um marco é mexer nos dados, nunca aqui. */
 export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; dias?: number }) {
-  const [categoriasAtivas, setCategoriasAtivas] = useState<Set<CategoriaMarco>>(new Set(CATEGORIAS))
+  const [categoriasAtivas, setCategoriasAtivas] = useState<Set<CategoriaMarco>>(new Set())
   const [hover, setHover] = useState<string | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [largura, setLargura] = useState(900)

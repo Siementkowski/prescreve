@@ -1,5 +1,5 @@
-// Suplementação de rotina no pré-natal — Ácido Fólico, Ferro, Cálcio, AAS, Vitaminas B12/D
-// e Iodo, conteúdo fornecido pelo usuário (Ministério da Saúde / Febrasgo).
+// Suplementação de rotina no pré-natal — Ácido Fólico, Ferro, AAS e Vitamina D,
+// conteúdo fornecido pelo usuário (Ministério da Saúde / Febrasgo).
 
 export type StatusSuplementoGestante = 'aguardar' | 'iniciar' | 'concluido' | 'nao_aplicavel'
 
@@ -14,11 +14,6 @@ export interface ContextoSuplementacaoGestante {
   anemiaConfirmada: boolean
   /** HAS crônica, DM, gestação múltipla, história de pré-eclâmpsia, entre outras — indica AAS. */
   riscoPreEclampsia: boolean
-  /** Dieta vegana estrita ou hipovitaminose já identificada — indica B12/D. */
-  dietaRestritivaOuHipovitaminose: boolean
-  /** Baixa ingesta de laticínios — indica suplementação de cálcio (600 mg/dia), sobretudo
-   *  quando associada a risco de pré-eclâmpsia. */
-  baixaIngestaLaticinios: boolean
   /** Deficiência de vitamina D comprovada por exame — só se suplementa nesse caso, não há
    *  esquema universal. */
   deficienciaVitaminaD: boolean
@@ -87,45 +82,6 @@ export function calcularFerro(ctx: ContextoSuplementacaoGestante): RecomendacaoS
     janela,
     indicacao,
     observacao: 'Tomar antes das refeições para melhor absorção. Manter até 3 meses pós-parto.',
-  }
-}
-
-export function calcularCalcio(ctx: ContextoSuplementacaoGestante): RecomendacaoSuplementoGestante {
-  const { baixaIngestaLaticinios, riscoPreEclampsia } = ctx
-  const dose = '600 mg/dia'
-  const indicacao = 'Baixa ingesta de laticínios — sobretudo relevante se associada a risco de pré-eclâmpsia'
-  const observacao = 'Não ingerir junto com o ferro — respeitar intervalo de 2 horas entre eles.'
-
-  if (!baixaIngestaLaticinios) {
-    return {
-      nome: 'Cálcio',
-      status: 'nao_aplicavel',
-      rotuloStatus: 'Não indicado',
-      dose,
-      janela: 'Durante a gestação, se indicado',
-      indicacao,
-      observacao: 'Marque "baixa ingesta de laticínios" acima se for o caso.',
-    }
-  }
-  return {
-    nome: 'Cálcio',
-    status: 'iniciar',
-    rotuloStatus: 'Em uso',
-    dose,
-    janela: 'Durante a gestação',
-    indicacao,
-    observacao: riscoPreEclampsia ? `${observacao} Também contribui pra redução do risco de pré-eclâmpsia.` : observacao,
-  }
-}
-
-export function calcularIodo(): RecomendacaoSuplementoGestante {
-  return {
-    nome: 'Iodo',
-    status: 'iniciar',
-    rotuloStatus: 'Rotina',
-    dose: '150 a 250 µg/dia',
-    janela: 'Durante toda a gestação e a lactação',
-    indicacao: 'Todas as gestantes e lactantes',
   }
 }
 
@@ -210,31 +166,5 @@ export function calcularVitaminaD(ctx: ContextoSuplementacaoGestante): Recomenda
     janela: 'Durante a gestação',
     indicacao,
     observacao: 'Dose ajustada ao grau de deficiência encontrado no exame.',
-  }
-}
-
-export function calcularB12(ctx: ContextoSuplementacaoGestante): RecomendacaoSuplementoGestante {
-  const { dietaRestritivaOuHipovitaminose } = ctx
-  const indicacao = 'Gestantes veganas ou com hipovitaminoses identificadas'
-
-  if (!dietaRestritivaOuHipovitaminose) {
-    return {
-      nome: 'Vitamina B12',
-      status: 'nao_aplicavel',
-      rotuloStatus: 'Não indicado',
-      dose: 'Conforme orientação nutricional individual',
-      janela: 'Durante toda a gestação, se indicado',
-      indicacao,
-      observacao: 'Marque o fator de risco acima (dieta vegana estrita ou hipovitaminose) se for o caso.',
-    }
-  }
-  return {
-    nome: 'Vitamina B12',
-    status: 'iniciar',
-    rotuloStatus: 'Em uso',
-    dose: 'Conforme orientação nutricional individual',
-    janela: 'Durante toda a gestação',
-    indicacao,
-    observacao: 'Objetivo: prevenir deficiências associadas a dietas restritivas.',
   }
 }

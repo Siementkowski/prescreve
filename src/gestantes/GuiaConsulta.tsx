@@ -15,7 +15,7 @@ import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
 import { useGuiaConsultaStore, type StatusSorologia, type MetodoBCF, type StatusLabs } from './guiaConsultaStore'
 import { calcularDPP, dppCorrigidaPorUSG, formatarIG, formatarData, trimestreDaIG } from './idade'
 import { PERIODICIDADE_CONSULTAS, examesDaConsulta } from './dados/preNatal'
-import { calcularAcidoFolico, calcularFerro, calcularCalcio, calcularAAS, calcularVitaminaD, calcularB12, calcularIodo } from './dados/suplementacao'
+import { calcularAcidoFolico, calcularFerro, calcularAAS, calcularVitaminaD } from './dados/suplementacao'
 import { vacinasAplicaveis } from './dados/vacinas'
 import { QUEIXAS_ROTINA, ORIENTACOES_PLANO, TEXTO_SINAIS_ALERTA } from './dados/anamnese'
 import { Secao } from './components/Secao'
@@ -137,19 +137,9 @@ export function GuiaConsulta() {
       riscoFolatoAlto: false,
       anemiaConfirmada: false,
       riscoPreEclampsia: false,
-      dietaRestritivaOuHipovitaminose: false,
-      baixaIngestaLaticinios: false,
       deficienciaVitaminaD: false,
     }
-    return [
-      calcularAcidoFolico(ctx),
-      calcularFerro(ctx),
-      calcularCalcio(ctx),
-      calcularAAS(ctx),
-      calcularVitaminaD(ctx),
-      calcularB12(ctx),
-      calcularIodo(),
-    ]
+    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularAAS(ctx), calcularVitaminaD(ctx)]
   }, [ig])
 
   function alternar<T>(set: Set<T>, valor: T, setter: (s: Set<T>) => void) {
@@ -505,22 +495,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                 </div>
               </div>
             </Secao>
-            </div>
 
-            <div className="w-full sm:w-[70%] sm:sticky sm:top-4">
-              <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-bold text-text-dim uppercase tracking-wide">Preview</span>
-                  <CopyButton texto={textoFinal} label="Copiar" variant="solid" />
-                </div>
-                <pre className="text-[11px] text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-[var(--radius-item,11px)] p-3 max-h-[70vh] overflow-y-auto">
-                  {textoFinal}
-                </pre>
-              </div>
-            </div>
-            </div>
-
-            <div className="max-w-3xl w-full flex flex-col gap-4">
             <Secao titulo="Medicamentos em uso" icone={Pill}>
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1.5">
@@ -689,15 +664,18 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                 </Campo>
               </div>
             </Secao>
+            </div>
 
-            <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-bold text-text-dim uppercase tracking-wide">Anamnese — pronta pra copiar</span>
-                <CopyButton texto={textoFinal} label="Copiar anamnese" variant="solid" />
+            <div className="w-full sm:w-[70%] sm:sticky sm:top-4">
+              <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-text-dim uppercase tracking-wide">Preview</span>
+                  <CopyButton texto={textoFinal} label="Copiar" variant="solid" />
+                </div>
+                <pre className="text-[11px] text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-[var(--radius-item,11px)] p-3 max-h-[calc(100vh-4rem)] overflow-y-auto">
+                  {textoFinal}
+                </pre>
               </div>
-              <pre className="text-xs text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-[var(--radius-item,11px)] p-3 max-h-96 overflow-y-auto">
-                {textoFinal}
-              </pre>
             </div>
             </div>
           </>
