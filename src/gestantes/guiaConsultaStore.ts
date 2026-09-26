@@ -13,9 +13,10 @@ export type StatusLabs = 'nao_avaliado' | 'normais' | 'alterados'
  *
  *  Estrutura segue o modelo SOAP fornecido: cabeçalho (antecedentes + status de labs),
  *  S (queixas fixas de rotina, nega/refere), O (exame físico objetivo), P (vacinas,
- *  orientações e exames a solicitar). LABS no cabeçalho é só um marcador rápido
- *  (avaliado/normal/alterado) — o que de fato entra em "Solicito X, Y" no Plano vem do
- *  checklist de exames do trimestre (`examesMarcados`, dados em dados/preNatal.ts). */
+ *  orientações e resultados de exames revisados). LABS no cabeçalho é só um marcador
+ *  rápido (avaliado/normal/alterado) — o que de fato entra em "Resultados revisados" no
+ *  Plano vem dos campos de resultado por exame do trimestre (`resultadosExame`, campos
+ *  definidos em `CAMPOS_RESULTADO_EXAME` de dados/preNatal.ts). */
 interface GuiaConsultaState {
   // ---- cabeçalho / antecedentes ----
   dumAnamnese: string
@@ -51,9 +52,9 @@ interface GuiaConsultaState {
   atividadeLaboral: string
   setAtividadeLaboral: (v: string) => void
 
-  // Marcador rápido de LABS pro cabeçalho — não é o checklist de exames a pedir, é "os
-  // resultados que ela já trouxe estão normais ou alterados". Ver `examesMarcados` pro
-  // que efetivamente vai ser solicitado nessa consulta.
+  // Marcador rápido de LABS pro cabeçalho — não são os resultados detalhados por exame, é
+  // "os resultados que ela já trouxe estão normais ou alterados". Ver `resultadosExame`
+  // pros valores efetivos por exame do trimestre.
   labsStatus: StatusLabs
   setLabsStatus: (v: StatusLabs) => void
   labsAlteradosDetalhe: string
@@ -91,9 +92,14 @@ interface GuiaConsultaState {
   planoExtra: string
   setPlanoExtra: (v: string) => void
 
-  // ---- exames a solicitar nessa consulta (checklist por trimestre) ----
-  examesMarcados: Set<string>
-  setExamesMarcados: (v: Set<string>) => void
+  // ---- exames — resultados de laboratório (por trimestre escolhido manualmente) ----
+  trimestreExames: 1 | 2 | 3 | null
+  setTrimestreExames: (v: 1 | 2 | 3 | null) => void
+  dataExames: string
+  setDataExames: (v: string) => void
+  // chave = `${exame.nome}::${campo.label}` (ver CAMPOS_RESULTADO_EXAME em dados/preNatal.ts)
+  resultadosExame: Record<string, string>
+  setResultadosExame: (v: Record<string, string>) => void
 }
 
 export const useGuiaConsultaStore = create<GuiaConsultaState>((set) => ({
@@ -164,6 +170,10 @@ export const useGuiaConsultaStore = create<GuiaConsultaState>((set) => ({
   planoExtra: '',
   setPlanoExtra: (planoExtra) => set({ planoExtra }),
 
-  examesMarcados: new Set(),
-  setExamesMarcados: (examesMarcados) => set({ examesMarcados }),
+  trimestreExames: null,
+  setTrimestreExames: (trimestreExames) => set({ trimestreExames }),
+  dataExames: '',
+  setDataExames: (dataExames) => set({ dataExames }),
+  resultadosExame: {},
+  setResultadosExame: (resultadosExame) => set({ resultadosExame }),
 }))

@@ -221,11 +221,59 @@ export const PRE_NATAL: BlocoTrimestre[] = [
   },
 ]
 
-/** Painel de exames pra uma consulta — usado no Guia de Consulta (checklist "o que fazer
- *  nessa consulta"). Sempre os exames de rotina do trimestre atual. */
+/** Painel de exames pra uma consulta — usado no Guia de Consulta (registro de resultado,
+ *  não mais checklist do que solicitar). Trimestre escolhido manualmente na tela (pré-
+ *  selecionado pela IG, mas trocável — a gestante pode trazer resultado de exame de um
+ *  trimestre anterior numa consulta mais adiantada). */
 export function examesDaConsulta(trimestreAtual: BlocoTrimestre['trimestre']): ExamePreNatal[] {
   const blocoAtual = PRE_NATAL.find((b) => b.trimestre === trimestreAtual) ?? PRE_NATAL[0]
   return blocoAtual.exames
+}
+
+export interface CampoResultadoExame {
+  label: string
+  placeholder: string
+}
+
+/** Campos de resultado por exame — granularidade dos valores que de fato compõem cada
+ *  exame do painel de LABS por trimestre (ver PRE_NATAL acima). Exame sem entrada aqui
+ *  cai no fallback de um único campo "Resultado" (ver uso em GuiaConsulta.tsx). */
+export const CAMPOS_RESULTADO_EXAME: Record<string, CampoResultadoExame[]> = {
+  Hemograma: [
+    { label: 'Hb (g/dL)', placeholder: 'ex: 12,5' },
+    { label: 'Ht (%)', placeholder: 'ex: 35,9' },
+    { label: 'Leucócitos', placeholder: 'ex: 8.500' },
+    { label: 'Plaquetas', placeholder: 'ex: 250.000' },
+  ],
+  'Tipagem sanguínea + Fator Rh': [{ label: 'Tipo sanguíneo', placeholder: 'ex: A+' }],
+  'Coombs indireto': [{ label: 'Resultado', placeholder: 'ex: Negativo' }],
+  'Eletroforese de hemoglobina': [{ label: 'Resultado', placeholder: 'ex: AA' }],
+  'Glicemia de jejum': [{ label: 'GJ (mg/dL)', placeholder: 'ex: 92' }],
+  EAS: [{ label: 'Resultado', placeholder: 'ex: Normal' }],
+  'Urocultura com TSA (antibiograma)': [{ label: 'Resultado', placeholder: 'ex: Negativa' }],
+  'Toxoplasmose IgG/IgM': [
+    { label: 'IgG', placeholder: 'ex: Reagente' },
+    { label: 'IgM', placeholder: 'ex: Não reagente' },
+  ],
+  HIV: [{ label: 'Resultado', placeholder: 'ex: Não reagente' }],
+  Sífilis: [{ label: 'VDRL', placeholder: 'ex: Não reagente' }],
+  'Hepatite B e C (HBsAg + Anti-HCV)': [
+    { label: 'HBsAg', placeholder: 'ex: Não reagente' },
+    { label: 'Anti-HCV', placeholder: 'ex: Não reagente' },
+  ],
+  'HTLV 1 e 2': [{ label: 'Resultado', placeholder: 'ex: Não reagente' }],
+  TSH: [{ label: 'TSH (mUI/L)', placeholder: 'ex: 2,10' }],
+  'Preventivo (citopatológico de colo uterino)': [{ label: 'Resultado', placeholder: 'ex: Normal' }],
+  'Vitamina D': [{ label: 'Vitamina D (ng/mL)', placeholder: 'ex: 32' }],
+  'Clamídia / Gonococo': [{ label: 'Resultado', placeholder: 'ex: Negativo' }],
+  'TOTG 75g': [
+    { label: 'Jejum (mg/dL)', placeholder: 'ex: 88' },
+    { label: '1h (mg/dL)', placeholder: 'ex: 160' },
+    { label: '2h (mg/dL)', placeholder: 'ex: 140' },
+  ],
+  Urocultura: [{ label: 'Resultado', placeholder: 'ex: Negativa' }],
+  'Hepatite B': [{ label: 'HBsAg', placeholder: 'ex: Não reagente' }],
+  'Pesquisa de estreptococo (EGB) — Streptococcus agalactiae': [{ label: 'Resultado', placeholder: 'ex: Negativo' }],
 }
 
 /** Agenda dos USG — categoria própria, fora do checklist de labs (PRE_NATAL) — com faixa

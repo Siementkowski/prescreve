@@ -14,7 +14,7 @@ import { CopyButton } from '../consulta/components/CopyButton'
 import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
 import { useGuiaConsultaStore, type StatusSorologia, type StatusLabs } from './guiaConsultaStore'
 import { calcularDPP, dppCorrigidaPorUSG, formatarIG, formatarData, trimestreDaIG } from './idade'
-import { PERIODICIDADE_CONSULTAS, examesDaConsulta } from './dados/preNatal'
+import { PERIODICIDADE_CONSULTAS, examesDaConsulta, CAMPOS_RESULTADO_EXAME } from './dados/preNatal'
 import { calcularAcidoFolico, calcularFerro, calcularAAS, calcularVitaminaD } from './dados/suplementacao'
 import { vacinasAplicaveis } from './dados/vacinas'
 import { QUEIXAS_ROTINA, ORIENTACOES_PLANO, TEXTO_SINAIS_ALERTA } from './dados/anamnese'
@@ -25,6 +25,7 @@ const ROTULO_SOROLOGIA: Record<StatusSorologia, string> = { desconhecido: '?', i
 const ROTULO_LABS: Record<StatusLabs, string> = { nao_avaliado: 'não avaliados', normais: 'normais', alterados: 'alterados' }
 
 const SEMANAS_POR_INTERVALO: Record<string, number> = { Mensal: 4, Quinzenal: 2, Semanal: 1 }
+const FALLBACK_CAMPO_EXAME = [{ label: 'Resultado', placeholder: 'ex: valor' }]
 
 /** Pré-natal — calculadora de IG + linha do tempo (compactas, topo) e o roteiro de
  *  anamnese que se adapta ao contexto (IG, 1ª consulta ou retorno). Reaproveita os dados
@@ -117,10 +118,17 @@ export function GuiaConsulta() {
   const planoExtra = useGuiaConsultaStore((s) => s.planoExtra)
   const setPlanoExtra = useGuiaConsultaStore((s) => s.setPlanoExtra)
 
-  const examesMarcados = useGuiaConsultaStore((s) => s.examesMarcados)
-  const setExamesMarcados = useGuiaConsultaStore((s) => s.setExamesMarcados)
+  const trimestreExames = useGuiaConsultaStore((s) => s.trimestreExames)
+  const setTrimestreExames = useGuiaConsultaStore((s) => s.setTrimestreExames)
+  const dataExames = useGuiaConsultaStore((s) => s.dataExames)
+  const setDataExames = useGuiaConsultaStore((s) => s.setDataExames)
+  const resultadosExame = useGuiaConsultaStore((s) => s.resultadosExame)
+  const setResultadosExame = useGuiaConsultaStore((s) => s.setResultadosExame)
 
-  const exames = trimestreAtual != null ? examesDaConsulta(trimestreAtual) : []
+  // Pré-selecionado pela IG, mas trocável — a gestante pode trazer resultado de exame de
+  // um trimestre anterior numa consulta mais adiantada.
+  const trimestreExibido = trimestreExames ?? trimestreAtual
+  const exames = trimestreExibido != null ? examesDaConsulta(trimestreExibido) : []
   const periodicidade = ig ? PERIODICIDADE_CONSULTAS.find((f) => ig.semanas >= f.semanaInicio && (f.semanaFim == null || ig.semanas < f.semanaFim)) : null
   const vacinasContexto = ig ? vacinasAplicaveis(ig.semanas) : []
 
@@ -141,6 +149,19 @@ export function GuiaConsulta() {
     if (novo.has(valor)) novo.delete(valor)
     else novo.add(valor)
     setter(novo)
+  }
+
+  function camposDoExame(nomeExame: string) {
+    return CAMPOS_RESULTADO_EXAME[nomeExame] ?? FALLBACK_CAMPO_EXAME
+  }
+  function chaveResultado(nomeExame: string, campoLabel: string) {
+    return `${nomeExame}::${campoLabel}`
+  }
+  function valorResultado(nomeExame: string, campoLabel: string) {
+    return resultadosExame[chaveResultado(nomeExame, campoLabel)] ?? ''
+  }
+  function setValorResultado(nomeExame: string, campoLabel: string, valor: string) {
+    setResultadosExame({ ...resultadosExame, [chaveResultado(nomeExame, campoLabel)]: valor })
   }
 
   const textoFinal = useMemo(() => {
@@ -185,11 +206,18 @@ export function GuiaConsulta() {
       )
     }
 
-    const examesTexto = exames.filter((e) => examesMarcados.has(e.nome)).map((e) => e.nome)
+    const examesComResultado = exames
+      .map((e) => {
+        const valores = camposDoExame(e.nome)
+          .map((campo) => valorResultado(e.nome, campo.label))
+          .filter((v) => v.trim() !== '')
+        return valores.length > 0 ? `${e.nome} (${valores.join(', ')})` : null
+      })
+      .filter((t): t is string => t != null)
     const linhaSolicitacao =
-      examesTexto.length > 0
-        ? `Solicito ${examesTexto.join(', ')}.`
-        : 'Solicito exames laboratoriais de rotina do trimestre.'
+      examesComResultado.length > 0
+        ? `Resultados revisados${dataExames ? ` (${formatarData(dataDeInputISO(dataExames))})` : ''}: ${examesComResultado.join(', ')}.`
+        : 'Aguardando resultados dos exames de rotina do trimestre.'
 
     const linhaVacinasPlano = vacinasFaltando.length > 0 ? `Vacinas pendentes: ${vacinasFaltando.join(', ')}.` : ''
 
@@ -280,7 +308,8 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
     orientacoesMarcadas,
     planoExtra,
     exames,
-    examesMarcados,
+    resultadosExame,
+    dataExames,
     periodicidade,
     trimestreAtual,
   ])
@@ -567,25 +596,39 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
               </div>
             </Secao>
 
-            <Secao titulo={`Exames — rotina do ${trimestreAtual}º trimestre`} icone={ClipboardCheck}>
-              <div className="flex flex-col gap-2">
-                {exames.map((e) => (
-                  <label
-                    key={e.nome}
-                    className="flex items-start gap-2.5 border border-border rounded-[var(--radius-card,14px)] bg-surface p-3 cursor-pointer hover:border-text-dim transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={examesMarcados.has(e.nome)}
-                      onChange={() => alternar(examesMarcados, e.nome, setExamesMarcados)}
-                      className="mt-0.5 w-4 h-4 accent-[var(--color-accent)] shrink-0"
-                    />
-                    <span className="min-w-0">
+            <Secao titulo="Exames laboratoriais" icone={ClipboardCheck}>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-text-dim shrink-0">Trimestre:</span>
+                  {[1, 2, 3].map((t) => (
+                    <ToggleChip key={t} ativo={trimestreExibido === t} onClick={() => setTrimestreExames(t as 1 | 2 | 3)} label={`${t}º tri`} />
+                  ))}
+                </div>
+
+                <Campo label="Data do exame">
+                  <input type="date" value={dataExames} onChange={(e) => setDataExames(e.target.value)} className={inputCls + ' w-full'} />
+                </Campo>
+
+                <div className="flex flex-col gap-3">
+                  {exames.map((e) => (
+                    <div key={e.nome} className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-3">
                       <span className="block text-sm font-semibold text-text">{e.nome}</span>
-                      <span className="block text-xs text-text-dim mt-0.5">{e.periodicidade}</span>
-                    </span>
-                  </label>
-                ))}
+                      <span className="block text-xs text-text-dim mt-0.5 mb-2.5">{e.periodicidade}</span>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        {camposDoExame(e.nome).map((campo) => (
+                          <Campo key={campo.label} label={campo.label}>
+                            <input
+                              value={valorResultado(e.nome, campo.label)}
+                              onChange={(ev) => setValorResultado(e.nome, campo.label, ev.target.value)}
+                              placeholder={campo.placeholder}
+                              className={inputCls + ' w-full'}
+                            />
+                          </Campo>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </Secao>
 
