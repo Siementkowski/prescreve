@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { CheckCircle2, Clock, MinusCircle, Info, ListChecks, Pill } from 'lucide-react'
 import { useIGAtual } from './store'
 import { formatarIG } from './idade'
-import { Secao } from './components/Secao'
+import { Secao, Tabela } from './components/Secao'
 import {
   calcularAcidoFolico,
   calcularFerro,
@@ -124,6 +124,33 @@ export function Suplementacao() {
                 </div>
               )
             })}
+          </div>
+        </Secao>
+        <Secao titulo="Profilaxia de pré-eclâmpsia com AAS" icone={Pill}>
+          <div className="flex flex-col gap-4">
+            <Tabela
+              cabecalho={['Fatores de Alto Risco', 'Fatores de Risco Moderado']}
+              linhas={[
+                ['Pré-eclâmpsia em gestação anterior', 'Nuliparidade'],
+                ['Gestação múltipla', 'História familiar de PE (mãe ou irmãs)'],
+                ['Obesidade (IMC > 30)', 'Condições socioeconômicas desfavoráveis'],
+                ['Hipertensão arterial crônica', 'Raça/cor preta ou parda'],
+                ['Diabetes tipo 1 ou 2', 'Idade ≥ 35 anos'],
+                ['Doença renal ou autoimune (LES, SAAF)', 'Desfecho adverso em gestação prévia*'],
+                ['Reprodução assistida', 'Intervalo > 10 anos desde a última gestação'],
+              ]}
+            />
+            <p className="text-xs text-text-dim -mt-2">*DPP, baixo peso ao nascer &gt;37s, parto prematuro, bebê com baixo peso</p>
+            <div className="flex flex-col gap-1.5 text-sm text-text">
+              <p className="font-semibold">Indicações de AAS:</p>
+              <ul className="list-disc pl-5 text-text-dim">
+                <li><strong className="text-text">1</strong> fator de Alto Risco, <strong className="text-text">ou</strong></li>
+                <li><strong className="text-text">2</strong> fatores de Risco Moderado</li>
+              </ul>
+            </div>
+            <p className="text-sm text-text">
+              <strong>Esquema:</strong> AAS 100mg — 1 comprimido, 1x/dia, todos os dias, de 12 a 36 semanas.
+            </p>
           </div>
         </Secao>
       </div>

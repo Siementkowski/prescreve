@@ -201,7 +201,7 @@ export function GuiaConsulta() {
         bcfAusente
           ? 'BCF ausente à ausculta — reavaliar com USG.'
           : bcfBpm
-            ? `BCF presente, FCF de ${bcfBpm} bpm.`
+            ? `BCF: ${bcfBpm}bpm.`
             : 'BCF não auscultado nessa consulta.'
       )
     }
@@ -324,7 +324,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
         <div className="flex justify-end">
           <button
             onClick={novaConsulta}
-            className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-3 py-1.5 rounded-[var(--radius-pill,999px)] border border-border bg-surface text-text-dim hover:text-text transition-colors"
+            className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-3 py-1.5 rounded-[var(--radius-pill,999px)] bg-accent hover:bg-accent/90 text-accent-text transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             Nova consulta
