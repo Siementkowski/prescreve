@@ -8,6 +8,7 @@ import {
   Stethoscope,
   ClipboardCheck,
   FileCheck,
+  RotateCcw,
 } from 'lucide-react'
 import { CopyButton } from '../consulta/components/CopyButton'
 import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
@@ -304,9 +305,24 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
     trimestreAtual,
   ])
 
+  const novaConsulta = () => {
+    if (!window.confirm('Limpar todos os dados e começar uma nova consulta?')) return
+    useGestantesStore.setState(useGestantesStore.getInitialState(), true)
+    useGuiaConsultaStore.setState(useGuiaConsultaStore.getInitialState(), true)
+  }
+
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="flex flex-col gap-4 pb-16">
+        <div className="flex justify-end">
+          <button
+            onClick={novaConsulta}
+            className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-3 py-1.5 rounded-[var(--radius-pill,999px)] border border-border bg-surface text-text-dim hover:text-text transition-colors"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Nova consulta
+          </button>
+        </div>
         {/* ---- calculadora de IG (compacta, canto superior esquerdo) + linha do tempo
             ocupando o resto da largura, lado a lado ---- */}
         <div className="flex flex-col sm:flex-row gap-3 items-start">
