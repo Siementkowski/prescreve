@@ -7,7 +7,7 @@ import { Intercorrencias } from './Intercorrencias'
 
 const ABAS: { id: AbaGestantes; label: string; icone: typeof FileText }[] = [
   { id: 'guia_consulta', label: 'Pré-natal', icone: FileText },
-  { id: 'suplementacao', label: 'Suplementação', icone: Pill },
+  { id: 'suplementacao', label: 'Suplementos', icone: Pill },
   { id: 'vacinacao', label: 'Vacinação', icone: Syringe },
   { id: 'intercorrencias', label: 'Intercorrências comuns', icone: AlertTriangle },
 ]
