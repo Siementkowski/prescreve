@@ -15,7 +15,6 @@ import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
 import { useGuiaConsultaStore, type StatusSorologia, type StatusLabs } from './guiaConsultaStore'
 import { calcularDPP, dppCorrigidaPorUSG, formatarIG, formatarData, trimestreDaIG } from './idade'
 import { PERIODICIDADE_CONSULTAS, examesDaConsulta, CAMPOS_RESULTADO_EXAME } from './dados/preNatal'
-import { calcularAcidoFolico, calcularFerro, calcularAAS, calcularVitaminaD } from './dados/suplementacao'
 import { vacinasAplicaveis } from './dados/vacinas'
 import { QUEIXAS_ROTINA, TEXTO_SINAIS_ALERTA } from './dados/anamnese'
 import { Secao } from './components/Secao'
@@ -23,6 +22,23 @@ import { LinhaDoTempoIG } from './components/LinhaDoTempoIG'
 
 const ROTULO_SOROLOGIA: Record<StatusSorologia, string> = { desconhecido: '?', imune: 'imune', suscetivel: 'suscetível' }
 const ROTULO_LABS: Record<StatusLabs, string> = { nao_avaliado: 'não avaliados', normais: 'normais', alterados: 'alterados' }
+
+/** Suplementos do card "Medicamentos em uso". `textoAnamnese` (nome + dose + posologia) é
+ *  o que aparece no card e vai pra anamnese; `detalhe` (período/orientação) só aparece no card. */
+const SUPLEMENTOS_EM_USO = [
+  { nome: 'Ácido Fólico', textoAnamnese: 'Ácido Fólico 400mcg (1-0-0)', detalhe: 'até 12ª semana de gestação' },
+  { nome: 'Sulfato Ferroso', textoAnamnese: 'Sulfato Ferroso 40mg (1-0-0)', detalhe: 'a partir da 20ª semana até o 3º mês pós-parto' },
+  {
+    nome: 'AAS',
+    textoAnamnese: 'AAS 100mg (1-0-0)',
+    detalhe: 'Alto risco para pré-eclâmpsia — janela ótima 12–16 semanas, limite até 20 semanas pra iniciar, interromper com 36 semanas.',
+  },
+  {
+    nome: 'Vitamina D',
+    textoAnamnese: 'Vitamina D',
+    detalhe: 'conduta médica conforme avaliação laboratorial (suplementar apenas se deficiência moderada a grave)',
+  },
+]
 
 const SEMANAS_POR_INTERVALO: Record<string, number> = { Mensal: 4, Quinzenal: 2, Semanal: 1 }
 
@@ -129,17 +145,6 @@ export function GuiaConsulta() {
   const periodicidade = ig ? PERIODICIDADE_CONSULTAS.find((f) => ig.semanas >= f.semanaInicio && (f.semanaFim == null || ig.semanas < f.semanaFim)) : null
   const vacinasContexto = ig ? vacinasAplicaveis(ig.semanas) : []
 
-  const suplementos = useMemo(() => {
-    if (!ig) return []
-    const ctx = {
-      semanasIG: ig.semanas,
-      riscoFolatoAlto: false,
-      anemiaConfirmada: false,
-      riscoPreEclampsia: false,
-      deficienciaVitaminaD: false,
-    }
-    return [calcularAcidoFolico(ctx), calcularFerro(ctx), calcularAAS(ctx), calcularVitaminaD(ctx)]
-  }, [ig])
 
   function alternar<T>(set: Set<T>, valor: T, setter: (s: Set<T>) => void) {
     const novo = new Set(set)
@@ -184,7 +189,7 @@ export function GuiaConsulta() {
     const textoVacinasHeader = vacinasFaltando.length === 0 ? 'em dia' : `faltando ${vacinasFaltando.join(', ')}`
 
     const itensMedicamentos = [
-      ...suplementos.filter((s) => medsSelecionados.has(s.nome)).map((s) => `${s.nome} ${s.dose}`),
+      ...SUPLEMENTOS_EM_USO.filter((s) => medsSelecionados.has(s.nome)).map((s) => s.textoAnamnese),
       ...(outrosMedicamentos ? [outrosMedicamentos] : []),
     ]
 
@@ -276,7 +281,6 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
     comorbidades,
     medsSelecionados,
     outrosMedicamentos,
-    suplementos,
     vacinasContexto,
     vacinasTomadas,
     alergias,
@@ -497,7 +501,7 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
             <Secao titulo="Medicamentos em uso" icone={Pill}>
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1.5">
-                  {suplementos.map((s) => (
+                  {SUPLEMENTOS_EM_USO.map((s) => (
                     <label
                       key={s.nome}
                       className="flex items-start gap-2.5 border border-border rounded-[var(--radius-item,11px)] px-3 py-2 cursor-pointer hover:border-text-dim transition-colors"
@@ -509,8 +513,8 @@ ${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a condut
                         className="mt-0.5 w-4 h-4 accent-[var(--color-accent)] shrink-0"
                       />
                       <span className="min-w-0">
-                        <span className="block text-sm font-semibold text-text">{s.nome}</span>
-                        <span className="block text-xs text-text-dim mt-0.5">{s.dose}</span>
+                        <span className="block text-sm font-semibold text-text">{s.textoAnamnese}</span>
+                        <span className="block text-xs text-text-dim mt-0.5">{s.detalhe}</span>
                       </span>
                     </label>
                   ))}
