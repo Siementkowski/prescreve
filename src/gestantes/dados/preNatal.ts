@@ -16,12 +16,15 @@ export interface FaixaPeriodicidade {
   semanaInicio: number
   semanaFim: number | null // null = "em diante"
   intervalo: string
+  /** Texto do retorno no Plano — "Retorno em ..." */
+  retorno: string
 }
 
 export const PERIODICIDADE_CONSULTAS: FaixaPeriodicidade[] = [
-  { semanaInicio: 0, semanaFim: 28, intervalo: 'Mensal' },
-  { semanaInicio: 28, semanaFim: 36, intervalo: 'Quinzenal' },
-  { semanaInicio: 36, semanaFim: null, intervalo: 'Semanal' },
+  { semanaInicio: 0, semanaFim: 32, intervalo: 'Mensal', retorno: '4 semanas' },
+  { semanaInicio: 32, semanaFim: 37, intervalo: 'Quinzenal', retorno: '2 semanas' },
+  { semanaInicio: 37, semanaFim: 41, intervalo: 'Semanal', retorno: '1 semana' },
+  { semanaInicio: 41, semanaFim: null, intervalo: 'A cada 3 dias', retorno: '3 dias' },
 ]
 
 /** Intervalo de consulta recomendado pra uma semana de IG — null se fora da faixa coberta. */

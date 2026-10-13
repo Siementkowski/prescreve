@@ -23,4 +23,4 @@ export const QUEIXAS_ROTINA: QueixaRotina[] = [
 ]
 
 export const TEXTO_SINAIS_ALERTA =
-  'Oriento sinais de alerta para pré-eclâmpsia (cefaleia intensa, alterações visuais/escotomas, dor epigástrica, edema súbito de mãos/rosto) e para parto prematuro (contrações regulares, perda de líquido ou sangramento vaginal) — procurar atendimento imediato se presentes.'
+  'Oriento sinais e sintomas de alarme para buscar atendimento na maternidade de referência — contrações, perda de líquido, sangramento vaginal e diminuição da movimentação fetal por mais de 4 horas.'

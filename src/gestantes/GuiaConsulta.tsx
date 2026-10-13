@@ -40,8 +40,6 @@ const SUPLEMENTOS_EM_USO = [
   },
 ]
 
-const SEMANAS_POR_INTERVALO: Record<string, number> = { Mensal: 4, Quinzenal: 2, Semanal: 1 }
-
 /** Pré-natal — calculadora de IG + linha do tempo (compactas, topo) e o roteiro de
  *  anamnese que se adapta ao contexto (IG, 1ª consulta ou retorno). Reaproveita os dados
  *  já alimentados em Suplementação/Vacinação — não duplica conteúdo clínico, só reorganiza.
@@ -219,11 +217,20 @@ export function GuiaConsulta() {
     const linhaSolicitacao =
       examesComResultado.length > 0
         ? `Resultados revisados${dataExames ? ` (${formatarData(dataDeInputISO(dataExames))})` : ''}: ${examesComResultado.join(', ')}.`
-        : 'Aguardando resultados dos exames de rotina do trimestre.'
+        : 'Aguardo resultados dos exames de rotina do trimestre.'
 
     const linhaVacinasPlano = vacinasFaltando.length > 0 ? `Vacinas pendentes: ${vacinasFaltando.join(', ')}.` : ''
 
-    const semanasRetorno = periodicidade ? SEMANAS_POR_INTERVALO[periodicidade.intervalo] ?? 4 : 4
+    const textoRetorno = periodicidade ? periodicidade.retorno : '4 semanas'
+
+    const itensPlano = [
+      linhaSolicitacao,
+      TEXTO_SINAIS_ALERTA,
+      linhaVacinasPlano,
+      `Retorno em ${textoRetorno}.`,
+      planoExtra ? `Orientações gerais: ${planoExtra}` : 'Orientações gerais.',
+      'Paciente entende, concorda e afirma não haver dúvidas.',
+    ].filter((t) => t.trim() !== '')
 
     const linhaLabs =
       labsStatus === 'alterados'
@@ -255,11 +262,7 @@ A
 Gestação de ${formatarIG(ig)}, ${riscoAlto ? 'alto risco' : 'risco habitual'}.
 
 P
-${linhaSolicitacao}
-${TEXTO_SINAIS_ALERTA}
-${linhaVacinasPlano}
-Retorno em ${semanasRetorno} semana${semanasRetorno === 1 ? '' : 's'}.
-${planoExtra ? planoExtra + '\n' : ''}Paciente ciente e concordante com a conduta.`
+${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
       .split('\n')
       .filter((linha) => linha.trim() !== '')
       .join('\n')
