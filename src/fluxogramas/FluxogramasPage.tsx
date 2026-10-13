@@ -86,11 +86,7 @@ export function FluxogramasPage() {
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-6xl mx-auto flex flex-col gap-6 pb-16">
         <div>
-          <span className="ed-eyebrow">
-            <span className="ed-eyebrow-dot" style={{ background: 'var(--red)' }} />
-            Conteúdo / Fluxogramas
-          </span>
-          <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
+          <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mb-2 text-text">
             Condutas clínicas em fluxograma.
           </h1>
           <p className="text-text-dim text-base leading-relaxed max-w-lg">
