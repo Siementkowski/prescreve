@@ -76,8 +76,7 @@ export function FluxogramasPage() {
           <ChevronLeft className="w-4 h-4" />
           Voltar pras categorias
         </button>
-        <h1 className="font-display text-[26px] tracking-[-.8px] text-text shrink-0">{grupoAberto.categoria}</h1>
-        <FluxogramaViewer fluxogramas={grupoAberto.itens} />
+        <FluxogramaViewer fluxogramas={grupoAberto.itens} titulo={grupoAberto.categoria} />
       </div>
     )
   }

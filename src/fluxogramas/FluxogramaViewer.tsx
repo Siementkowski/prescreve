@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Maximize2, Minimize2 } from 'lucide-react'
+import { Check, ChevronDown, Maximize2, Minimize2 } from 'lucide-react'
 import type { Fluxograma } from '../admin/types'
 import { HtmlSandbox } from '../core/components/HtmlSandbox'
 
@@ -7,7 +7,9 @@ import { HtmlSandbox } from '../core/components/HtmlSandbox'
  *  anamnese (AnamnesePage.tsx), generalizado aqui pra aceitar qualquer lista de
  *  Fluxograma[] via prop. Reaproveitado tanto em /fluxogramas quanto nas condutas
  *  pediátricas (Pediatria → Condutas), que só passam a lista já filtrada por categoria. */
-export function FluxogramaViewer({ fluxogramas }: { fluxogramas: Fluxograma[] }) {
+export function FluxogramaViewer({ fluxogramas, titulo }: { fluxogramas: Fluxograma[]; titulo?: string }) {
+  const [listaAberta, setListaAberta] = useState(false)
+  const seletorRef = useRef<HTMLDivElement>(null)
   const [selecionadoId, setSelecionadoId] = useState<number | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [emTelaCheia, setEmTelaCheia] = useState(false)
@@ -21,6 +23,15 @@ export function FluxogramaViewer({ fluxogramas }: { fluxogramas: Fluxograma[] })
     document.addEventListener('fullscreenchange', aoMudarFullscreen)
     return () => document.removeEventListener('fullscreenchange', aoMudarFullscreen)
   }, [])
+
+  useEffect(() => {
+    if (!listaAberta) return
+    function aoClicarFora(e: MouseEvent) {
+      if (!seletorRef.current?.contains(e.target as Node)) setListaAberta(false)
+    }
+    document.addEventListener('mousedown', aoClicarFora)
+    return () => document.removeEventListener('mousedown', aoClicarFora)
+  }, [listaAberta])
 
   function alternarTelaCheia() {
     if (document.fullscreenElement) {
@@ -36,23 +47,40 @@ export function FluxogramaViewer({ fluxogramas }: { fluxogramas: Fluxograma[] })
 
   return (
     <div className="flex-1 min-h-0 flex flex-col gap-3">
-      {fluxogramas.length > 1 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 shrink-0">
-          {fluxogramas.map((f) => (
+      <div className="flex items-center gap-4 shrink-0 flex-wrap">
+        {titulo && <h1 className="font-display text-[26px] tracking-[-.8px] text-text">{titulo}</h1>}
+        {fluxogramas.length > 1 && (
+          <div ref={seletorRef} className="relative">
             <button
-              key={f.id}
-              onClick={() => setSelecionadoId(f.id)}
-              className={`px-3.5 py-1.5 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap ${
-                selecionado?.id === f.id
-                  ? 'bg-accent-dim border-accent text-accent'
-                  : 'bg-surface border-border text-text-dim hover:text-text hover:border-text-dim'
-              }`}
+              type="button"
+              onClick={() => setListaAberta((v) => !v)}
+              className="flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-lg border bg-accent-dim border-accent text-accent"
             >
-              {f.titulo}
+              {selecionado?.titulo}
+              <ChevronDown className={`w-4 h-4 transition-transform ${listaAberta ? 'rotate-180' : ''}`} />
             </button>
-          ))}
-        </div>
-      )}
+            {listaAberta && (
+              <ul className="absolute left-0 top-full mt-1.5 z-20 min-w-full w-max max-w-[min(90vw,420px)] rounded-xl border border-border bg-surface shadow-[var(--shadow-float,0_4px_14px_rgba(17,17,17,.08))] p-1">
+                {fluxogramas.map((f) => (
+                  <li key={f.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelecionadoId(f.id)
+                        setListaAberta(false)
+                      }}
+                      className="w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-left rounded-lg text-text hover:bg-accent-dim"
+                    >
+                      {f.titulo}
+                      {selecionado?.id === f.id && <Check className="w-4 h-4 text-accent shrink-0" />}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
 
       {selecionado && (
         <>
