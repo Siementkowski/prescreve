@@ -1,86 +1,38 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { ChevronDown } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 import { useSyncStore } from '../core/sync'
-import type { Area, ModoTratamento } from '../admin/types'
 import { SearchInput } from '../admin/components/SearchInput'
-import { TratamentoCard } from '../consulta/TratamentoCard'
-import { CopyButton } from '../consulta/components/CopyButton'
-import { principaisVisiveis } from '../consulta/filtros'
+import { IconePorNome } from '../admin/components/IconPicker'
+import { CartaoAreaLink } from '../core/components/CartaoAreaLink'
+import { HeroPagina } from '../core/components/HeroPagina'
+import type { Area, Patologia } from '../admin/types'
 
-/** Patologias — aba do USUÁRIO, só leitura. Nada aqui registra ou edita conteúdo: quem
- *  cadastra é o editor, em Painel → Patologias (rota separada, /painel/patologias). Essa
- *  tela é só pra consultar — orientações, sinônimos e os esquemas já publicados — no mesmo
- *  espírito de pathologies-screen.jsx do kit (workspace com lista à esquerda e detalhe à
- *  direita), mas sem nenhuma das ações de edição do mockup (sem Salvar, sem Nova
- *  patologia). Usa o mesmo cache offline-first do Consulta/Pediatria (useSyncStore), não a
- *  API direta do admin. */
+const COR_PADRAO = '#1857d1'
+
+/** Patologias — aba do USUÁRIO, só leitura. Dois níveis: grade de áreas (/patologias) e
+ *  lista da área escolhida (/patologias?area=ID), de onde se abre a ficha em
+ *  /patologias/:id (ver PatologiaDetalhe). Quem cadastra é o editor, em Painel →
+ *  Patologias. Usa o mesmo cache offline-first do Consulta/Pediatria (useSyncStore). */
 export function PatologiasPage() {
   const carregandoInicial = useSyncStore((s) => s.carregandoInicial)
   const areas = useSyncStore((s) => s.areas)
   const patologias = useSyncStore((s) => s.patologias)
-  const tratamentos = useSyncStore((s) => s.tratamentos)
-  const itens = useSyncStore((s) => s.itens)
-  const medicamentos = useSyncStore((s) => s.medicamentos)
-  const apresentacoes = useSyncStore((s) => s.apresentacoes)
-
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const areaDaUrl = Number(searchParams.get('area')) || null
-  const [areaSelecionada, setAreaSelecionada] = useState<number | null>(areaDaUrl)
   const [busca, setBusca] = useState('')
-  const [selecionadaId, setSelecionadaId] = useState<number | null>(null)
-  const [modo, setModo] = useState<ModoTratamento>('ambulatorial')
 
   const areasOrdenadas = useMemo(
     () => [...areas].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')),
     [areas]
   )
 
-  // Cai na primeira área assim que a base carrega, a menos que já tenha vindo uma pela URL.
-  useEffect(() => {
-    if (areaSelecionada != null) return
-    if (areasOrdenadas.length > 0) setAreaSelecionada(areasOrdenadas[0].id)
-  }, [areasOrdenadas, areaSelecionada])
-
-  const patologiasDaArea = useMemo(
-    () =>
-      patologias
-        .filter((p) => p.area_id === areaSelecionada)
-        .sort((a, b) => a.ordem - b.ordem),
-    [patologias, areaSelecionada]
-  )
-
-  const filtradas = useMemo(() => {
-    const t = busca.trim().toLowerCase()
-    if (!t) return patologiasDaArea
-    return patologiasDaArea.filter(
-      (p) => p.nome.toLowerCase().includes(t) || (p.sinonimos ?? '').toLowerCase().includes(t)
-    )
-  }, [patologiasDaArea, busca])
-
-  // Mantém uma patologia sempre selecionada quando a lista filtrada muda (troca de área ou
-  // busca) — sem isso a tela ficaria "selecionada" numa patologia que já não aparece mais.
-  useEffect(() => {
-    if (filtradas.length === 0) {
-      setSelecionadaId(null)
-      return
-    }
-    if (!filtradas.some((p) => p.id === selecionadaId)) setSelecionadaId(filtradas[0].id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtradas])
-
-  const patologia = patologias.find((p) => p.id === selecionadaId) ?? null
-  const area = areas.find((a) => a.id === areaSelecionada) ?? null
-
-  const esquemas = useMemo(() => {
-    if (patologia == null) return []
-    return principaisVisiveis(tratamentos, patologia.id, modo).sort((a, b) => a.ordem - b.ordem)
-  }, [tratamentos, patologia, modo])
-
-  function selecionarArea(id: number) {
-    setAreaSelecionada(id)
-    setSearchParams({ area: String(id) }, { replace: true })
-  }
+  const porArea = useMemo(() => {
+    const mapa = new Map<number, Patologia[]>()
+    for (const p of patologias) mapa.set(p.area_id, [...(mapa.get(p.area_id) ?? []), p])
+    for (const lista of mapa.values()) lista.sort((a, b) => a.ordem - b.ordem)
+    return mapa
+  }, [patologias])
 
   if (carregandoInicial) {
     return (
@@ -90,193 +42,134 @@ export function PatologiasPage() {
     )
   }
 
-  return (
-    <div className="h-full flex flex-col min-h-0">
-      {/* barra de contexto — só o modo (não é uma escolha de prescrição aqui, é filtro de
-          leitura), no mesmo lugar fixo que a Consulta usa pro seu ModoToggle. Antes ficava
-          solto no meio do painel de detalhe, encostado no título "Esquemas". */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
-        <ModoSwitch value={modo} onChange={setModo} />
-      </div>
+  const area = areaDaUrl ? areas.find((a) => a.id === areaDaUrl) ?? null : null
+  if (area) return <ListaDaArea area={area} lista={porArea.get(area.id) ?? []} />
 
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
-        {/* painel esquerdo — área, busca e lista (só leitura) */}
-        <div className="flex flex-col gap-3 min-h-0 border-b lg:border-b-0 lg:border-r border-border bg-surface-2 p-5 lg:w-[320px] xl:w-[360px] shrink-0">
-          <AreaDropdown areas={areasOrdenadas} value={areaSelecionada} onChange={selecionarArea} />
-          <SearchInput value={busca} onChange={setBusca} placeholder="Buscar patologia…" />
-          <div className="flex-1 overflow-y-auto flex flex-col gap-1.5 pr-1">
-            {filtradas.length === 0 ? (
-              <p className="text-sm text-text-dim px-1">Nenhuma patologia nesta área.</p>
-            ) : (
-              filtradas.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setSelecionadaId(p.id)}
-                  className={`w-full text-left px-3 py-2.5 rounded-[var(--radius-item,11px)] border transition-colors ${
-                    selecionadaId === p.id
-                      ? 'bg-surface border-text shadow-[var(--shadow-selected)]'
-                      : 'bg-surface border-transparent hover:border-border'
-                  }`}
-                >
-                  <span className="block text-[14px] font-semibold text-text truncate">{p.nome}</span>
-                  {p.sinonimos && (
-                    <span className="block text-[11px] text-text-dim truncate mt-0.5">{p.sinonimos}</span>
-                  )}
-                </button>
-              ))
-            )}
-          </div>
+  const t = busca.trim().toLowerCase()
+  const resultadoBusca = t
+    ? patologias
+        .filter((p) => p.nome.toLowerCase().includes(t) || (p.sinonimos ?? '').toLowerCase().includes(t))
+        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+    : null
+
+  return (
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-6xl mx-auto px-6 sm:px-9 py-10 flex flex-col gap-8">
+        <div className="flex flex-col items-center text-center gap-2">
+          <h1 className="font-display text-[36px] font-bold tracking-[-1.2px] text-text">Patologias</h1>
+          <p className="text-sm text-text-dim max-w-lg">
+            {patologias.length} patologias divididas por área. Escolha uma especialidade — ou busque pelo nome — para ver
+            as orientações e os esquemas de tratamento.
+          </p>
         </div>
 
-        {/* painel direito — detalhe, sem nenhuma ação de edição */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-7 xl:p-10">
-          {!patologia ? (
-            <p className="text-sm text-text-dim">Selecione uma patologia.</p>
+        <div className="w-full max-w-md mx-auto">
+          <SearchInput value={busca} onChange={setBusca} placeholder="Buscar patologia ou sinônimo…" />
+        </div>
+
+        {resultadoBusca ? (
+          resultadoBusca.length === 0 ? (
+            <p className="text-sm text-text-dim text-center">Nenhuma patologia encontrada.</p>
           ) : (
-            <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-              <div>
-                <h2 className="font-display text-[28px] tracking-[-.8px] text-text">{patologia.nome}</h2>
-                <p className="text-sm text-text-dim mt-1">{area?.nome}</p>
-                {patologia.sinonimos && (
-                  <p className="text-xs text-text-dim mt-1">Também conhecida como: {patologia.sinonimos}</p>
-                )}
-              </div>
-
-              {(patologia.orientacoes || patologia.observacoes) && (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                  {patologia.orientacoes && (
-                    <div className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-4 flex flex-col gap-2">
-                      <div className="flex items-center justify-between gap-3">
-                        <h3 className="text-sm font-semibold text-text">Orientações não medicamentosas</h3>
-                        <CopyButton texto={patologia.orientacoes} label="Copiar" />
-                      </div>
-                      <p className="text-sm text-text-dim whitespace-pre-wrap leading-relaxed">
-                        {patologia.orientacoes}
-                      </p>
-                    </div>
-                  )}
-                  {patologia.observacoes && (
-                    <div className="border border-dashed border-border rounded-[var(--radius-card,14px)] p-4 flex flex-col gap-2">
-                      <h3 className="text-sm font-semibold text-text">Observações</h3>
-                      <p className="text-sm text-text-dim whitespace-pre-wrap leading-relaxed">
-                        {patologia.observacoes}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <h3 className="font-display text-[20px] tracking-[-.6px] text-text mt-2">Esquemas</h3>
-
-              {esquemas.length === 0 ? (
-                <p className="text-sm text-text-dim">Nenhum esquema publicado pra esse modo ainda.</p>
-              ) : (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-                  {esquemas.map((t) => (
-                    <TratamentoCard
-                      key={t.id}
-                      tratamento={t}
-                      itens={itens}
-                      medicamentos={medicamentos}
-                      apresentacoes={apresentacoes}
-                      gestante={false}
-                    />
-                  ))}
-                </div>
-              )}
+            <div className="border border-border bg-surface rounded-[var(--radius-panel,18px)] px-6">
+              {resultadoBusca.map((p) => (
+                <LinhaPatologia key={p.id} p={p} areaNome={areas.find((a) => a.id === p.area_id)?.nome} />
+              ))}
             </div>
-          )}
-        </div>
+          )
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {areasOrdenadas.map((a) => {
+              const cor = a.cor ?? COR_PADRAO
+              const total = porArea.get(a.id)?.length ?? 0
+              return (
+                <CartaoAreaLink
+                  key={a.id}
+                  to={`/patologias?area=${a.id}`}
+                  cor={cor}
+                  raio="18px"
+                  className="p-5 min-h-[150px] flex flex-col justify-between"
+                >
+                  <span
+                    className="w-11 h-11 rounded-full flex items-center justify-center"
+                    style={{ color: cor, backgroundColor: `${cor}1f` }}
+                  >
+                    <IconePorNome nome={a.icone} className="w-5 h-5" />
+                  </span>
+                  <div>
+                    <p className="font-display text-[19px] font-semibold tracking-[-.5px] text-text leading-tight">
+                      {a.nome}
+                    </p>
+                    <p className="text-xs mt-1 font-medium" style={{ color: cor }}>
+                      {total} {total === 1 ? 'patologia' : 'patologias'}
+                    </p>
+                  </div>
+                </CartaoAreaLink>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-/** Alternância ambulatorial/hospitalar local à tela — mesmo padrão visual do ModeSwitch do
- *  kit (pill com fundo, opção ativa em bg-text). Não usa o store da Consulta de propósito:
- *  aqui é só filtro de leitura, não uma escolha que vira parte de uma prescrição. */
-function ModoSwitch({ value, onChange }: { value: ModoTratamento; onChange: (m: ModoTratamento) => void }) {
-  const opcoes: { valor: ModoTratamento; label: string }[] = [
-    { valor: 'ambulatorial', label: 'Ambulatorial' },
-    { valor: 'hospitalar', label: 'Hospitalar' },
-  ]
+function ListaDaArea({ area, lista }: { area: Area; lista: Patologia[] }) {
+  const [busca, setBusca] = useState('')
+  const t = busca.trim().toLowerCase()
+  const filtradas = t
+    ? lista.filter((p) => p.nome.toLowerCase().includes(t) || (p.sinonimos ?? '').toLowerCase().includes(t))
+    : lista
+
   return (
-    <div className="flex items-center gap-0.5 bg-surface-2 border border-border rounded-[var(--radius-control,12px)] p-1 shrink-0">
-      {opcoes.map((o) => (
-        <button
-          key={o.valor}
-          type="button"
-          onClick={() => onChange(o.valor)}
-          className={`text-xs font-bold rounded-[var(--radius-input,9px)] px-3 py-1.5 transition-colors ${
-            value === o.valor ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
-          }`}
-        >
-          {o.label}
-        </button>
-      ))}
+    <div className="h-full overflow-y-auto">
+      <HeroPagina
+        migalhas={[
+          { label: 'Página inicial', to: '/' },
+          { label: 'Patologias', to: '/patologias' },
+          { label: area.nome },
+        ]}
+        titulo={area.nome}
+      >
+        <p className="inline-flex items-center gap-1.5 text-[13px] text-white/90">
+          <IconePorNome nome={area.icone} className="w-3.5 h-3.5" />
+          <b>{lista.length}</b> {lista.length === 1 ? 'patologia' : 'patologias'}
+        </p>
+      </HeroPagina>
+
+      <div className="px-6 sm:px-9 py-8 flex flex-col gap-4 max-w-5xl">
+        <div className="max-w-md">
+          <SearchInput value={busca} onChange={setBusca} placeholder={`Buscar em ${area.nome}…`} />
+        </div>
+        {filtradas.length === 0 ? (
+          <p className="text-sm text-text-dim">Nenhuma patologia nesta área.</p>
+        ) : (
+          <div className="border border-border bg-surface rounded-[var(--radius-panel,18px)] px-6">
+            {filtradas.map((p) => (
+              <LinhaPatologia key={p.id} p={p} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
-/** Dropdown próprio pra "Área" — o <select> nativo decide sozinho (pelo navegador) se abre
- *  pra cima ou pra baixo conforme o espaço na tela, e numa sidebar que já nasce perto do
- *  topo isso vira o menu abrindo pra cima sem aviso. Com um painel nosso, sempre abre a
- *  partir da borda inferior do botão (top-full), igual ao breadcrumb da Consulta. */
-function AreaDropdown({
-  areas,
-  value,
-  onChange,
-}: {
-  areas: Area[]
-  value: number | null
-  onChange: (id: number) => void
-}) {
-  const [aberto, setAberto] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!aberto) return
-    function onClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setAberto(false)
-    }
-    document.addEventListener('mousedown', onClick)
-    return () => document.removeEventListener('mousedown', onClick)
-  }, [aberto])
-
-  const area = areas.find((a) => a.id === value) ?? null
-
+function LinhaPatologia({ p, areaNome }: { p: Patologia; areaNome?: string }) {
   return (
-    <div className="relative shrink-0" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setAberto((v) => !v)}
-        className={`flex items-center justify-between gap-2 w-full rounded-[var(--radius-input,9px)] border px-3.5 py-3 text-sm font-medium transition-colors ${
-          aberto ? 'border-text bg-surface' : 'border-border bg-surface text-text hover:border-text-dim'
-        }`}
-      >
-        <span className="truncate">{area ? area.nome : 'Selecione a área'}</span>
-        <ChevronDown className={`w-3.5 h-3.5 text-text-dim shrink-0 transition-transform ${aberto ? 'rotate-180' : ''}`} />
-      </button>
-
-      {aberto && (
-        <div className="absolute z-20 top-full mt-1.5 left-0 right-0 max-h-72 overflow-y-auto bg-surface border border-border rounded-xl shadow-lg py-1.5">
-          {areas.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => {
-                onChange(a.id)
-                setAberto(false)
-              }}
-              className={`w-full text-left px-3.5 py-2 text-sm transition-colors ${
-                value === a.id ? 'bg-accent-dim text-accent font-medium' : 'hover:bg-surface-2 text-text'
-              }`}
-            >
-              {a.nome}
-            </button>
-          ))}
-        </div>
+    <Link to={`/patologias/${p.id}`} className="group flex items-center gap-3 py-4 border-b border-border last:border-b-0">
+      <ChevronRight className="w-4 h-4 text-text-dim shrink-0 transition-transform group-hover:translate-x-0.5" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[15px] font-semibold text-text truncate group-hover:text-accent transition-colors">
+          {p.nome}
+        </p>
+        {(p.sinonimos || areaNome) && (
+          <p className="text-xs text-text-dim truncate mt-0.5">{p.sinonimos || areaNome}</p>
+        )}
+      </div>
+      {areaNome && p.sinonimos && (
+        <span className="hidden md:inline text-xs font-semibold text-text-dim shrink-0">{areaNome}</span>
       )}
-    </div>
+    </Link>
   )
 }

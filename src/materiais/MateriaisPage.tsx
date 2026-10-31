@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, Link2 } from 'lucide-react'
 import { materiaisComplementaresApi } from '../admin/api'
 import type { MaterialComplementar } from '../admin/types'
 import { SearchInput } from '../admin/components/SearchInput'
@@ -93,13 +93,26 @@ export function MateriaisPage() {
               return (
                 <div
                   key={grupo.categoria}
-                  className="mb-4 break-inside-avoid rounded-[var(--radius-card,14px)] border border-border overflow-hidden bg-surface shadow-[var(--shadow-float,0_4px_14px_rgba(17,17,17,.08))]"
+                  className="mb-4 break-inside-avoid rounded-[var(--radius-panel,18px)] border border-border overflow-hidden bg-surface"
                 >
                   <div
-                    className="px-4 py-3 font-display font-semibold text-[15px] tracking-[-.2px] text-white"
-                    style={{ background: cor }}
+                    className="px-4 py-3.5 flex items-center gap-3"
+                    style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${cor} 18%, transparent), var(--surface) 90%)` }}
                   >
-                    {grupo.categoria}
+                    <span
+                      className="w-9 h-9 rounded-full bg-surface flex items-center justify-center shrink-0 shadow-[var(--shadow-float)]"
+                      style={{ color: cor }}
+                    >
+                      <Link2 className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-display font-semibold text-[16px] tracking-[-.4px] text-text leading-tight">
+                        {grupo.categoria}
+                      </p>
+                      <p className="text-[11px] font-medium" style={{ color: cor }}>
+                        {grupo.itens.length} {grupo.itens.length === 1 ? 'material' : 'materiais'}
+                      </p>
+                    </div>
                   </div>
                   <div className="p-2 flex flex-col gap-0.5">
                     {grupo.itens.map((m) => (

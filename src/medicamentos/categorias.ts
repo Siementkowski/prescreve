@@ -16,7 +16,11 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
+import type { Medicamento } from '../admin/types'
+
 export const CLASSE_SEM_CATEGORIA = 'Outros'
+
+export const temDosePorPeso = (m: Medicamento) => m.ped_mg_kg_dia != null && m.ped_mg_kg_dia > 0
 
 /** Ícone e cor (par de tokens --tint-* do Painel Editorial) de cada classe. Classe nova,
  *  cadastrada pelo editor sem entrada aqui, cai no padrão (pílula cinza) — nunca quebra. */

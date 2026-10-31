@@ -8,6 +8,7 @@ import { calcularDosePediatrica, formatarNumero, textoFormula, textoPrescricaoPe
 import { formatarApresentacao } from '../core/apresentacao'
 import { FORMAS_CONFIG, type FormaFarmaceutica } from '../core/formas'
 import { LABEL_STATUS_RISCO, type Medicamento } from '../admin/types'
+import { HeroPagina } from '../core/components/HeroPagina'
 import { CopyButton } from '../consulta/components/CopyButton'
 
 const OPCOES_TOMADAS = [1, 2, 3, 4, 6]
@@ -62,70 +63,55 @@ export function MedicamentoDetalhe() {
     ),
   ]
   const advertencias = montarAdvertencias(medicamento)
+  const classe = medicamento.classe?.trim() || 'Outros'
 
   return (
     <div className="h-full overflow-y-auto">
-      {/* hero */}
-      <div className="px-6 sm:px-9 pt-6">
-        <div className="relative overflow-hidden ed-panel bg-accent text-white px-7 sm:px-10 py-8 shadow-[var(--shadow-area)]">
-          <span className="pointer-events-none absolute -right-16 -bottom-24 w-72 h-72 rounded-full bg-white/10" />
-          <span className="pointer-events-none absolute right-40 -top-20 w-44 h-44 rounded-full bg-white/5" />
+      <HeroPagina
+        migalhas={[
+          { label: 'Página inicial', to: '/' },
+          { label: 'Medicamentos', to: '/medicamentos' },
+          { label: classe, to: `/medicamentos?classe=${encodeURIComponent(classe)}` },
+          { label: medicamento.nome },
+        ]}
+        titulo={medicamento.nome}
+        subtitulo={medicamento.nome_comercial}
+      >
+        {/* campo de peso — sem ele não há dose pra calcular */}
+        <label className="flex items-center bg-surface text-text rounded-[var(--radius-control,12px)] p-1.5 max-w-lg focus-within:ring-2 focus-within:ring-white/60">
+          <input
+            type="number"
+            min={0}
+            step="0.1"
+            value={pesoKg ?? ''}
+            onChange={(e) => setPesoKg(e.target.value === '' ? null : Number(e.target.value))}
+            placeholder="Digite o peso do paciente (em kg)"
+            className="tabular flex-1 min-w-0 bg-transparent outline-none px-3 py-2 text-sm text-text placeholder:text-text-dim"
+          />
+          <span className="w-10 h-10 rounded-[var(--radius-input,9px)] bg-text text-bg flex items-center justify-center shrink-0">
+            <Calculator className="w-4 h-4" />
+          </span>
+        </label>
 
-          <div className="relative flex flex-col gap-4">
-            <nav className="flex items-center gap-2 text-xs text-white/80">
-              <Link to="/" className="hover:text-white">Página inicial</Link>
-              <span>/</span>
-              <Link to="/medicamentos" className="hover:text-white">Medicamentos</Link>
-              <span>/</span>
-              <Link to={`/medicamentos?classe=${encodeURIComponent(medicamento.classe?.trim() || 'Outros')}`} className="hover:text-white">
-                {medicamento.classe?.trim() || 'Outros'}
-              </Link>
-              <span>/</span>
-              <span className="text-white">{medicamento.nome}</span>
-            </nav>
-
-            <div>
-              <h1 className="font-display text-[40px] font-bold tracking-[-1.4px] leading-none">{medicamento.nome}</h1>
-              {medicamento.nome_comercial && <p className="text-sm text-white/80 mt-2">{medicamento.nome_comercial}</p>}
-            </div>
-
-            {/* campo de peso — sem ele não há dose pra calcular */}
-            <label className="flex items-center bg-surface text-text rounded-[var(--radius-control,12px)] p-1.5 max-w-lg focus-within:ring-2 focus-within:ring-white/60">
-              <input
-                type="number"
-                min={0}
-                step="0.1"
-                value={pesoKg ?? ''}
-                onChange={(e) => setPesoKg(e.target.value === '' ? null : Number(e.target.value))}
-                placeholder="Digite o peso do paciente (em kg)"
-                className="tabular flex-1 min-w-0 bg-transparent outline-none px-3 py-2 text-sm text-text placeholder:text-text-dim"
-              />
-              <span className="w-10 h-10 rounded-[var(--radius-input,9px)] bg-text text-bg flex items-center justify-center shrink-0">
-                <Calculator className="w-4 h-4" />
-              </span>
-            </label>
-
-            <div className="flex items-center gap-x-5 gap-y-2 flex-wrap text-[13px]">
-              {formas.length > 0 && <Atalho icone={Pill}>{formas.join(' · ')}</Atalho>}
-              {medicamento.gestacao_status && (
-                <Atalho icone={Heart}>
-                  <b>Gestação:</b> {LABEL_STATUS_RISCO[medicamento.gestacao_status]}
-                </Atalho>
-              )}
-              {medicamento.lactacao_status && (
-                <Atalho icone={Baby}>
-                  <b>Lactação:</b> {LABEL_STATUS_RISCO[medicamento.lactacao_status]}
-                </Atalho>
-              )}
-              {temDosePediatrica && (
-                <Atalho icone={FlaskConical}>
-                  <b>Pediatria:</b> {formatarNumero(medicamento.ped_mg_kg_dia as number, 2)} mg/kg/dia
-                </Atalho>
-              )}
-            </div>
-          </div>
+        <div className="flex items-center gap-x-5 gap-y-2 flex-wrap text-[13px]">
+          {formas.length > 0 && <Atalho icone={Pill}>{formas.join(' · ')}</Atalho>}
+          {medicamento.gestacao_status && (
+            <Atalho icone={Heart}>
+              <b>Gestação:</b> {LABEL_STATUS_RISCO[medicamento.gestacao_status]}
+            </Atalho>
+          )}
+          {medicamento.lactacao_status && (
+            <Atalho icone={Baby}>
+              <b>Lactação:</b> {LABEL_STATUS_RISCO[medicamento.lactacao_status]}
+            </Atalho>
+          )}
+          {temDosePediatrica && (
+            <Atalho icone={FlaskConical}>
+              <b>Pediatria:</b> {formatarNumero(medicamento.ped_mg_kg_dia as number, 2)} mg/kg/dia
+            </Atalho>
+          )}
         </div>
-      </div>
+      </HeroPagina>
 
       {/* corpo */}
       <div className="px-6 sm:px-9 py-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">

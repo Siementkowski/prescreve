@@ -5,7 +5,8 @@ import { useSyncStore } from '../core/sync'
 import { FORMAS_CONFIG, type FormaFarmaceutica } from '../core/formas'
 import { SearchInput } from '../admin/components/SearchInput'
 import type { Medicamento } from '../admin/types'
-import { CLASSE_SEM_CATEGORIA, visualCategoria } from './categorias'
+import { HeroPagina } from '../core/components/HeroPagina'
+import { CLASSE_SEM_CATEGORIA, temDosePorPeso, visualCategoria } from './categorias'
 
 const porNome = (a: Medicamento, b: Medicamento) => a.nome.localeCompare(b.nome, 'pt-BR')
 
@@ -19,6 +20,8 @@ export function MedicamentosPage() {
   const apresentacoes = useSyncStore((s) => s.apresentacoes)
   const [searchParams] = useSearchParams()
   const classeAberta = searchParams.get('classe')
+  // ?dose=1 (vem da calculadora de Pediatria) mostra só quem tem dose por peso cadastrada.
+  const apenasDose = searchParams.get('dose') === '1'
   const [busca, setBusca] = useState('')
 
   const classes = useMemo(() => {
@@ -56,7 +59,8 @@ export function MedicamentosPage() {
   const classe = classeAberta ? classes.find((c) => c.nome === classeAberta) ?? null : null
 
   if (classe) {
-    return <ListaDaClasse nome={classe.nome} lista={classe.lista} formasPorMed={formasPorMed} />
+    const lista = apenasDose ? classe.lista.filter(temDosePorPeso) : classe.lista
+    return <ListaDaClasse nome={classe.nome} lista={lista} formasPorMed={formasPorMed} apenasDose={apenasDose} />
   }
 
   const t = busca.trim().toLowerCase()
@@ -130,10 +134,12 @@ function ListaDaClasse({
   nome,
   lista,
   formasPorMed,
+  apenasDose,
 }: {
   nome: string
   lista: Medicamento[]
   formasPorMed: Map<number, string[]>
+  apenasDose: boolean
 }) {
   const [busca, setBusca] = useState('')
   const { icone: Icone } = visualCategoria(nome)
@@ -144,26 +150,20 @@ function ListaDaClasse({
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="px-6 sm:px-9 pt-6">
-        <div className="relative overflow-hidden ed-panel bg-accent text-white px-7 sm:px-10 py-8 shadow-[var(--shadow-area)]">
-          <span className="pointer-events-none absolute -right-16 -bottom-24 w-72 h-72 rounded-full bg-white/10" />
-          <span className="pointer-events-none absolute right-40 -top-20 w-44 h-44 rounded-full bg-white/5" />
-          <div className="relative flex flex-col gap-4">
-            <nav className="flex items-center gap-2 text-xs text-white/80">
-              <Link to="/" className="hover:text-white">Página inicial</Link>
-              <span>/</span>
-              <Link to="/medicamentos" className="hover:text-white">Medicamentos</Link>
-              <span>/</span>
-              <span className="text-white">{nome}</span>
-            </nav>
-            <h1 className="font-display text-[40px] font-bold tracking-[-1.4px] leading-none">{nome}</h1>
-            <p className="inline-flex items-center gap-1.5 text-[13px] text-white/90">
-              <Icone className="w-3.5 h-3.5" />
-              <b>{lista.length}</b> {lista.length === 1 ? 'medicamento' : 'medicamentos'}
-            </p>
-          </div>
-        </div>
-      </div>
+      <HeroPagina
+        migalhas={[
+          { label: 'Página inicial', to: '/' },
+          { label: 'Medicamentos', to: '/medicamentos' },
+          { label: nome },
+        ]}
+        titulo={nome}
+      >
+        <p className="inline-flex items-center gap-1.5 text-[13px] text-white/90">
+          <Icone className="w-3.5 h-3.5" />
+          <b>{lista.length}</b> {lista.length === 1 ? 'medicamento' : 'medicamentos'}
+          {apenasDose && ' com dose por peso'}
+        </p>
+      </HeroPagina>
 
       <div className="px-6 sm:px-9 py-8 flex flex-col gap-4 max-w-5xl">
         <div className="max-w-md">
@@ -183,7 +183,7 @@ function ListaDaClasse({
   )
 }
 
-function LinhaMedicamento({
+export function LinhaMedicamento({
   m,
   formas,
   mostrarClasse,
@@ -192,7 +192,7 @@ function LinhaMedicamento({
   formas?: string[]
   mostrarClasse?: boolean
 }) {
-  const temDosePediatrica = m.ped_mg_kg_dia != null && m.ped_mg_kg_dia > 0
+  const temDosePediatrica = temDosePorPeso(m)
   return (
     <Link
       to={`/medicamentos/${m.id}`}

@@ -4,6 +4,7 @@ import { FolderHeart, Pill, ListChecks, Baby, Search } from 'lucide-react'
 import { areasApi, patologiasApi, medicamentosApi, materiaisComplementaresApi } from './api'
 import type { Area, Patologia, Medicamento, MaterialComplementar } from './types'
 import { useAuth } from '../core/auth/AuthProvider'
+import { CartaoAreaLink } from '../core/components/CartaoAreaLink'
 import { IconePorNome } from './components/IconPicker'
 
 /** Início — mesmo espírito da "Visão geral" do kit (overview-screen.jsx): cabeçalho com
@@ -52,10 +53,10 @@ export function AdminHub() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8 mb-11">
           <div className="min-w-0">
             <h1 className="font-display text-[clamp(30px,4.2vw,48px)] leading-[0.98] tracking-[-.045em] mb-3">
-              Oi, {primeiroNome} — vamos cuidar da sua base?
+              Oi, {primeiroNome} — o que vamos consultar hoje?
             </h1>
             <p className="max-w-md text-text-dim text-[15px] leading-relaxed">
-              Cadastre áreas, patologias e medicamentos, monte as prescrições — tudo por aqui, num só lugar.
+              Patologias, medicamentos, doses por peso e materiais pro paciente — tudo por aqui, num só lugar.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -106,7 +107,7 @@ export function AdminHub() {
                   {resultadosPatologias.map((p) => (
                     <button
                       key={`p-${p.id}`}
-                      onClick={() => navigate('/patologias')}
+                      onClick={() => navigate(`/patologias/${p.id}`)}
                       className="w-full grid grid-cols-[30px_1fr_auto] items-center gap-2.5 text-left px-3.5 py-2.5 border-b border-border last:border-b-0 hover:bg-surface-2 transition-colors"
                     >
                       <span className="w-[30px] h-[30px] rounded-[var(--radius-sm,8px)] flex items-center justify-center bg-[var(--tint-green-bg)] text-[var(--tint-green-fg)]">
@@ -122,7 +123,7 @@ export function AdminHub() {
                   {resultadosMedicamentos.map((m) => (
                     <button
                       key={`m-${m.id}`}
-                      onClick={() => navigate('/painel/medicamentos')}
+                      onClick={() => navigate(`/medicamentos/${m.id}`)}
                       className="w-full grid grid-cols-[30px_1fr_auto] items-center gap-2.5 text-left px-3.5 py-2.5 border-b border-border last:border-b-0 hover:bg-surface-2 transition-colors"
                     >
                       <span className="w-[30px] h-[30px] rounded-[var(--radius-sm,8px)] flex items-center justify-center bg-[var(--tint-blue-bg)] text-[var(--tint-blue-fg)]">
@@ -148,22 +149,26 @@ export function AdminHub() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
           {areas.map((a) => (
-            <Link
+            <CartaoAreaLink
               key={a.id}
               to={`/patologias?area=${a.id}`}
-              className="group border border-border hover:border-text bg-surface rounded-[var(--radius-card,14px)] min-h-[74px] p-3.5 grid grid-cols-[34px_1fr] items-center gap-2.5 transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:shadow-[var(--shadow-area,3px_3px_0_var(--color-text))]"
+              cor={a.cor ?? '#1857d1'}
+              raio="14px"
+              className="min-h-[74px] p-3.5 grid grid-cols-[40px_1fr] items-center gap-3"
             >
               <span
-                className="w-9 h-9 rounded-[var(--radius-nav,10px)] flex items-center justify-center shrink-0"
-                style={{ backgroundColor: (a.cor ?? '#2dd4e8') + '22', color: a.cor ?? '#2dd4e8' }}
+                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                style={{ color: a.cor ?? '#1857d1', backgroundColor: (a.cor ?? '#1857d1') + '1f' }}
               >
                 <IconePorNome nome={a.icone} className="w-[18px] h-[18px]" />
               </span>
               <span className="min-w-0">
                 <strong className="block text-sm font-semibold text-text truncate">{a.nome}</strong>
-                <small className="block text-[11px] text-text-dim mt-0.5">Conteúdo clínico</small>
+                <small className="block text-[11px] text-text-dim mt-0.5">
+                  {patologias.filter((p) => p.area_id === a.id).length} patologias
+                </small>
               </span>
-            </Link>
+            </CartaoAreaLink>
           ))}
           {areas.length === 0 && (
             <p className="col-span-full text-sm text-text-dim py-6 text-center">Nenhuma área cadastrada ainda.</p>
@@ -177,7 +182,7 @@ export function AdminHub() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           <CompactAction
-            to="/painel/medicamentos"
+            to="/medicamentos"
             glyph="+"
             titulo="Medicamentos"
             nota={`${medicamentos.length} cadastrado${medicamentos.length === 1 ? '' : 's'}`}
