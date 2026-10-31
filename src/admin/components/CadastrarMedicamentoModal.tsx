@@ -72,6 +72,7 @@ export function CadastrarMedicamentoModal({
       const medicamento = await onCriarMedicamento({
         nome: nome.trim(),
         nome_comercial: nomeComercial.trim() || null,
+        classe: null,
         apresentacoes: null,
         gestacao_status: null,
         gestacao_obs: null,

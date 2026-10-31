@@ -13,6 +13,7 @@ import { Plus } from 'lucide-react'
 const VAZIO: MedicamentoInput = {
   nome: '',
   nome_comercial: '',
+  classe: '',
   apresentacoes: '',
   gestacao_status: null,
   gestacao_obs: '',
@@ -47,6 +48,10 @@ export function MedicamentosPage() {
   const [selecionadoId, setSelecionadoId] = useState<number | null>(null)
   const [form, setForm] = useState<MedicamentoInput>(VAZIO)
   const [salvando, setSalvando] = useState(false)
+  const classesExistentes = useMemo(
+    () => [...new Set(medicamentos.map((m) => m.classe).filter((c): c is string => !!c))].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    [medicamentos]
+  )
   const [paraExcluir, setParaExcluir] = useState<Medicamento | null>(null)
   const [pediatriaAberta, setPediatriaAberta] = useState(false)
 
@@ -105,6 +110,7 @@ export function MedicamentosPage() {
         const {
           nome,
           nome_comercial,
+          classe,
           apresentacoes,
           gestacao_status,
           gestacao_obs,
@@ -120,6 +126,7 @@ export function MedicamentosPage() {
         const atualizado = await medicamentosApi.update(selecionadoId, {
           nome,
           nome_comercial,
+          classe: classe?.trim() || null,
           apresentacoes,
           gestacao_status,
           gestacao_obs,
@@ -228,6 +235,18 @@ export function MedicamentosPage() {
                 value={form.nome_comercial ?? ''}
                 onChange={(e) => setForm({ ...form, nome_comercial: e.target.value })}
               />
+              <TextField
+                label="Classe"
+                hint="Categoria em que o medicamento aparece na aba Medicamentos (ex.: Antimicrobianos, Analgésicos). Escolha uma existente ou digite uma nova."
+                list="classes-medicamentos"
+                value={form.classe ?? ''}
+                onChange={(e) => setForm({ ...form, classe: e.target.value })}
+              />
+              <datalist id="classes-medicamentos">
+                {classesExistentes.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
 
               {form.incompleto && (
                 <div className="flex items-center justify-between gap-3 rounded-md border border-warn/40 bg-warn/10 px-3 py-2.5">

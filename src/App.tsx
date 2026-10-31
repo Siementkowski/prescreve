@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Stethoscope, Baby, FileText, User, Pill, Settings, Microscope, BookOpen, Workflow, HeartPulse } from 'lucide-react'
+import { Stethoscope, Baby, FileText, User, Pill, Tablets, Settings, Microscope, BookOpen, Workflow, HeartPulse } from 'lucide-react'
 import { useAuth } from './core/auth/AuthProvider'
 import { LoginPage } from './core/auth/LoginPage'
 import { useSyncStore } from './core/sync'
@@ -21,6 +21,8 @@ import { ComplementosPage } from './admin/ComplementosPage'
 import { TratamentosPage } from './admin/TratamentosPage'
 import { GeradoresPage } from './admin/GeradoresPage'
 import { MateriaisComplementaresPage } from './admin/MateriaisComplementaresPage'
+import { MedicamentosPage as MedicamentosConsultaPage } from './medicamentos/MedicamentosPage'
+import { MedicamentoDetalhe } from './medicamentos/MedicamentoDetalhe'
 import { MateriaisPage } from './materiais/MateriaisPage'
 import { FluxogramasPage as FluxogramasAdminPage } from './admin/FluxogramasPage'
 import { FluxogramasPage } from './fluxogramas/FluxogramasPage'
@@ -90,12 +92,13 @@ function App() {
     { to: '/gestantes', label: 'Gestantes', lucide: HeartPulse },
     { to: '/anamnese', label: 'Anamnese', lucide: FileText },
     { to: '/patologias', label: 'Patologias', lucide: Microscope },
+    { to: '/medicamentos', label: 'Medicamentos', lucide: Pill },
     { to: '/materiais', label: 'Materiais', lucide: BookOpen },
     { to: '/fluxogramas', label: 'Fluxogramas', lucide: Workflow },
   ]
   const navPainel: ItemNav[] = isEditor
     ? [
-        { to: '/painel/medicamentos', label: 'Medicamentos', lucide: Pill, ativo: medicamentosAtivo },
+        { to: '/painel/medicamentos', label: 'Cadastro de medicamentos', lucide: Tablets, ativo: medicamentosAtivo },
         { to: '/painel', label: 'Painel', lucide: Settings, ativo: painelAtivo },
       ]
     : []
@@ -140,6 +143,8 @@ function App() {
             <Route path="/gestantes" element={<GestantesPage />} />
             <Route path="/anamnese" element={<AnamnesePage />} />
             <Route path="/patologias" element={<PatologiasPage />} />
+            <Route path="/medicamentos" element={<MedicamentosConsultaPage />} />
+            <Route path="/medicamentos/:id" element={<MedicamentoDetalhe />} />
             <Route path="/materiais" element={<MateriaisPage />} />
             <Route path="/fluxogramas" element={<FluxogramasPage />} />
             <Route path="/painel" element={<AdminLayout />}>

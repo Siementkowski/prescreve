@@ -31,6 +31,8 @@ export interface Medicamento {
   id: number
   nome: string
   nome_comercial: string | null
+  // Categoria farmacológica (Antimicrobianos, Analgésicos...) — agrupa a aba Medicamentos.
+  classe: string | null
   apresentacoes: string | null
   gestacao_status: StatusRisco | null
   gestacao_obs: string | null
