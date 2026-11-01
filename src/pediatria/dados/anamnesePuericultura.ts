@@ -332,7 +332,12 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   p.push(prox ? `Retorno para ${prox.titulo.replace('Consulta de ', 'consulta de ')}.` : 'Retorno para acompanhamento anual.')
   p.push('Responsável entende, concorda e afirma não haver dúvidas.')
 
+  // ---- Cabeçalho (todas as idades): MUC, comorbidades e alergias ----
+  const linhaCab = (rotulo: string, id: string) => (v(id) ? `# ${rotulo}: ${v(id)}` : `# Nega ${rotulo}`)
+  const cabecalho = [linhaCab('MUC', 'muc'), linhaCab('comorbidades', 'comorbidades'), linhaCab('alergias', 'alergias')].join('\n')
+
   return [
+    cabecalho,
     `S\n${s.join('\n')}`,
     `O\n${o.join('\n')}`,
     `A\n${a}`,

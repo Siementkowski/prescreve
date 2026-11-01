@@ -85,6 +85,21 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
 
       <div className="flex flex-col lg:flex-row gap-4 items-start">
         <div className="w-full lg:flex-1 min-w-0 flex flex-col gap-4">
+          <Secao titulo="Cabeçalho" icone={ClipboardList}>
+            <p className="text-xs text-text-dim mb-3">Deixe em branco para sair como "Nega" no texto.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Campo label="MUC (medicamentos de uso contínuo)">
+                <input value={v('muc')} onChange={(e) => s.setValor('muc', e.target.value)} className={inputCls + ' w-full'} />
+              </Campo>
+              <Campo label="Comorbidades">
+                <input value={v('comorbidades')} onChange={(e) => s.setValor('comorbidades', e.target.value)} className={inputCls + ' w-full'} />
+              </Campo>
+              <Campo label="Alergias">
+                <input value={v('alergias')} onChange={(e) => s.setValor('alergias', e.target.value)} className={inputCls + ' w-full'} />
+              </Campo>
+            </div>
+          </Secao>
+
           {GRUPOS_ORDEM.map((grupo) => {
             const campos = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m))
             if (campos.length === 0 && grupo !== 'Consulta') return null

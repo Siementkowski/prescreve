@@ -99,7 +99,6 @@ export function PuericulturaPage() {
 
         <div>
           <h1 className="font-display text-[24px] tracking-[-.5px] text-text">{faixa.titulo}</h1>
-          <p className="text-sm text-text-dim mt-1">{faixa.resumo}</p>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
