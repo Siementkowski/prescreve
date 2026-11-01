@@ -1,0 +1,558 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Profilaxia do Tétano</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout: coluna única de leitura (máx. 760px). Cabeçalho com alternância de modo; abaixo, wizard (Consulta) ou accordion (Mapa Geral). */
+  /* Identidade: Painel Editorial. Tokens claros em :root, escuros redefinidos abaixo. */
+  :root{
+    --paper:#f5f2eb; --surface:#fbfaf7; --surface-2:#f0ede6;
+    --ink:#111111; --muted:#706f69; --line:#d9d6ce; --line-strong:#c8c5bc;
+    --blue:#1857d1; --soft-blue:#e8eefc;
+    --mint:#007f5f; --soft-mint:#def5ee;
+    --orange:#b84a07; --soft-orange:#fcebdc;
+    --shadow-hard:#111111;
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'DM Sans', system-ui, sans-serif;
+    --radius-card:14px; --radius-control:12px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#131311; --surface:#1b1b18; --surface-2:#242420;
+      --ink:#f2efe8; --muted:#a09c91; --line:#34342f; --line-strong:#4a4a43;
+      --blue:#7aa2ff; --soft-blue:#1c2848;
+      --mint:#35d3a3; --soft-mint:#0f3128;
+      --orange:#ff9355; --soft-orange:#3b2213;
+      --shadow-hard:#000000;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#131311; --surface:#1b1b18; --surface-2:#242420;
+    --ink:#f2efe8; --muted:#a09c91; --line:#34342f; --line-strong:#4a4a43;
+    --blue:#7aa2ff; --soft-blue:#1c2848;
+    --mint:#35d3a3; --soft-mint:#0f3128;
+    --orange:#ff9355; --soft-orange:#3b2213;
+    --shadow-hard:#000000;
+    color-scheme: dark;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:16px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 48px;
+  }
+  .coluna{ max-width:760px; margin-inline:auto; display:flex; flex-direction:column; gap:20px; }
+  button{ font:inherit; color:inherit; }
+  :focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+  /* Cabeçalho */
+  .eyebrow{
+    margin:0 0 6px; font-size:.7rem; font-weight:700; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--blue);
+  }
+  h1{
+    margin:0; font-family:var(--font-display); font-weight:700;
+    font-size:clamp(1.7rem, 5.4vw, 2.3rem); line-height:1.08; letter-spacing:-1.1px;
+    text-wrap:balance;
+  }
+  .sub{ margin:8px 0 0; color:var(--muted); font-size:.95rem; max-width:60ch; }
+  .barra{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }
+  .modos{
+    display:inline-flex; border:1.5px solid var(--ink); border-radius:var(--radius-control);
+    overflow:hidden; background:var(--surface); box-shadow:3px 3px 0 var(--shadow-hard);
+  }
+  .modos button{
+    border:0; background:transparent; padding:10px 16px; cursor:pointer;
+    font-size:.78rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+  }
+  .modos button + button{ border-left:1.5px solid var(--ink); }
+  .modos button[aria-pressed="true"]{ background:var(--ink); color:var(--paper); }
+  .tema{
+    border:1.5px solid var(--line-strong); background:var(--surface); border-radius:var(--radius-control);
+    padding:9px 14px; cursor:pointer; font-size:.78rem; font-weight:600; color:var(--muted);
+  }
+  .tema:hover{ border-color:var(--ink); color:var(--ink); }
+
+  /* Trilha clicável */
+  .trilha{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0; padding:0; list-style:none; }
+  .trilha[hidden]{ display:none; }
+  .trilha .rotulo{ font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-right:2px; }
+  .trilha button{
+    border:1.5px solid var(--line-strong); background:var(--surface); border-radius:999px;
+    padding:6px 12px; font-size:.82rem; cursor:pointer; text-align:left; max-width:100%;
+  }
+  .trilha button:hover{ border-color:var(--blue); background:var(--soft-blue); }
+  .trilha b{ font-weight:600; color:var(--muted); }
+
+  /* Cartão de pergunta */
+  .painel{
+    background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-card);
+    box-shadow:5px 5px 0 var(--shadow-hard); padding:22px;
+  }
+  .passo{ margin:0 0 6px; font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--blue); }
+  .pergunta{ margin:0; font-family:var(--font-display); font-weight:600; font-size:1.35rem; line-height:1.2; letter-spacing:-.4px; text-wrap:balance; }
+  .pergunta:focus{ outline:none; }
+  .ajuda{ margin:8px 0 0; color:var(--muted); font-size:.92rem; }
+  .opcoes{ display:flex; flex-direction:column; gap:12px; margin-top:18px; }
+  .opcao{
+    display:block; width:100%; text-align:left; cursor:pointer;
+    background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-control);
+    padding:14px 16px; box-shadow:3px 3px 0 var(--shadow-hard);
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .opcao:hover{ background:var(--soft-blue); transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--shadow-hard); }
+  .opcao:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--shadow-hard); }
+  .opcao strong{ display:block; font-family:var(--font-display); font-weight:600; font-size:1.02rem; }
+  .opcao span{ display:block; margin-top:2px; color:var(--muted); font-size:.88rem; line-height:1.4; }
+  .acoes{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  .ghost{
+    border:1.5px solid var(--line-strong); background:transparent; border-radius:var(--radius-control);
+    padding:9px 14px; font-size:.82rem; font-weight:600; cursor:pointer; color:var(--muted);
+  }
+  .ghost:hover{ border-color:var(--ink); color:var(--ink); }
+
+  /* Resultado */
+  .selo{
+    display:inline-block; padding:4px 11px; border-radius:999px; font-size:.7rem; font-weight:700;
+    letter-spacing:1px; text-transform:uppercase; border:1.5px solid currentColor;
+  }
+  .selo.nada{ color:var(--mint); background:var(--soft-mint); }
+  .selo.vacina{ color:var(--blue); background:var(--soft-blue); }
+  .selo.vacinaIg{ color:var(--orange); background:var(--soft-orange); }
+  .resultado h2{ margin:12px 0 0; font-family:var(--font-display); font-weight:700; font-size:1.55rem; line-height:1.15; letter-spacing:-.6px; text-wrap:balance; }
+  .contexto{ margin:8px 0 0; color:var(--muted); font-size:.92rem; }
+  .condutas{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px; }
+  .conduta{ border:1.5px solid var(--line-strong); border-radius:var(--radius-control); padding:12px 14px; background:var(--surface-2); min-width:0; }
+  .conduta .k{ margin:0; font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+  .conduta .v{ margin:4px 0 0; font-family:var(--font-display); font-weight:600; font-size:1.08rem; line-height:1.25; }
+  .conduta.sim{ border-color:var(--ink); background:var(--surface); }
+  .conduta.nao .v{ color:var(--muted); }
+  .notas{ margin:16px 0 0; padding-left:1.1em; color:var(--muted); font-size:.9rem; }
+  .notas li + li{ margin-top:4px; }
+
+  /* Mapa Geral */
+  .mapa{ display:flex; flex-direction:column; gap:16px; }
+  .bloco{ background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-card); overflow:hidden; }
+  .bloco > summary{
+    list-style:none; cursor:pointer; padding:14px 18px; background:var(--surface-2);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    font-family:var(--font-display); font-weight:600; font-size:1.05rem; border-bottom:1.5px solid transparent;
+  }
+  .bloco > summary::-webkit-details-marker{ display:none; }
+  .bloco > summary::after{ content:"+"; color:var(--blue); font-size:1.3rem; font-weight:700; }
+  .bloco[open] > summary{ border-bottom-color:var(--ink); }
+  .bloco[open] > summary::after{ content:"\2212"; }
+  .corpo{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:14px; }
+  .corpo p{ margin:0; }
+  .def{ color:var(--muted); font-size:.92rem; }
+  .def ul{ margin:6px 0 0; padding-left:1.1em; }
+  .regra{ font-size:.9rem; }
+  .linhas{ display:flex; flex-direction:column; gap:10px; }
+  .linha{
+    display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:12px 16px; align-items:center;
+    border:1.5px solid var(--line-strong); border-radius:var(--radius-control); padding:12px 14px; background:var(--surface);
+  }
+  .linha .situacao{ font-weight:500; }
+  .linha .par{ display:flex; gap:10px; flex-wrap:wrap; }
+  .linha .par .conduta{ flex:1 1 120px; padding:8px 10px; }
+  .linha .par .conduta .v{ font-size:.95rem; }
+
+  @media (max-width:560px){
+    .painel{ padding:18px; }
+    .condutas{ grid-template-columns:1fr; }
+    .linha{ grid-template-columns:1fr; }
+  }
+  @media (prefers-reduced-motion: reduce){ .opcao{ transition:none; } }
+  [hidden]{ display:none !important; }
+</style>
+
+<div class="coluna">
+  <header>
+    <p class="eyebrow">Mapas clínicos</p>
+    <h1>Profilaxia do tétano</h1>
+    <p class="sub">Conduta pós-exposição em ferimentos com risco de tétano: quando indicar vacina e imunoglobulina.</p>
+  </header>
+
+  <div class="barra">
+    <div class="modos" role="group" aria-label="Modo de visualização">
+      <button type="button" id="btn-consulta" aria-pressed="true">Modo consulta</button>
+      <button type="button" id="btn-mapa" aria-pressed="false">Mapa geral</button>
+    </div>
+    <button type="button" class="tema" id="btn-tema">Tema escuro</button>
+  </div>
+
+  <!-- MODO CONSULTA -->
+  <section id="vista-consulta" aria-label="Modo consulta">
+    <ol class="trilha" id="trilha" aria-label="Respostas anteriores" hidden></ol>
+    <div id="palco" aria-live="polite" style="margin-top:16px;"></div>
+  </section>
+
+  <!-- MAPA GERAL -->
+  <section id="vista-mapa" class="mapa" aria-label="Mapa geral" hidden>
+
+    <details class="bloco" open>
+      <summary>Melhor cenário</summary>
+      <div class="corpo">
+        <div class="linhas">
+          <div class="linha">
+            <p class="situacao">Esquema vacinal completo (mínimo de 3 doses) e última dose há menos de 5 anos.</p>
+            <div class="par">
+              <div class="conduta nao"><p class="k">Vacina</p><p class="v">Não indicada</p></div>
+              <div class="conduta nao"><p class="k">Imunoglobulina / soro</p><p class="v">Não indicada</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <details class="bloco" open>
+      <summary>Ferimento com risco mínimo</summary>
+      <div class="corpo">
+        <p class="def">Ferimentos superficiais, limpos, sem corpos estranhos ou tecidos desvitalizados. Devem ser lavados, desinfetados e desbridados. Não se usa imunoglobulina nem soro.</p>
+        <p class="regra"><strong>Aplicar vacina se:</strong></p>
+        <div class="linhas">
+          <div class="linha">
+            <p class="situacao">Esquema vacinal desconhecido.</p>
+            <div class="par">
+              <div class="conduta sim"><p class="k">Vacina</p><p class="v">3 doses</p></div>
+              <div class="conduta nao"><p class="k">Imunoglobulina / soro</p><p class="v">Não indicada</p></div>
+            </div>
+          </div>
+          <div class="linha">
+            <p class="situacao">Esquema vacinal incompleto.</p>
+            <div class="par">
+              <div class="conduta sim"><p class="k">Vacina</p><p class="v">Completar o esquema</p></div>
+              <div class="conduta nao"><p class="k">Imunoglobulina / soro</p><p class="v">Não indicada</p></div>
+            </div>
+          </div>
+          <div class="linha">
+            <p class="situacao">Última dose da vacina há mais de 10 anos.</p>
+            <div class="par">
+              <div class="conduta sim"><p class="k">Vacina</p><p class="v">1 dose de reforço</p></div>
+              <div class="conduta nao"><p class="k">Imunoglobulina / soro</p><p class="v">Não indicada</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <details class="bloco" open>
+      <summary>Ferimento com alto risco</summary>
+      <div class="corpo">
+        <div class="def">
+          <p>Entram nesta categoria:</p>
+          <ul>
+            <li>ferimento profundo;</li>
+            <li>ferimento superficial sujo;</li>
+            <li>com corpos estranhos ou tecidos desvitalizados;</li>
+            <li>queimaduras;</li>
+            <li>ferimentos puntiformes;</li>
+            <li>ferimentos por armas brancas ou de fogo;</li>
+            <li>mordeduras;</li>
+            <li>politraumas ou fraturas expostas.</li>
+          </ul>
+        </div>
+        <p class="regra">Usa vacina (exceto se a última dose foi há menos de 5 anos) e imunoglobulina / soro se:</p>
+        <div class="linhas">
+          <div class="linha">
+            <p class="situacao">Esquema vacinal desconhecido.</p>
+            <div class="par">
+              <div class="conduta sim"><p class="k">Vacina</p><p class="v">3 doses</p></div>
+              <div class="conduta sim"><p class="k">Imunoglobulina / soro</p><p class="v">1 dose</p></div>
+            </div>
+          </div>
+          <div class="linha">
+            <p class="situacao">Esquema vacinal incompleto.</p>
+            <div class="par">
+              <div class="conduta sim"><p class="k">Vacina</p><p class="v">Completar as doses que faltam</p></div>
+              <div class="conduta sim"><p class="k">Imunoglobulina / soro</p><p class="v">1 dose</p></div>
+            </div>
+          </div>
+          <div class="linha">
+            <p class="situacao">Última dose há mais de 5 anos em situações especiais: imunodeprimidos, desnutrido grave ou idoso.</p>
+            <div class="par">
+              <div class="conduta sim"><p class="k">Vacina</p><p class="v">1 dose</p></div>
+              <div class="conduta sim"><p class="k">Imunoglobulina / soro</p><p class="v">1 dose</p></div>
+            </div>
+          </div>
+          <div class="linha">
+            <p class="situacao">Última dose há mais de 10 anos e o médico julgar que o ferimento não será cuidado apropriadamente.</p>
+            <div class="par">
+              <div class="conduta sim"><p class="k">Vacina</p><p class="v">1 dose</p></div>
+              <div class="conduta sim"><p class="k">Imunoglobulina / soro</p><p class="v">1 dose</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+  </section>
+</div>
+
+<script>
+  /* ---------- Árvore de decisão ----------
+     Cada nó tem: curto (rótulo na trilha), pergunta, ajuda?, opcoes[{id, rotulo, desc?}]
+     e depois(respostas, opcaoId) -> "n:<nó>" (próxima pergunta) ou "r:<resultado>". */
+  const NOS = {
+    esquema: {
+      curto: "Esquema", passo: "Esquema vacinal",
+      pergunta: "Qual é o esquema vacinal do paciente contra tétano?",
+      ajuda: "Esquema completo significa no mínimo 3 doses.",
+      opcoes: [
+        { id: "completo",    rotulo: "Completo",    desc: "3 doses ou mais" },
+        { id: "incompleto",  rotulo: "Incompleto",  desc: "Menos de 3 doses" },
+        { id: "desconhecido", rotulo: "Desconhecido", desc: "Não há informação sobre as doses" }
+      ],
+      depois: (r, o) => o === "completo" ? "n:ultima" : "n:ferimento"
+    },
+    ultima: {
+      curto: "Última dose", passo: "Última dose",
+      pergunta: "Quando foi aplicada a última dose da vacina?",
+      opcoes: [
+        { id: "menos5",  rotulo: "Há menos de 5 anos" },
+        { id: "e5a10",   rotulo: "Entre 5 e 10 anos" },
+        { id: "mais10",  rotulo: "Há mais de 10 anos" }
+      ],
+      depois: (r, o) => o === "menos5" ? "r:semConduta" : "n:ferimento"
+    },
+    ferimento: {
+      curto: "Ferimento", passo: "Tipo de ferimento",
+      pergunta: "Qual é o risco de tétano do ferimento?",
+      opcoes: [
+        { id: "minimo", rotulo: "Risco mínimo",
+          desc: "Superficial, limpo, sem corpos estranhos ou tecidos desvitalizados." },
+        { id: "alto", rotulo: "Alto risco",
+          desc: "Profundo; superficial sujo; com corpos estranhos ou tecidos desvitalizados; queimaduras; puntiformes; armas brancas ou de fogo; mordeduras; politraumas; fraturas expostas." }
+      ],
+      depois: (r, o) => {
+        if(r.esquema === "completo"){
+          if(o === "alto") return "n:especial";
+          return r.ultima === "mais10" ? "r:reforco" : "r:semCondutaMinimo";
+        }
+        if(r.esquema === "incompleto") return o === "alto" ? "r:completarIg" : "r:completar";
+        return o === "alto" ? "r:tresDosesIg" : "r:tresDoses";
+      }
+    },
+    especial: {
+      curto: "Situação especial", passo: "Situação especial",
+      pergunta: "O paciente tem alguma situação especial?",
+      ajuda: "Imunodeprimido, desnutrido grave ou idoso.",
+      opcoes: [
+        { id: "sim", rotulo: "Sim" },
+        { id: "nao", rotulo: "Não" }
+      ],
+      depois: (r, o) => {
+        if(o === "sim") return "r:vacinaIg";
+        return r.ultima === "mais10" ? "n:cuidado" : "r:reforcoAlto";
+      }
+    },
+    cuidado: {
+      curto: "Cuidado do ferimento", passo: "Cuidado do ferimento",
+      pergunta: "O médico julga que o ferimento não será cuidado apropriadamente?",
+      opcoes: [
+        { id: "sim", rotulo: "Sim", desc: "Cuidado inadequado" },
+        { id: "nao", rotulo: "Não", desc: "Cuidado apropriado" }
+      ],
+      depois: (r, o) => o === "sim" ? "r:vacinaIg" : "r:reforcoAlto"
+    }
+  };
+
+  const CUIDADO_LOCAL = "Lavar, desinfetar e desbridar o ferimento.";
+  const NAO = { texto: "Não indicada", indicada: false };
+  const RESULTADOS = {
+    semConduta: {
+      tipo: "nada", selo: "Melhor cenário", titulo: "Sem vacina e sem imunoglobulina",
+      contexto: "Esquema completo e última dose há menos de 5 anos.",
+      vacina: { texto: "Não indicada", indicada: false }, ig: NAO, notas: []
+    },
+    semCondutaMinimo: {
+      tipo: "nada", selo: "Sem conduta", titulo: "Sem vacina e sem imunoglobulina",
+      contexto: "Ferimento de risco mínimo, esquema completo e última dose há 10 anos ou menos.",
+      vacina: { texto: "Não indicada", indicada: false }, ig: NAO, notas: [CUIDADO_LOCAL]
+    },
+    reforco: {
+      tipo: "vacina", selo: "Vacina", titulo: "1 dose de reforço da vacina",
+      contexto: "Ferimento de risco mínimo, esquema completo e última dose há mais de 10 anos.",
+      vacina: { texto: "1 dose de reforço", indicada: true }, ig: NAO, notas: [CUIDADO_LOCAL]
+    },
+    completar: {
+      tipo: "vacina", selo: "Vacina", titulo: "Completar o esquema vacinal",
+      contexto: "Ferimento de risco mínimo e esquema incompleto.",
+      vacina: { texto: "Completar o esquema", indicada: true }, ig: NAO, notas: [CUIDADO_LOCAL]
+    },
+    tresDoses: {
+      tipo: "vacina", selo: "Vacina", titulo: "3 doses da vacina",
+      contexto: "Ferimento de risco mínimo e esquema desconhecido.",
+      vacina: { texto: "3 doses", indicada: true }, ig: NAO, notas: [CUIDADO_LOCAL]
+    },
+    completarIg: {
+      tipo: "vacinaIg", selo: "Vacina e imunoglobulina", titulo: "Completar a vacina e dar 1 dose de imunoglobulina / soro",
+      contexto: "Ferimento de alto risco e esquema incompleto.",
+      vacina: { texto: "Completar as doses que faltam", indicada: true },
+      ig: { texto: "1 dose", indicada: true }, notas: []
+    },
+    tresDosesIg: {
+      tipo: "vacinaIg", selo: "Vacina e imunoglobulina", titulo: "3 doses da vacina e 1 dose de imunoglobulina / soro",
+      contexto: "Ferimento de alto risco e esquema desconhecido.",
+      vacina: { texto: "3 doses", indicada: true },
+      ig: { texto: "1 dose", indicada: true }, notas: []
+    },
+    vacinaIg: {
+      tipo: "vacinaIg", selo: "Vacina e imunoglobulina", titulo: "1 dose da vacina e 1 dose de imunoglobulina / soro",
+      contexto: "Ferimento de alto risco, esquema completo e indicação de imunoglobulina.",
+      vacina: { texto: "1 dose", indicada: true },
+      ig: { texto: "1 dose", indicada: true }, notas: []
+    },
+    reforcoAlto: {
+      tipo: "vacina", selo: "Vacina", titulo: "1 dose de reforço da vacina",
+      contexto: "Ferimento de alto risco, esquema completo e sem indicação de imunoglobulina.",
+      vacina: { texto: "1 dose de reforço", indicada: true }, ig: NAO,
+      notas: ["A imunoglobulina entra só nas situações descritas no Mapa geral."]
+    }
+  };
+
+  /* ---------- Estado e renderização ---------- */
+  let trilha = []; // [{ no, opcao }]
+  const $ = (s) => document.querySelector(s);
+  const el = (tag, cls, txt) => {
+    const e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(txt !== undefined) e.textContent = txt;
+    return e;
+  };
+
+  function proximoNo(){
+    let atual = "n:esquema";
+    const r = {};
+    trilha.forEach(p => { r[p.no] = p.opcao; atual = NOS[p.no].depois(r, p.opcao); });
+    return atual;
+  }
+
+  function renderTrilha(){
+    const ol = $("#trilha");
+    ol.replaceChildren();
+    ol.hidden = trilha.length === 0;
+    if(!trilha.length) return;
+    ol.append(el("li", "rotulo", "Trilha"));
+    trilha.forEach((p, i) => {
+      const op = NOS[p.no].opcoes.find(o => o.id === p.opcao);
+      const li = el("li");
+      const b = el("button");
+      b.type = "button";
+      b.title = "Voltar a esta etapa";
+      const k = el("b", null, NOS[p.no].curto + ": ");
+      b.append(k, document.createTextNode(op.rotulo));
+      b.addEventListener("click", () => { trilha = trilha.slice(0, i); render(); });
+      li.append(b);
+      ol.append(li);
+    });
+  }
+
+  function acoes(comVoltar, comRecomecar){
+    const box = el("div", "acoes");
+    if(comVoltar){
+      const v = el("button", "ghost", "Voltar"); v.type = "button";
+      v.addEventListener("click", () => { trilha.pop(); render(); });
+      box.append(v);
+    }
+    if(comRecomecar){
+      const r = el("button", "ghost", "Recomeçar"); r.type = "button";
+      r.addEventListener("click", () => { trilha = []; render(); });
+      box.append(r);
+    }
+    return box;
+  }
+
+  function renderPergunta(chave){
+    const no = NOS[chave];
+    const painel = el("div", "painel");
+    painel.append(el("p", "passo", "Pergunta " + (trilha.length + 1) + " · " + no.passo));
+    const h = el("h2", "pergunta", no.pergunta);
+    h.tabIndex = -1; h.id = "foco";
+    painel.append(h);
+    if(no.ajuda) painel.append(el("p", "ajuda", no.ajuda));
+    const lista = el("div", "opcoes");
+    no.opcoes.forEach(op => {
+      const b = el("button", "opcao");
+      b.type = "button";
+      b.append(el("strong", null, op.rotulo));
+      if(op.desc) b.append(el("span", null, op.desc));
+      b.addEventListener("click", () => { trilha.push({ no: chave, opcao: op.id }); render(); });
+      lista.append(b);
+    });
+    painel.append(lista);
+    if(trilha.length) painel.append(acoes(true, true));
+    return painel;
+  }
+
+  function bloco(rotulo, dado){
+    const d = el("div", "conduta " + (dado.indicada ? "sim" : "nao"));
+    d.append(el("p", "k", rotulo), el("p", "v", dado.texto));
+    return d;
+  }
+
+  function renderResultado(chave){
+    const r = RESULTADOS[chave];
+    const painel = el("div", "painel resultado");
+    painel.append(el("span", "selo " + r.tipo, r.selo));
+    const h = el("h2", null, r.titulo);
+    h.tabIndex = -1; h.id = "foco";
+    painel.append(h);
+    painel.append(el("p", "contexto", r.contexto));
+    const grade = el("div", "condutas");
+    grade.append(bloco("Vacina", r.vacina), bloco("Imunoglobulina / soro", r.ig));
+    painel.append(grade);
+    if(r.notas.length){
+      const ul = el("ul", "notas");
+      r.notas.forEach(n => ul.append(el("li", null, n)));
+      painel.append(ul);
+    }
+    painel.append(acoes(true, true));
+    return painel;
+  }
+
+  function render(){
+    renderTrilha();
+    const alvo = proximoNo();
+    const palco = $("#palco");
+    palco.replaceChildren(alvo.startsWith("n:") ? renderPergunta(alvo.slice(2)) : renderResultado(alvo.slice(2)));
+    if(trilha.length){ const f = $("#foco"); if(f) f.focus({ preventScroll: false }); }
+  }
+
+  /* ---------- Modos e tema ---------- */
+  function setModo(modo){
+    const consulta = modo === "consulta";
+    $("#vista-consulta").hidden = !consulta;
+    $("#vista-mapa").hidden = consulta;
+    $("#btn-consulta").setAttribute("aria-pressed", String(consulta));
+    $("#btn-mapa").setAttribute("aria-pressed", String(!consulta));
+  }
+  $("#btn-consulta").addEventListener("click", () => setModo("consulta"));
+  $("#btn-mapa").addEventListener("click", () => setModo("mapa"));
+
+  const raiz = document.documentElement;
+  function escuroAgora(){
+    const t = raiz.getAttribute("data-theme");
+    if(t) return t === "dark";
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function rotuloTema(){ $("#btn-tema").textContent = escuroAgora() ? "Tema claro" : "Tema escuro"; }
+  $("#btn-tema").addEventListener("click", () => {
+    raiz.setAttribute("data-theme", escuroAgora() ? "light" : "dark");
+    rotuloTema();
+  });
+  if(window.matchMedia){
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    (mq.addEventListener ? mq.addEventListener.bind(mq, "change") : mq.addListener.bind(mq))(rotuloTema);
+  }
+
+  rotuloTema();
+  render();
+</script>
+
+</body></html>

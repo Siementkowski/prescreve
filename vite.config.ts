@@ -33,6 +33,17 @@ export default defineConfig({
         // não pelo service worker. Aqui só garante que o app abre offline mesmo sem o SW ter
         // visto aquela rota antes.
         navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/fluxogramas\//],
+        // Imagens dos fluxogramas (vários MB) ficam fora do precache pra não pesar na instalação;
+        // entram no cache na primeira vez que o fluxograma é aberto e passam a funcionar offline.
+        globIgnores: ['fluxogramas/**/*.{png,jpg,jpeg,webp}'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/fluxogramas/') && /\.(png|jpe?g|webp)$/i.test(url.pathname),
+            handler: 'CacheFirst',
+            options: { cacheName: 'fluxogramas-imagens', expiration: { maxEntries: 100 } },
+          },
+        ],
       },
       devOptions: { enabled: true, type: 'module' },
     }),

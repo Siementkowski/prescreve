@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doenças Exantemáticas — Consulta Guiada</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* ============================================================
+   TOKENS — base do Painel Editorial (Prescreve), 1:1
+   ============================================================ */
+:root {
+  --paper: #f5f2eb;
+  --surface: #fbfaf7;
+  --surface-2: #f0ede6;
+  --surface-3: #ebe7de;
+  --ink: #111111;
+  --muted: #706f69;
+  --on-ink: #ffffff;
+  --line: #d9d6ce;
+  --line-strong: #c8c5bc;
+
+  --blue: #1857d1;   --soft-blue: #e8eefc;   --on-soft-blue: #1857d1;
+  --mint: #00b989;   --soft-mint: #def5ee;   --on-soft-mint: #087d62;
+  --orange: #ef6b17; --soft-orange: #fcebdc; --on-soft-orange: #a54e12;
+  --red: #e9443d;    --soft-red: #fae7e4;    --on-soft-red: #ad342f;
+
+  --shadow-soft: rgba(17, 17, 17, .08);
+  --shadow-hard: var(--ink);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0d0d0b; --surface: #151512; --surface-2: #1b1b17; --surface-3: #24231f;
+    --ink: #f5f2eb; --muted: #aaa69c; --on-ink: #111111;
+    --line: #2d2c28; --line-strong: #3a3832;
+    --soft-blue: #152650;   --on-soft-blue: #79a4ff;
+    --soft-mint: #103b31;   --on-soft-mint: #7edfc4;
+    --soft-orange: #432716; --on-soft-orange: #ffb77e;
+    --soft-red: #3e1b1a;    --on-soft-red: #ff9d94;
+    --shadow-soft: rgba(0,0,0,.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0d0d0b; --surface: #151512; --surface-2: #1b1b17; --surface-3: #24231f;
+  --ink: #f5f2eb; --muted: #aaa69c; --on-ink: #111111;
+  --line: #2d2c28; --line-strong: #3a3832;
+  --soft-blue: #152650;   --on-soft-blue: #79a4ff;
+  --soft-mint: #103b31;   --on-soft-mint: #7edfc4;
+  --soft-orange: #432716; --on-soft-orange: #ffb77e;
+  --soft-red: #3e1b1a;    --on-soft-red: #ff9d94;
+  --shadow-soft: rgba(0,0,0,.5);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column;
+}
+h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; margin: 0; }
+
+/* ---- topbar ---- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; padding: 0 18px; flex-shrink: 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.wordmark { font-weight: 700; font-size: 15px; }
+
+.mode-switch { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 12px; }
+.mode-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 600;
+  padding: 7px 14px; border-radius: 9px; cursor: pointer; border: none; background: none; color: var(--muted);
+}
+.mode-btn.active { background: var(--ink); color: var(--on-ink); }
+
+.theme-btn {
+  width: 34px; height: 34px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  display: grid; place-items: center; cursor: pointer;
+}
+.theme-btn svg { width: 15px; height: 15px; }
+
+main { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 32px 20px 60px; }
+.wizard { width: 100%; max-width: 640px; }
+
+/* ============================================================
+   TRILHA — respostas já dadas, tipo breadcrumb de perguntas
+   ============================================================ */
+.trail { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; min-height: 26px; align-items: center; }
+.trail-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 600; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 999px; padding: 5px 11px; cursor: pointer;
+}
+.trail-pill:hover { border-color: var(--line-strong); }
+.trail-arrow { color: var(--line-strong); font-size: 11px; display: flex; align-items: center; }
+
+/* ============================================================
+   CARD DE PERGUNTA
+   ============================================================ */
+.q-card {
+  background: var(--surface); border: 1.5px solid var(--line);
+  border-radius: 18px; padding: 26px 26px 20px;
+  animation: fadein .22s ease;
+}
+@keyframes fadein { from { opacity:0; transform: translateY(6px);} to {opacity:1; transform: translateY(0);} }
+
+.q-card h2 { font-size: 21px; line-height: 1.3; margin-bottom: 4px; }
+.q-card .q-hint { font-size: 12.5px; color: var(--muted); margin-bottom: 18px; }
+
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--paper); border: 1.5px solid var(--line); border-radius: 12px;
+  padding: 13px 16px; cursor: pointer; text-align: left;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--ink);
+  transition: border-color .15s ease, box-shadow .15s ease, transform .12s ease;
+}
+.option-btn:hover { border-color: var(--ink); box-shadow: 3px 3px 0 var(--shadow-hard); transform: translateY(-1px); }
+.option-btn .o-sub { display: block; font-size: 11.5px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+.option-btn .o-arrow { flex-shrink: 0; font-size: 16px; color: var(--muted); }
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12.5px; font-weight: 600; color: var(--muted);
+  cursor: pointer; margin-top: 16px;
+}
+.back-link:hover { color: var(--ink); }
+
+.restart-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  cursor: pointer; margin-top: 22px;
+}
+.restart-link:hover { color: var(--ink); }
+
+/* ============================================================
+   CARD DE DIAGNÓSTICO FINAL
+   ============================================================ */
+.dx-card {
+  background: var(--surface); border: 1.5px solid var(--line);
+  border-left: 6px solid var(--accent, var(--ink));
+  border-radius: 18px; padding: 26px;
+  animation: fadein .25s ease;
+}
+.dx-eyebrow {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--accent-text, var(--muted)); margin-bottom: 6px;
+}
+.dx-card h2 { font-size: 33px; font-weight: 700; margin-bottom: 2px; }
+.dx-card .dx-subtitle { font-size: 15px; color: var(--ink); margin-bottom: 14px; }
+.dx-image { margin: 4px 0 14px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.dx-image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 4px 0 14px; }
+.dx-image-gallery .dx-image { margin: 0; }
+.dx-image-gallery .dx-image img { max-height: 160px; }
+.dx-image img { display: block; width: 100%; height: auto; max-height: 260px; object-fit: cover; }
+.dx-image-caption { font-size: 11px; color: var(--ink); padding: 6px 10px; background: var(--surface-2); font-weight: 600; }
+
+.dx-tx-note { font-size: 11.5px; font-style: italic; color: var(--muted); margin-top: 10px; }
+
+.dx-exantema-banner {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 11px 14px; margin-bottom: 18px;
+}
+.dx-exantema-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text, var(--muted)); margin-bottom: 4px; }
+.dx-exantema-text { font-size: 13px; line-height: 1.5; }
+
+.d-block { margin-bottom: 15px; }
+.d-block:last-of-type { margin-bottom: 0; }
+.d-block-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--ink); margin-bottom: 6px;
+  border-bottom: 1.5px solid var(--line-strong); display: inline-block; padding-bottom: 2px;
+}
+.d-block ul { margin: 0; padding-left: 17px; }
+.d-block li { font-size: 13.5px; line-height: 1.55; margin-bottom: 4px; }
+
+.dx-treatment {
+  margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line);
+}
+.dx-treatment-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--ink); margin-bottom: 8px; }
+.dx-exames-tag {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--on-soft-red); background: var(--soft-red);
+  padding: 2px 7px; border-radius: 999px; margin-left: 7px; vertical-align: middle;
+}
+.dx-tx-list { margin: 10px 0 0; padding-left: 17px; }
+.dx-tx-list li { font-size: 13px; line-height: 1.55; margin-bottom: 4px; color: var(--ink); }
+.dx-tx-sublist { list-style: none; margin: 6px 0 10px; padding-left: 4px; }
+.dx-tx-sublist li {
+  position: relative; padding-left: 16px; margin-bottom: 4px;
+  font-size: 13px; line-height: 1.5; color: var(--ink);
+}
+.dx-tx-sublist li::before {
+  content: ''; position: absolute; left: 0; top: 0.42em;
+  width: 6px; height: 6px; border-radius: 50%;
+  border: 1.4px solid var(--ink); background: transparent;
+}
+.dx-internacao {
+  margin-top: 12px; padding: 10px 13px; border-radius: 8px;
+  background: var(--soft-red); border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
+  font-size: 12.5px; line-height: 1.5; color: var(--on-soft-red);
+}
+.dx-internacao b { font-weight: 700; }
+.status-pill {
+  display: inline-flex; align-items: center; font-size: 12px; font-weight: 600;
+  padding: 5px 12px; border-radius: 999px; border: 1px solid transparent; margin: 0 6px 6px 0;
+}
+.status-pill.mint   { color: var(--on-soft-mint);   background: var(--soft-mint);   border-color: color-mix(in srgb, var(--mint) 40%, transparent); }
+.status-pill.orange { color: var(--on-soft-orange); background: var(--soft-orange); border-color: color-mix(in srgb, var(--orange) 40%, transparent); }
+.status-pill.blue   { color: var(--on-soft-blue);   background: var(--soft-blue);   border-color: color-mix(in srgb, var(--blue) 40%, transparent); }
+.status-pill.red    { color: var(--on-soft-red);    background: var(--soft-red);    border-color: color-mix(in srgb, var(--red) 40%, transparent); }
+
+/* ============================================================
+   MODO MAPA — toggle por categoria, cards de doença dentro
+   (mesmo visual do card de diagnóstico do modo Consulta)
+   ============================================================ */
+#mainMapa { display: block; padding: 32px 24px 70px; overflow-y: auto; }
+.mapa-wrap { max-width: 900px; margin: 0 auto; }
+
+.mapa-cat { margin-bottom: 0.75rem; }
+
+.mapa-cat-toggle {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 4px; cursor: pointer;
+  border-bottom: 2px solid var(--accent, var(--ink));
+}
+.mapa-cat-toggle-text h2 { font-size: 18px; }
+.mapa-cat-toggle-text .mapa-cat-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+.mapa-chevron { font-size: 18px; color: var(--muted); transition: transform .2s ease; flex-shrink: 0; }
+.mapa-cat.open .mapa-chevron { transform: rotate(180deg); }
+
+.mapa-cat-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s ease; }
+.mapa-cat.open .mapa-cat-body { grid-template-rows: 1fr; }
+.mapa-cat-body-inner { overflow: hidden; }
+
+.mapa-disease-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; padding: 18px 4px 6px; }
+
+.mapa-disease-card {
+  background: var(--surface); border: 1.5px solid var(--line);
+  border-left: 4px solid var(--accent, var(--ink));
+  border-radius: 14px; padding: 18px 20px;
+}
+.mapa-disease-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+.mapa-disease-card .mapa-dc-meta { font-size: 12.5px; color: var(--ink); margin-bottom: 12px; }
+
+@media (max-width: 480px) {
+  .q-card, .dx-card { padding: 20px 18px 16px; border-radius: 14px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="wordmark">Exantemáticas</span>
+  <div class="mode-switch">
+    <button class="mode-btn active" id="modeConsulta" onclick="setMode('consulta')">Consulta</button>
+    <button class="mode-btn" id="modeMapa" onclick="setMode('mapa')">Mapa Geral</button>
+  </div>
+  <button class="theme-btn" id="themeBtn" title="Alternar tema">
+    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14.2A7.5 7.5 0 0 1 9.8 5 7.5 7.5 0 1 0 19 14.2Z"></path></svg>
+  </button>
+</header>
+
+<main id="mainConsulta">
+  <div class="wizard">
+    <div class="trail" id="trail"></div>
+    <div id="stepArea"></div>
+  </div>
+</main>
+
+<main id="mainMapa" style="display:none">
+  <div class="mapa-wrap" id="mapaWrap"></div>
+</main>
+
+
+<script>
+/* ============================================================
+   ÁRVORE DE DECISÃO — cada nó é uma pergunta com opções.
+   Cada opção leva a outro nó (next) ou a um diagnóstico (dx).
+   Isso reproduz a sequência real de perguntas de consultório.
+   ============================================================ */
+const tree = {
+  start: {
+    q: 'As lesões têm vesículas (bolhas com líquido)?',
+    hint: 'Primeiro, olhe o tipo de lesão na pele.',
+    options: [
+      { label: 'Sim', sub: 'bolhas visíveis, cheias de líquido', next: 'vesic_location' },
+      { label: 'Não', sub: 'máculas, pápulas ou placas, sem bolhas', next: 'cavidade_oral' }
+    ]
+  },
+  vesic_location: {
+    q: 'As vesículas estão limitadas a mãos, pés e boca?',
+    hint: 'Localização define entre as duas causas vesiculares mais comuns.',
+    options: [
+      { label: 'Sim', sub: 'concentradas em mãos, pés, boca (e às vezes nádegas)', dx: 'maopeboca' },
+      { label: 'Não', sub: 'espalhadas pelo corpo — face, tronco, couro cabeludo', dx: 'varicela' }
+    ]
+  },
+  cavidade_oral: {
+    q: 'Há alteração na cavidade oral? (língua em morango, lábios rachados, placas na garganta, ou petéquias no palato)',
+    hint: 'Enantema oral aponta para um grupo específico de diagnósticos — inclusive petéquias no palato (sinal de Forchheimer) contam aqui.',
+    options: [
+      { label: 'Sim', sub: 'língua, lábios, garganta ou palato alterados', next: 'oral_type' },
+      { label: 'Não', sub: 'boca normal', next: 'febre_timing' }
+    ]
+  },
+  oral_type: {
+    q: 'Qual desses padrões combina melhor com o quadro?',
+    hint: 'Escolha o que mais se aproxima do que você está vendo.',
+    options: [
+      { label: 'Faringite purulenta + língua em framboesa', sub: 'amigdalite, febre alta, exantema em lixa', dx: 'escarlatina' },
+      { label: 'Febre ≥5 dias + conjuntivite + extremidades alteradas', sub: 'sem foco infeccioso claro, criança irritada', dx: 'kawasaki' },
+      { label: 'Faringite exsudativa + linfonodos generalizados', sub: 'esplenomegalia, piora se usar amoxicilina', dx: 'mono' },
+      { label: 'Petéquias no palato (sinal de Forchheimer)', sub: 'febre baixa, linfonodos retroauriculares/occipitais', dx: 'rubeola' }
+    ]
+  },
+  febre_timing: {
+    q: 'O exantema surgiu enquanto a febre ainda estava presente, ou só depois que ela cedeu?',
+    hint: 'A relação temporal entre febre e rash é o achado mais discriminador aqui.',
+    options: [
+      { label: 'Ainda com febre', sub: 'rash apareceu com a criança ainda febril', next: 'febre_presente_tipo' },
+      { label: 'Só depois que a febre cedeu', sub: 'febre sumiu, e então surgiu o rash', next: 'febre_apos_tipo' }
+    ]
+  },
+  febre_presente_tipo: {
+    q: 'Tem tosse, coriza, conjuntivite e manchas de Koplik?',
+    hint: 'A tríade catarral + Koplik é praticamente diagnóstica.',
+    options: [
+      { label: 'Sim', sub: 'tríade catarral presente, manchas de Koplik na boca', dx: 'sarampo' },
+      { label: 'Não', sub: 'febre baixa, linfonodos retroauriculares/occipitais', dx: 'rubeola' }
+    ]
+  },
+  febre_apos_tipo: {
+    q: 'Antes do exantema, teve fase de "bochecha esbofeteada" (face muito vermelha)?',
+    hint: 'Esse achado distingue as duas causas mais comuns desse padrão.',
+    options: [
+      { label: 'Sim', sub: 'face vermelha antes do exantema no corpo', dx: 'eritema' },
+      { label: 'Não', sub: 'só febre alta que sumiu de repente, depois veio o rash', dx: 'subito' }
+    ]
+  }
+};
+
+/* ============================================================
+   DIAGNÓSTICOS — mesma estrutura em fases usada antes
+   ============================================================ */
+const diagnoses = {
+  sarampo: {
+    title:'Sarampo', subtitle:'Paramyxovírus (Morbillivirus) · incubação 8–12 dias',
+    accent:'var(--orange)', accentText:'var(--on-soft-orange)',
+    images:[
+      {src:'sarampo-koplik.png', caption:'Manchas de Köplik'},
+      {src:'sarampo-exantema.png', caption:'Exantema morbiliforme generalizado'},
+      {src:'sarampo-convalescencia.png', caption:'Fase de convalescência — descamação fina'}
+    ],
+    exantemaChar:'Morbiliforme, confluente, com descamação fina e furfurácea. Craniocaudal: face → pescoço → MMSS → MMII.',
+    fases:[
+      { t:'Fase Prodrômica', items:['Febre, rinorreia, tosse, conjuntivite (3–5 dias)','Ao final do pródromo surgem as manchas de Koplik'] },
+      { t:'Fase Exantemática', items:['Exantema morbiliforme, confluente','Progressão craniocaudal: face → pescoço → MMSS → MMII','Dura de 4 a 7 dias','Contágio do 6º dia de incubação até o 6º dia de exantema'] },
+      { t:'Fase de Convalescência', items:['Descamação fina e furfurácea','Tosse é o último sintoma a desaparecer'] }
+    ],
+    exames:['Sorologia para IgM e IgG','Swab combinado naso/orofaríngeo — para RT-PCR','Urina — para detecção viral por RT-PCR'],
+    pills:[{t:'Vitamina A + suporte', c:'mint'},{t:'Notificação imediata', c:'orange'}],
+    tx:[
+      'Vitamina A (150.000 U/mL), VO, 1x/dia por 2 dias:',
+      '< 6 meses: 10 gotas (50.000 U)',
+      '6–11 meses: 20 gotas (100.000 U)',
+      '≥ 1 ano: 40 gotas (200.000 U)'
+    ]
+  },
+  rubeola: {
+    title:'Rubéola', subtitle:'Togavírus · incubação 12–23 dias',
+    accent:'var(--orange)', accentText:'var(--on-soft-orange)',
+    images:[
+      {src:'rubeola-forchheimer.png', caption:'Sinal de Forchheimer — petéquias na transição palato duro/mole'},
+      {src:'rubeola-exantema.png', caption:'Exantema rubeoliforme no tronco'}
+    ],
+    exantemaChar:'Morbiliforme, não confluente, sem descamação. Progressão crânio-caudal, lesões bem esparsas.',
+    fases:[
+      { t:'Fase Prodrômica', items:['Febre baixa, adenomegalia (retroauricular, occipital e cervical)','Pode não haver pródromo','Sinal de Forchheimer: petéquias no palato'] },
+      { t:'Fase Exantemática', items:['Exantema rubeoliforme, progressão crânio-caudal','Lesões esparsas, não confluentes, sem descamação','Dura de 3 a 5 dias'] },
+      { t:'Complicações', items:['Raras: encefalite, trombocitopenia','Síndrome da rubéola congênita se infecção na gestação'] }
+    ],
+    pills:[{t:'Suporte', c:'mint'},{t:'Notificação imediata', c:'orange'}],
+    tx:['Tratamento sintomático — não há tratamento específico']
+  },
+  subito: {
+    title:'Exantema Súbito', subtitle:'Herpes-vírus 6 (e 7) · Roséola',
+    accent:'var(--blue)', accentText:'var(--on-soft-blue)',
+    images:[{src:'subito-exantema.png', caption:'Exantema maculopapular após o término da febre'}],
+    exantemaChar:'Maculopapular, não pruriginoso. Inicia no tronco, dissemina para face e extremidades. Fugaz, sem descamação.',
+    fases:[
+      { t:'Fase Prodrômica', items:['Febre alta (39–40°C) por 3–4 dias','Geralmente é apenas febre, sem outros sintomas'] },
+      { t:'Fase Exantemática', items:['A febre some subitamente — aí surge o exantema','Maculopapular, início no tronco, dura pouco tempo','Criança em bom estado geral, sem prurido'] },
+      { t:'Complicações', items:['Crise febril (convulsão febril)'] }
+    ],
+    pills:[{t:'Suporte', c:'mint'},{t:'Atenção à crise febril', c:'orange'}],
+    tx:['Tratamento sintomático — cuidado com baixa aceitação hídrica']
+  },
+  eritema: {
+    title:'Eritema Infeccioso', subtitle:'Parvovírus B19 · 5ª doença',
+    accent:'var(--blue)', accentText:'var(--on-soft-blue)',
+    images:[{src:'eritema-esbofeteada.png', caption:'Face esbofeteada e exantema rendilhado no tronco'}],
+    exantemaChar:'Face esbofeteada → exantema rendilhado/reticulado no tronco, pruriginoso, poupa palma e planta. Pode recidivar.',
+    fases:[
+      { t:'Fase Prodrômica', items:['Período livre de sintomas','Fase prodrômica inexistente ou inespecífica'] },
+      { t:'Fase Exantemática', items:['1ª fase: face esbofeteada (2–4 dias)','2ª fase: exantema reticulado/rendilhado no tronco','3ª fase: recidiva com sol, calor ou exercício','Nesta fase o paciente já não é mais contagioso'] },
+      { t:'Complicações', items:['Crise aplásica em doença hemolítica crônica (ex: falciforme)','Infecção fetal: pode causar anemia e miocardite'] }
+    ],
+    pills:[{t:'Suporte', c:'mint'},{t:'Imunoglobulina se crise aplásica', c:'orange'}],
+    tx:['Tratamento sintomático']
+  },
+  varicela: {
+    title:'Varicela', subtitle:'Vírus varicela-zóster · Catapora',
+    accent:'var(--mint)', accentText:'var(--on-soft-mint)',
+    images:[{src:'varicela-progressao.png', caption:'Progressão da lesão (mácula → crosta) e distribuição do exantema'}],
+    exantemaChar:'Polimorfismo regional: mácula → pápula → vesícula → pústula → crosta, tudo ao mesmo tempo. Progressão centrífuga, muito pruriginoso.',
+    fases:[
+      { t:'Fase Prodrômica', items:['Febre e mal-estar','Pode não haver pródromo','Contágio por aerossol'] },
+      { t:'Fase Exantemática', items:['Muito pruriginoso','Mácula → pápula → vesícula → pústula → crosta, tudo ao mesmo tempo (polimorfismo regional)','Progressão centrífuga, mais concentrada no centro','Pode acometer mucosas','Transmite até todas as lesões virarem crosta'] },
+      { t:'Complicações', items:['Infecção bacteriana secundária','SNC: ataxia cerebelar (nistagmo, ataxia) — bom prognóstico'] }
+    ],
+    pills:[{t:'Suporte', c:'mint'},{t:'Aciclovir em situações especiais', c:'blue'}],
+    tx:[
+      'Aciclovir indicado em: >13 anos, gestante, 2º caso no domicílio, doença pulmonar/cutânea crônica, uso crônico de AAS ou corticoide',
+      'Aciclovir (200 mg/comprimido) 20 mg/kg/dose VO 5x/dia por 5 dias — dose máxima 800 mg/dia',
+      'Não usar em gestantes',
+      'Manter unhas curtas e limpas',
+      'Anti-histamínico enquanto houver lesões pruriginosas',
+      'Profilaxia pós-contato: imunoglobulina até 96h (suscetíveis de risco) ou bloqueio vacinal até 120h (>9 meses, sem contraindicação)'
+    ],
+    internacao:'RN, doença grave ou progressiva, imunodeprimidos'
+  },
+  maopeboca: {
+    title:'Doença Mão-Pé-Boca', subtitle:'Coxsackie A16 (Enterovírus)',
+    accent:'var(--mint)', accentText:'var(--on-soft-mint)',
+    images:[{src:'maopeboca-lesoes.png', caption:'Lesões em mãos, pés, boca e nádegas'}],
+    exantemaChar:'Vesicular/maculopapular, envolve mãos, pés, nádegas e boca. Lesões ulceradas na mucosa oral.',
+    fases:[
+      { t:'Fase Prodrômica', items:['Febre, faringite, diarreia'] },
+      { t:'Fase Exantemática', items:['Lesões vesiculares e ulceradas','Envolve mãos, pés, nádegas e boca'] },
+      { t:'Complicações', items:['Quadro autolimitado','Dor na boca pode prejudicar a aceitação hídrica'] }
+    ],
+    pills:[{t:'Suporte, analgesia e hidratação', c:'mint'}],
+    tx:[
+      'Evolução benigna e autolimitada, lesões regridem em 7–10 dias',
+      'Estímulo à ingesta hídrica — líquidos frios ou gelados ajudam na aceitação'
+    ],
+    internacao:'Criança que não consegue aceitar líquidos VO, ou complicações cardiovasculares/neurológicas'
+  },
+  escarlatina: {
+    title:'Escarlatina', subtitle:'Streptococcus pyogenes (grupo A)',
+    accent:'var(--red)', accentText:'var(--on-soft-red)',
+    images:[{src:'escarlatina-sinais.png', caption:'Sinal de Filatov, língua em framboesa e sinal de Pastia'}],
+    exantemaChar:'Micropapular, áspero — "pele em lixa". Progressão centrífuga, inicia em tronco e dobras. Descamação lamelar depois.',
+    fases:[
+      { t:'Fase Prodrômica', items:['Faringite estreptocócica','Língua em morango/framboesa'] },
+      { t:'Fase Exantemática', items:['Exantema micropapular, áspero — "pele em lixa"','Progressão centrífuga, inicia em tronco e dobras','Sinal de Pastia (acentua nas dobras)','Sinal de Filatov (palidez perioral)'] },
+      { t:'Fase de Convalescência', items:['Descamação lamelar, "em lascas"'] }
+    ],
+    pills:[{t:'Penicilina benzatina', c:'blue'}],
+    txNote:'Escolha uma das opções abaixo:',
+    tx:[
+      { t:'Penicilina G benzatina (primeira linha), IM, dose única:', subs:['≤ 27 kg: 600.000 U','> 27 kg: 1.200.000 U'] },
+      { t:'Amoxicilina 250mg/5ml', subs:['25mg/kg/dose de 12/12h (máx: 500mg/dose) por 10 dias'] },
+      'Retorno à creche/escola: 24h após início do antibiótico, se afebril e bem',
+      'Reavaliar se sintomas persistirem após 5 dias de antibioticoterapia'
+    ],
+    internacao:'Apenas por complicações da infecção ou da toxina estreptocócica: abscessos, bacteremia, síndrome do choque tóxico estreptocócico, meningite, pioartrite, endocardite, osteomielite, peritonite, glomerulonefrite difusa aguda, febre reumática, poliarterite nodosa, artrite reativa, hepatite ou colelitíase'
+  },
+  kawasaki: {
+    title:'Doença de Kawasaki', subtitle:'Vasculite de etiologia desconhecida',
+    accent:'var(--red)', accentText:'var(--on-soft-red)',
+    images:[{src:'kawasaki-mucosite.png', caption:'Conjuntivite não exsudativa, língua em framboesa e lábios fissurados'}],
+    exantemaChar:'Exantema polimorfo, sem vesículas (pode ter enantema perineal). Se houver vesícula, pensar em outro diagnóstico.',
+    fases:[
+      { t:'Fase Prodrômica', items:['Febre alta por pelo menos 5 dias — critério obrigatório'] },
+      { t:'Quadro Clínico', items:['E 4 ou mais: conjuntivite não exsudativa','Alteração de lábio e cavidade oral','Adenomegalia cervical','Exantema polimorfo (pode ter enantema perineal)','Alterações nas extremidades'] },
+      { t:'Atenção — o que fala contra Kawasaki', items:['Faringite/conjuntivite exsudativa','Exantema com vesículas'] }
+    ],
+    pills:[{t:'AAS + Imunoglobulina IV', c:'red'},{t:'Emergência', c:'red'}],
+    tx:[
+      'Fase aguda: Imunoglobulina humana (IVIG) 2 g/kg durante 8–12 horas',
+      'Ácido acetilsalicílico (AAS) 30–50 mg/kg/dia — dose anti-inflamatória'
+    ],
+    internacao:'Sempre internar'
+  },
+  mono: {
+    title:'Mononucleose', subtitle:'Vírus Epstein-Barr · "doença do beijo"',
+    accent:'var(--red)', accentText:'var(--on-soft-red)',
+    images:[{src:'mono-faringite.png', caption:'Faringite exsudativa/membranosa'}],
+    exantemaChar:'Rash variável, presente em 10–20% dos casos — muito mais comum (>70%) se usar amoxicilina/ampicilina.',
+    fases:[
+      { t:'Fase Prodrômica', items:['Febre, fadiga, faringite'] },
+      { t:'Quadro Clínico', items:['Linfadenopatia generalizada','Esplenomegalia e hepatomegalia','Edema palpebral (sinal de Hoagland)','Rash surge tipicamente após uso de amoxicilina/ampicilina'] },
+      { t:'Complicações', items:['Risco de ruptura esplênica'] }
+    ],
+    pills:[{t:'Suporte', c:'mint'},{t:'Evitar esporte de contato', c:'orange'}],
+    tx:[
+      'Apenas sintomáticos e repouso',
+      'Repouso por, no mínimo, 1 semana'
+    ],
+    internacao:'Sinais de alarme: prostração excessiva, sonolência/coma, desidratação, dispneia, vômitos incoercíveis, incapacidade de ingerir líquido, oligúria ou dor abdominal importante — encaminhar imediatamente à urgência'
+  }
+};
+
+/* ============================================================
+   ESTADO E RENDERIZAÇÃO
+   ============================================================ */
+let history = []; // [{nodeId, answerLabel, nextNode, dx}]
+
+function currentNodeId() {
+  return history.length === 0 ? 'start' : history[history.length - 1].nextNode;
+}
+
+function renderTrail() {
+  const trail = document.getElementById('trail');
+  if (history.length === 0) { trail.innerHTML = ''; return; }
+  trail.innerHTML = history.map((h, i) => `
+    <span class="trail-pill" onclick="jumpTo(${i})">${h.answerLabel}</span>
+    <span class="trail-arrow">→</span>
+  `).join('');
+}
+
+function jumpTo(index) {
+  history = history.slice(0, index);
+  render();
+}
+
+function render() {
+  renderTrail();
+  const area = document.getElementById('stepArea');
+
+  // se o último passo levou a um diagnóstico, mostra o card final
+  if (history.length > 0 && history[history.length - 1].dx) {
+    renderDiagnosis(history[history.length - 1].dx, area);
+    return;
+  }
+
+  const nodeId = currentNodeId();
+  const node = tree[nodeId];
+  area.innerHTML = `
+    <div class="q-card">
+      <h2>${node.q}</h2>
+      <div class="q-hint">${node.hint}</div>
+      <div class="options">
+        ${node.options.map((opt, i) => `
+          <div class="option-btn" onclick="answer(${i})">
+            <div>
+              ${opt.label}
+              ${opt.sub ? `<span class="o-sub">${opt.sub}</span>` : ''}
+            </div>
+            <span class="o-arrow">→</span>
+          </div>
+        `).join('')}
+      </div>
+      ${history.length > 0 ? `<div class="back-link" onclick="goBack()">← Voltar uma pergunta</div>` : ''}
+    </div>
+  `;
+}
+
+function answer(index) {
+  const nodeId = currentNodeId();
+  const node = tree[nodeId];
+  const opt = node.options[index];
+  history.push({
+    nodeId: nodeId,
+    answerLabel: opt.label,
+    nextNode: opt.next || null,
+    dx: opt.dx || null
+  });
+  render();
+}
+
+function goBack() {
+  history.pop();
+  render();
+}
+
+function restart() {
+  history = [];
+  render();
+}
+
+function renderImages(images) {
+  if (!images || !images.length) return '';
+  if (images.length === 1) {
+    const img = images[0];
+    return `<div class="dx-image"><img src="${img.src}" alt="${img.caption}"><div class="dx-image-caption">${img.caption}</div></div>`;
+  }
+  return `<div class="dx-image-gallery">${images.map(img =>
+    `<div class="dx-image"><img src="${img.src}" alt="${img.caption}"><div class="dx-image-caption">${img.caption}</div></div>`
+  ).join('')}</div>`;
+}
+
+function renderTxList(tx) {
+  const items = tx.map(i => {
+    if (typeof i === 'string') return `<li>${i}</li>`;
+    return `<li>${i.t}<ul class="dx-tx-sublist">${i.subs.map(s => `<li>${s}</li>`).join('')}</ul></li>`;
+  }).join('');
+  return `<ul class="dx-tx-list">${items}</ul>`;
+}
+
+function renderDiagnosis(dxId, area) {
+  const d = diagnoses[dxId];
+  let html = `
+    <div class="dx-card" style="--accent:${d.accent};--accent-text:${d.accentText}">
+      <div class="dx-eyebrow">Diagnóstico mais provável</div>
+      <h2>${d.title}</h2>
+      <div class="dx-subtitle">${d.subtitle}</div>
+      ${renderImages(d.images)}
+      <div class="dx-exantema-banner">
+        <div class="dx-exantema-label">Características do Exantema</div>
+        <div class="dx-exantema-text">${d.exantemaChar}</div>
+      </div>
+  `;
+  d.fases.forEach(f => {
+    html += `<div class="d-block">
+      <div class="d-block-label">${f.t}</div>
+      <ul>${f.items.map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>`;
+  });
+  if (d.exames) {
+    html += `<div class="d-block">
+      <div class="d-block-label">Exames<span class="dx-exames-tag">Obrigatórios</span></div>
+      <ul>${d.exames.map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>`;
+  }
+  html += `
+      <div class="dx-treatment">
+        <div class="dx-treatment-label">Tratamento / Conduta</div>
+        ${d.pills.map(p => `<span class="status-pill ${p.c}">${p.t}</span>`).join('')}
+        ${d.txNote ? `<div class="dx-tx-note">${d.txNote}</div>` : ''}
+        ${d.tx ? renderTxList(d.tx) : ''}
+        ${d.internacao ? `<div class="dx-internacao"><b>Indicação de internação:</b> ${d.internacao}</div>` : ''}
+      </div>
+      <div class="back-link" onclick="goBack()" style="margin-top:18px">← Voltar e revisar uma resposta</div>
+      <div class="restart-link" onclick="restart()">↺ Começar nova consulta</div>
+    </div>
+  `;
+  area.innerHTML = html;
+}
+
+/* ============================================================
+   TEMA CLARO/ESCURO
+   ============================================================ */
+const themeBtn = document.getElementById('themeBtn');
+const themeIcon = document.getElementById('themeIcon');
+const root = document.documentElement;
+function temaAtual() {
+  const attr = root.getAttribute('data-theme');
+  if (attr) return attr;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+function aplicarIconeTema(tema) {
+  themeIcon.innerHTML = tema === 'dark'
+    ? '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>'
+    : '<path d="M19 14.2A7.5 7.5 0 0 1 9.8 5 7.5 7.5 0 1 0 19 14.2Z"></path>';
+}
+aplicarIconeTema(temaAtual());
+themeBtn.addEventListener('click', () => {
+  const novo = temaAtual() === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', novo);
+  aplicarIconeTema(novo);
+});
+
+/* ============================================================
+   MODO MAPA — agrupamento por categoria, para visão geral
+   ============================================================ */
+const mapaCategories = [
+  { title:'Exantema com Febre', hint:'rash surge com a febre ainda presente', accent:'var(--orange)', accentText:'var(--on-soft-orange)', diseases:['sarampo','rubeola'] },
+  { title:'Exantema após Febre', hint:'rash só surge quando a febre cessa', accent:'var(--blue)', accentText:'var(--on-soft-blue)', diseases:['subito','eritema'] },
+  { title:'Exantema Vesicular', hint:'lesões evoluem para vesícula/crosta', accent:'var(--mint)', accentText:'var(--on-soft-mint)', diseases:['varicela','maopeboca'] },
+  { title:'Alterações na Cavidade Oral', hint:'enantema/mucosa associados', accent:'var(--red)', accentText:'var(--on-soft-red)', diseases:['escarlatina','kawasaki','mono'] }
+];
+
+let mapaOpenState = {}; // lembra quais categorias estão abertas entre re-renders
+
+function renderMapa() {
+  const wrap = document.getElementById('mapaWrap');
+  wrap.innerHTML = mapaCategories.map((cat, i) => `
+    <div class="mapa-cat ${mapaOpenState[i] ? 'open' : ''}" style="--accent:${cat.accent}">
+      <div class="mapa-cat-toggle" onclick="toggleMapaCat(${i})">
+        <div class="mapa-cat-toggle-text">
+          <h2>${cat.title}</h2>
+          <div class="mapa-cat-hint">${cat.hint}</div>
+        </div>
+        <span class="mapa-chevron">⌄</span>
+      </div>
+      <div class="mapa-cat-body">
+        <div class="mapa-cat-body-inner">
+          <div class="mapa-disease-grid">
+            ${cat.diseases.map(dId => mapaDiseaseCardHTML(dId, cat.accent, cat.accentText)).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleMapaCat(i) {
+  mapaOpenState[i] = !mapaOpenState[i];
+  renderMapa();
+}
+
+function mapaDiseaseCardHTML(dId, accent, accentText) {
+  const d = diagnoses[dId];
+  let html = `<div class="mapa-disease-card" style="--accent:${accent}">
+    <h3>${d.title}</h3>
+    <div class="mapa-dc-meta">${d.subtitle}</div>
+    ${renderImages(d.images)}
+    <div class="dx-exantema-banner" style="--accent-text:${accentText}">
+      <div class="dx-exantema-label">Características do Exantema</div>
+      <div class="dx-exantema-text">${d.exantemaChar}</div>
+    </div>`;
+  d.fases.forEach(f => {
+    html += `<div class="d-block">
+      <div class="d-block-label">${f.t}</div>
+      <ul>${f.items.map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>`;
+  });
+  if (d.exames) {
+    html += `<div class="d-block">
+      <div class="d-block-label">Exames<span class="dx-exames-tag">Obrigatórios</span></div>
+      <ul>${d.exames.map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>`;
+  }
+  html += `<div class="dx-treatment">
+    <div class="dx-treatment-label">Tratamento / Conduta</div>
+    ${d.pills.map(p => `<span class="status-pill ${p.c}">${p.t}</span>`).join('')}
+    ${d.txNote ? `<div class="dx-tx-note">${d.txNote}</div>` : ''}
+    ${d.tx ? renderTxList(d.tx) : ''}
+    ${d.internacao ? `<div class="dx-internacao"><b>Indicação de internação:</b> ${d.internacao}</div>` : ''}
+  </div>`;
+  html += `</div>`;
+  return html;
+}
+
+function setMode(mode) {
+  document.getElementById('modeConsulta').classList.toggle('active', mode === 'consulta');
+  document.getElementById('modeMapa').classList.toggle('active', mode === 'mapa');
+  document.getElementById('mainConsulta').style.display = mode === 'consulta' ? 'flex' : 'none';
+  document.getElementById('mainMapa').style.display = mode === 'mapa' ? 'block' : 'none';
+  if (mode === 'mapa') renderMapa();
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+render();
+</script>
+</body>
+</html>
