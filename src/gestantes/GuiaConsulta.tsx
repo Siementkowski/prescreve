@@ -679,7 +679,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
   )
 }
 
-const inputCls =
+export const inputCls =
   'bg-surface-2 border border-border focus:border-text rounded-[var(--radius-input,9px)] px-2.5 py-1.5 text-sm text-text outline-none transition-colors'
 
 function Stat({ label, valor, destaque }: { label: string; valor: string; destaque?: boolean }) {
@@ -691,7 +691,7 @@ function Stat({ label, valor, destaque }: { label: string; valor: string; destaq
   )
 }
 
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
+export function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
       <span className="text-[10px] font-semibold text-text-dim">{label}</span>
@@ -723,7 +723,7 @@ function CampoComNega({ label, valor, onChange }: { label: string; valor: string
   )
 }
 
-function ToggleChip({ ativo, onClick, label, alerta }: { ativo: boolean; onClick: () => void; label: string; alerta?: boolean }) {
+export function ToggleChip({ ativo, onClick, label, alerta }: { ativo: boolean; onClick: () => void; label: string; alerta?: boolean }) {
   return (
     <button
       type="button"

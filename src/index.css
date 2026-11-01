@@ -107,10 +107,17 @@ body,
 }
 
 body {
-  background-color: var(--color-bg);
+  /* Fundo do Painel Editorial (paper) já na raiz: o tema editorial só vale dentro de
+     .tema-editorial, então antes do React montar (refresh rápido) o body mostrava a lavanda
+     do tema antigo. O escuro é marcado em <html> por um script em index.html. */
+  background-color: #f5f2eb;
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+html[data-tema='dark'] body {
+  background-color: #0d0d0b;
 }
 
 ::selection {

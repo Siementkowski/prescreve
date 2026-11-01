@@ -8,6 +8,8 @@ export type AbaPediatria = 'calculadora' | 'puericultura' | 'condutas' | 'sinais
 // antigas (Calendário vacinal, Marcos, Suplementação, Aleitamento, Exames) continuam
 // existindo e acessíveis via "ver completo" dentro de cada bloco do guia — por isso ainda
 // precisam de um jeito de saber qual delas está em tela cheia.
+export type AbaFaixa = 'anamnese' | 'vacinas' | 'referencia'
+
 export type TelaReferenciaPuericultura = 'calendario_vacinal' | 'marcos_desenvolvimento' | 'suplementacao' | 'aleitamento' | 'exames'
 
 // Estado da calculadora pediátrica. Não usa `persist` (localStorage) de propósito —
@@ -29,6 +31,10 @@ interface PediatriaState {
 
   // Qual tela antiga está em modo "ver completo" dentro de Puericultura — null = nenhuma
   // (mostrando o guia normalmente).
+  // Aba aberta dentro da consulta escolhida (Anamnese / Calendário vacinal / Referência).
+  abaFaixaPuericultura: AbaFaixa
+  setAbaFaixaPuericultura: (v: AbaFaixa) => void
+
   telaReferenciaPuericultura: TelaReferenciaPuericultura | null
   setTelaReferenciaPuericultura: (v: TelaReferenciaPuericultura | null) => void
 
@@ -54,6 +60,9 @@ export const usePediatriaStore = create<PediatriaState>((set) => ({
 
   faixaPuericultura: null,
   setFaixaPuericultura: (faixaPuericultura) => set({ faixaPuericultura }),
+
+  abaFaixaPuericultura: 'anamnese',
+  setAbaFaixaPuericultura: (abaFaixaPuericultura) => set({ abaFaixaPuericultura }),
 
   telaReferenciaPuericultura: null,
   setTelaReferenciaPuericultura: (telaReferenciaPuericultura) => set({ telaReferenciaPuericultura }),

@@ -12,6 +12,13 @@
     <meta name="apple-mobile-web-app-title" content="Prescreve" />
     <meta name="description" content="Consultor de prescrições médicas — chegue numa prescrição pronta em três cliques." />
     <title>Prescreve</title>
+    <script>
+      // Marca o tema escuro em <html> antes da primeira pintura (mesma chave de src/App.tsx),
+      // pra o fundo não piscar claro/lavanda num refresh.
+      try {
+        if (localStorage.getItem('prescreve-painel-tema') === 'dark') document.documentElement.dataset.tema = 'dark'
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

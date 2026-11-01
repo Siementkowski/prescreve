@@ -11,9 +11,11 @@ import {
   ShieldAlert,
   Pill,
 } from 'lucide-react'
-import { usePediatriaStore } from './store'
-import { FAIXAS_PUERICULTURA } from './dados/guiaPuericultura'
+import { usePediatriaStore, type AbaFaixa, type TelaReferenciaPuericultura } from './store'
+import { FAIXAS_PUERICULTURA, type FaixaPuericultura } from './dados/guiaPuericultura'
 import { calcularFerro, calcularVitaminaD } from './dados/suplementacao'
+import { GuiaAnamnese } from './GuiaAnamnese'
+import { CalendarioPNI } from './CalendarioPNI'
 import { CalendarioVacinal } from './CalendarioVacinal'
 import { MarcosDesenvolvimento } from './MarcosDesenvolvimento'
 import { Suplementacao } from './Suplementacao'
@@ -82,12 +84,12 @@ export function PuericulturaPage() {
     )
   }
 
-  const ferro = calcularFerro({ idadeMeses: faixa.idadeReferenciaMeses, prematuroOuBaixoPeso: false, fatorRiscoVitaminaD: false })
-  const vitaminaD = calcularVitaminaD({ idadeMeses: faixa.idadeReferenciaMeses, prematuroOuBaixoPeso: false, fatorRiscoVitaminaD: false })
+  const aba = usePediatriaStore((s) => s.abaFaixaPuericultura)
+  const setAba = usePediatriaStore((s) => s.setAbaFaixaPuericultura)
 
   return (
     <div className="h-full overflow-y-auto p-6">
-      <div className="max-w-3xl mx-auto flex flex-col gap-4 pb-16">
+      <div className="max-w-6xl mx-auto flex flex-col gap-4 pb-16">
         <button
           onClick={() => setFaixaId(null)}
           className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors w-fit"
@@ -101,6 +103,56 @@ export function PuericulturaPage() {
           <p className="text-sm text-text-dim mt-1">{faixa.resumo}</p>
         </div>
 
+        <div className="flex flex-wrap gap-1.5">
+          {FAIXAS_PUERICULTURA.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setFaixaId(f.id)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-pill,999px)] border transition-colors ${
+                f.id === faixa.id ? "bg-text border-text text-bg" : "bg-surface-2 border-border text-text-dim hover:text-text"
+              }`}
+            >
+              {f.id === "acima2a" ? "> 2 anos" : f.titulo.replace("Consulta de ", "")}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-1.5 border-b border-border">
+          {ABAS_FAIXA.map(({ id, label, icone: Icone }) => (
+            <button
+              key={id}
+              onClick={() => setAba(id)}
+              className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                aba === id ? "border-text text-text" : "border-transparent text-text-dim hover:text-text"
+              }`}
+            >
+              <Icone className="w-4 h-4" />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {aba === "anamnese" && <GuiaAnamnese faixa={faixa} />}
+        {aba === "vacinas" && <CalendarioPNI faixa={faixa} />}
+        {aba === "referencia" && <ReferenciaFaixa faixa={faixa} setTelaReferencia={setTelaReferencia} />}
+      </div>
+    </div>
+  )
+}
+
+const ABAS_FAIXA: { id: AbaFaixa; label: string; icone: typeof Syringe }[] = [
+  { id: "anamnese", label: "Anamnese", icone: ClipboardList },
+  { id: "vacinas", label: "Calendário vacinal", icone: Syringe },
+  { id: "referencia", label: "Referência da consulta", icone: ListChecks },
+]
+
+/** Blocos de referência da consulta (o que avaliar, orientar e conferir) — o conteúdo que
+ *  já existia nesta tela, agora numa aba própria. */
+function ReferenciaFaixa({ faixa, setTelaReferencia }: { faixa: FaixaPuericultura; setTelaReferencia: (v: TelaReferenciaPuericultura | null) => void }) {
+  const ferro = calcularFerro({ idadeMeses: faixa.idadeReferenciaMeses, prematuroOuBaixoPeso: false, fatorRiscoVitaminaD: false })
+  const vitaminaD = calcularVitaminaD({ idadeMeses: faixa.idadeReferenciaMeses, prematuroOuBaixoPeso: false, fatorRiscoVitaminaD: false })
+  return (
+    <div className="max-w-3xl flex flex-col gap-4">
         <Bloco titulo="Queixas e intercorrências" icone={MessageCircleQuestion}>
           <ul className="flex flex-col gap-1.5">
             {faixa.queixas.map((q) => (
@@ -198,7 +250,6 @@ export function PuericulturaPage() {
           Conteúdo de referência (Ministério da Saúde / SBP) — não substitui avaliação clínica individual. Alimentação e
           tempo de tela são rascunho inicial, em revisão.
         </p>
-      </div>
     </div>
   )
 }
