@@ -229,7 +229,7 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
           </Secao>
         </div>
 
-        <div className="w-full lg:w-[420px] lg:shrink-0 lg:sticky lg:top-4">
+        <div className="w-full lg:w-[calc(420px+5.263%)] lg:shrink-0 lg:sticky lg:top-4">
           <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-bold text-text-dim uppercase tracking-wide">Preview</span>
