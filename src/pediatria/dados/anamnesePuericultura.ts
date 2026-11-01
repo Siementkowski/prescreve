@@ -20,7 +20,7 @@ export interface Campo {
   min?: number
   max?: number
   /** Só aparece quando a condição sobre os valores já preenchidos é verdadeira. */
-  quando?: (valores: Record<string, string>) => boolean
+  quando?: (valores: Record<string, string>, meses: number) => boolean
   /** Até essa idade (em meses) o campo sai no cabeçalho (#), não no S. */
   cabAte?: number
   /** Frase que entra no texto quando o campo está preenchido (check: valor = '1'). */
@@ -42,6 +42,7 @@ export const GRUPOS_ORDEM = [
   'Consulta',
   'Nascimento',
   'Alimentação',
+  'Recordatório',
   'Eliminações',
   'Sono e hábitos',
   'Saúde bucal',
@@ -60,14 +61,7 @@ export const CAMPOS: Campo[] = [
     ],
     frase: () => '',
   },
-  { id: 'queixa', grupo: 'Consulta', label: 'Queixa principal', tipo: 'text', frase: (v) => `Queixa: ${v}.` },
-  {
-    id: 'negaQueixas',
-    grupo: 'Consulta',
-    label: 'Nega febre, vômitos, diarreia, dispneia e convulsões',
-    tipo: 'check',
-    frase: () => 'Nega febre, vômitos, diarreia, dispneia, convulsões e outras queixas.',
-  },
+  { id: 'queixa', grupo: 'Consulta', label: 'Queixas (em branco = nega queixas)', tipo: 'text', frase: (v) => `Refere ${v}.` },
 
   // ---- Nascimento (cabeçalho — 7 dias a 4 meses) ----
   { id: 'capurro', grupo: 'Nascimento', label: 'IG (Capurro), semanas', tipo: 'text', max: 4, frase: (v) => v },
@@ -171,20 +165,7 @@ export const CAMPOS: Campo[] = [
   { id: 'fissuras', grupo: 'Alimentação', label: 'Dor ou fissuras mamárias (mãe)', tipo: 'select', opcoes: NEGA_REFERE, max: 1, frase: (v) => `${nr(v)} dor ou fissuras mamárias.` },
   { id: 'semAgua', grupo: 'Alimentação', label: 'Nega água, chás ou outros alimentos', tipo: 'check', max: 5, frase: () => 'Nega oferta de água, chás ou outros alimentos.' },
   { id: 'introAlim', grupo: 'Alimentação', label: 'Introdução alimentar aos (meses)', tipo: 'text', min: 6, max: 23, frase: (v) => `Introdução alimentar aos ${v} meses.` },
-  {
-    id: 'textura',
-    grupo: 'Alimentação',
-    label: 'Textura dos alimentos',
-    tipo: 'select',
-    opcoes: [
-      ['amassada', 'Amassada'],
-      ['pedaços macios', 'Pedaços macios'],
-      ['a mesma da família', 'Mesma da família'],
-    ],
-    min: 6,
-    max: 17,
-    frase: (v) => `Textura dos alimentos: ${v}.`,
-  },
+  { id: 'comidaFamilia', grupo: 'Alimentação', label: 'Come a mesma comida da família', tipo: 'check', min: 12, frase: () => 'Come a mesma comida da família.' },
   {
     id: 'alergenicos',
     grupo: 'Alimentação',
@@ -199,7 +180,6 @@ export const CAMPOS: Campo[] = [
     max: 11,
     frase: (v) => `Introdução de alimentos alergênicos ${v}.`,
   },
-  { id: 'recordatorio', grupo: 'Alimentação', label: 'Recordatório (resumo do dia)', tipo: 'text', min: 6, frase: (v) => `Recordatório alimentar: ${v}.` },
   { id: 'negaAcucar', grupo: 'Alimentação', label: 'Nega açúcar, doces, frituras e ultraprocessados', tipo: 'check', min: 6, frase: () => 'Nega consumo de açúcar, refrigerante, doces, frituras e ultraprocessados.' },
   {
     id: 'qualidade',
@@ -213,6 +193,25 @@ export const CAMPOS: Campo[] = [
     min: 12,
     frase: (v) => `Alimentação ${v} qualitativamente.`,
   },
+
+  // ---- Recordatório alimentar: acima de 2 anos, ou em qualquer idade se já desmamado ----
+  ...[
+    ['rcCafeManha', 'Café da manhã'],
+    ['rcAlmoco', 'Almoço'],
+    ['rcCafeTarde', 'Café da tarde'],
+    ['rcJantar', 'Jantar'],
+    ['rcCeia', 'Ceia'],
+  ].map(
+    ([id, label]): Campo => ({
+      id,
+      grupo: 'Recordatório',
+      label,
+      tipo: 'text',
+      min: 6,
+      quando: (x, meses) => meses >= 24 || x.aleitamento === 'desmamado',
+      frase: (v) => `${label}: ${v}`,
+    })
+  ),
 
   // ---- Eliminações ----
   { id: 'fraldas', grupo: 'Eliminações', label: 'Trocas de fralda/dia (urina)', tipo: 'text', max: 17, frase: (v) => `Urina: troca de fralda ${v}x/dia.` },
@@ -250,7 +249,10 @@ export const CAMPOS: Campo[] = [
     ],
     frase: (v, sexo) => (v === 'sozinho' ? `Dorme ${gen(sexo, 'sozinho', 'sozinha', 'sozinho(a)')} em cama própria.` : 'Dorme com os pais.'),
   },
-  { id: 'tela', grupo: 'Sono e hábitos', label: 'Tempo de tela', tipo: 'select', opcoes: NEGA_REFERE, min: 6, frase: (v) => (v === 'nega' ? 'Nega exposição a telas.' : 'Refere exposição a telas.') },
+  { id: 'tela', grupo: 'Sono e hábitos', label: 'Tempo de tela', tipo: 'select', opcoes: NEGA_REFERE, frase: (v) => (v === 'nega' ? 'Nega exposição a telas.' : 'Refere exposição a telas.') },
+  { id: 'telaDet', grupo: 'Sono e hábitos', label: 'Quanto tempo de tela?', tipo: 'text', quando: (x) => x.tela === 'refere', frase: (v) => `Tempo de tela: ${v}.` },
+  { id: 'tabagismo', grupo: 'Sono e hábitos', label: 'Exposição ao tabagismo', tipo: 'select', opcoes: NEGA_REFERE, frase: (v) => `${nr(v)} exposição ao tabagismo.` },
+  { id: 'etilismo', grupo: 'Sono e hábitos', label: 'Exposição ao etilismo', tipo: 'select', opcoes: NEGA_REFERE, frase: (v) => `${nr(v)} exposição ao etilismo.` },
   { id: 'creche', grupo: 'Sono e hábitos', label: 'Creche/escola', tipo: 'text', min: 12, frase: (v) => `Creche/escola: ${v}.` },
   { id: 'visaoAudicao', grupo: 'Sono e hábitos', label: 'Nega queixas de visão e audição', tipo: 'check', min: 12, frase: () => 'Nega queixas de visão e audição.' },
 
@@ -267,7 +269,7 @@ export interface ItemExame {
   label: string
   min?: number
   max?: number
-  texto: (meses: number, sexo?: string) => string
+  texto: (meses: number, sexo?: string, reflexos?: string[]) => string
 }
 
 export const EXAME: ItemExame[] = [
@@ -277,17 +279,24 @@ export const EXAME: ItemExame[] = [
     texto: (m) => (m <= 6 ? 'BEG, ativo e reativo, choroso ao exame. Anictérico, acianótico, hidratado, normocorado.' : 'BEG, ativo e reativo, interage com o examinador. Anictérico, acianótico, hidratado, normocorado.'),
   },
   { id: 'pele', label: 'Pele', texto: () => 'Pele íntegra, sem lesões ou manchas.' },
-  { id: 'olhos', label: 'Olhos', texto: (m) => (m <= 6 ? 'Reflexo vermelho presente bilateralmente. Conjuntivas sem hiperemia ou secreções.' : 'Pupilas isocóricas e fotorreagentes, motilidade ocular preservada. Conjuntivas sem hiperemia ou secreções.') },
+  { id: 'olhos', label: 'Olhos', texto: (m) => (m <= 6 ? 'Conjuntivas sem hiperemia ou secreções.' :'Pupilas isocóricas e fotorreagentes, motilidade ocular preservada. Conjuntivas sem hiperemia ou secreções.') },
   { id: 'ouvidos', label: 'Otoscopia', texto: () => 'Otoscopia: conduto pérvio, membrana timpânica íntegra e translúcida bilateralmente.' },
-  { id: 'boca', label: 'Oroscopia', texto: (m) => (m <= 6 ? 'Oroscopia: mucosa oral úmida e corada, sem lesões ou placas. Palato íntegro. Freio lingual sem alterações.' : 'Oroscopia: mucosa oral úmida e corada, sem lesões. Amígdalas sem hipertrofia ou exsudato. Dentes sem lesões cariosas visíveis.') },
+  { id: 'boca', label: 'Oroscopia', texto: (m) => (m <= 6 ? 'Oroscopia: mucosa oral úmida e corada, sem lesões ou placas. Palato íntegro.' : 'Oroscopia: mucosa oral úmida e corada, sem lesões. Amígdalas sem hipertrofia ou exsudato. Dentes sem lesões cariosas visíveis.') },
   { id: 'linfonodos', label: 'Linfonodos', min: 6, texto: () => 'Ausência de linfonodomegalia.' },
   { id: 'ac', label: 'Cardiovascular', texto: (m) => (m <= 6 ? 'AC: BNT em 2T, RR, sem sopros. Pulsos femorais palpáveis e simétricos.' : 'AC: BNT em 2T, RR, sem sopros.') },
   { id: 'ap', label: 'Respiratório', texto: () => 'AP: MV+ bilateralmente, simétrico, sem RA e/ou esforço.' },
   { id: 'abdome', label: 'Abdome', texto: (m) => (m <= 1 ? 'Abdome globoso, flácido, sem visceromegalias ou herniações. Coto umbilical limpo, sem sinais flogísticos. Ânus pérvio.' : 'Abdome flácido, indolor, sem visceromegalias, RHA presentes.') },
   { id: 'genital', label: 'Genitália', texto: (_m, sexo) => (sexo === 'masculino' ? 'Genitália masculina típica, testículos tópicos, sem alterações.' : sexo === 'feminino' ? 'Genitália feminina típica, sem alterações.' : 'Genitália sem alterações (testículos tópicos, em meninos).') },
   { id: 'quadril', label: 'Ortolani e Barlow', max: 4, texto: () => 'Ortolani e Barlow negativos.' },
-  { id: 'membros', label: 'Membros e coluna', texto: (m) => `MMSS e MMII simétricos, sem deformidades, mobilidade preservada.${m >= 12 ? ' Marcha sem alterações.' : ''}${m >= 24 ? ' Coluna sem escoliose ou assimetrias.' : ''}` },
-  { id: 'neuro', label: 'Neurológico', texto: (m) => (m <= 6 ? 'Tônus e postura adequados para a idade. Reflexos primitivos presentes e simétricos.' : 'Tônus preservado, força grau V, reflexos presentes e simétricos.') },
+  { id: 'marcha', label: 'Marcha e coluna', min: 12, texto: (m) => `Marcha sem alterações.${m >= 24 ? ' Coluna sem escoliose ou assimetrias.' : ''}` },
+  {
+    id: 'neuro',
+    label: 'Neurológico',
+    texto: (m, _sexo, reflexos) =>
+      m <= 6
+        ? `Reflexos primitivos presentes e simétricos${reflexos && reflexos.length ? ` (${listaReflexos(reflexos)})` : ''}.`
+        : 'Tônus preservado, força grau V, reflexos presentes e simétricos.',
+  },
 ]
 
 export const FONTANELA: [string, string][] = [
@@ -299,7 +308,8 @@ export const FONTANELA: [string, string][] = [
 
 /** Reflexos primitivos — nas consultas até 1 mês entram no lugar do checklist de marcos. */
 export const REFLEXOS = ['Moro', 'Sucção', 'Busca', 'Preensão palmar', 'Preensão plantar', 'Marcha reflexa']
-export const mostraReflexos = (meses: number) => meses <= 1
+export const mostraReflexos = (meses: number) => meses <= 6
+export const listaReflexos = (lista: string[]) => lista.map((x) => (x === 'Moro' ? x : x.toLowerCase())).join(', ')
 export const ehMarcoReflexo = (x: string) => /^Reflexos primitivos/i.test(x)
 
 export const ORIENTACOES = [
@@ -355,13 +365,23 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   // ---- S ----
   const s: string[] = []
   const acompanhante = v('acompanhante')
-  s.push(`Consulta de puericultura (${rotuloIdade(f)})${acompanhante ? `, ${gen(v('sexo'), 'acompanhado', 'acompanhada', 'acompanhado(a)')} de ${acompanhante}` : ''}.`)
+  const comQuem = ({ mãe: 'da mãe', pai: 'do pai', avó: 'da avó', responsável: 'do responsável' } as Record<string, string>)[acompanhante] ?? (acompanhante ? `de ${acompanhante}` : '')
+  s.push(
+    `Paciente vem${comQuem ? ` ${gen(v('sexo'), 'acompanhado', 'acompanhada', 'acompanhado/a')} ${comQuem}` : ''} para consulta de puericultura.`
+  )
+  s.push(v('queixa') ? `Refere ${v('queixa')}.` : 'Nega queixas.')
 
   for (const grupo of GRUPOS_ORDEM) {
-    if (grupo === 'Nascimento') continue // vai no cabeçalho
-    const frases = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m) && (!c.quando || c.quando(e.valores)) && !DESMAME.includes(c.id))
+    if (grupo === 'Nascimento' || grupo === 'Consulta') continue // Nascimento vai no cabeçalho; Consulta já foi acima
+    if (grupo === 'Recordatório') {
+      const refeicoes = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m) && (!c.quando || c.quando(e.valores, m)) && v(c.id))
+      if (refeicoes.length) s.push(`Recordatório alimentar:\n${refeicoes.map((c) => ` - ${c.label}: ${v(c.id)}`).join('\n')}`)
+      continue
+    }
+    const frases = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m) && (!c.quando || c.quando(e.valores, m)) && !DESMAME.includes(c.id))
       .map((c) => {
         if (!v(c.id)) return ''
+        if (c.id === 'aleitamento' && v(c.id) === 'parcial' && m >= 6) return 'Aleitamento materno complementado.'
         if (c.id === 'aleitamento' && v(c.id) === 'desmamado') {
           return `${gen(v('sexo'), 'Desmamado', 'Desmamada', 'Desmamado(a)')}${v('desmameIdade') ? ' ao ' + v('desmameIdade') : ''}${v('desmameMotivo') ? ' por ' + v('desmameMotivo') : ''}${v('formulaLeite') ? ', atualmente em uso de ' + v('formulaLeite') : ''}.`
         }
@@ -388,8 +408,7 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
       continue
     }
     if (!frases.length) continue
-    if (grupo === 'Consulta') s.push(frases.join(' '))
-    else s.push(`${grupo}: ${frases.join(' ')}`)
+    s.push(`${grupo}: ${frases.join(' ')}`)
   }
 
   const adaptar = (t: string) => t.replace(/sozinho\(a\)/g,gen(v('sexo'), 'sozinho', 'sozinha', 'sozinho(a)'))
@@ -404,7 +423,7 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
     )
   }
   if (mostraReflexos(m) && e.reflexos.size > 0) {
-    s.push(`DNPM: reflexos primitivos presentes (${REFLEXOS.filter((x) => e.reflexos.has(x)).map((x) => (x === 'Moro' ? x : x.toLowerCase())).join(', ')}).`)
+    s.push(`DNPM: reflexos primitivos presentes (${listaReflexos(REFLEXOS.filter((x) => e.reflexos.has(x)))}).`)
   }
   if (v('dnpmObs')) s.push(`Obs. DNPM: ${v('dnpmObs')}`)
 
@@ -419,7 +438,7 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   if (medidas.length) o.push(`${medidas.join('. ')}.`)
   if (v('fontanela') && m <= 18) o.push(`Fontanela anterior ${v('fontanela')}.`)
   o.push(
-    ...EXAME.filter((x) => visivel(x, m) && !e.exameOff.has(x.id)).map((x) => x.texto(m, v('sexo')))
+    ...EXAME.filter((x) => visivel(x, m) && !e.exameOff.has(x.id)).map((x) => x.texto(m, v('sexo'), REFLEXOS.filter((r) => e.reflexos.has(r))))
   )
   if (v('achados')) o.push(`Outros achados: ${v('achados')}`)
 
@@ -428,15 +447,20 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
 
   // ---- P ----
   const p: string[] = []
-  if (faltando.length) p.push(`Atualizar vacinas pendentes: ${faltando.join(', ')}.`)
+  if (faltando.length) p.push('Encaminho à sala de vacinação.')
   else if (f.vacinas.length) p.push(`Vacinas previstas para esta consulta: ${f.vacinas.join('; ')}.`)
 
+  // Só prescreve o que ainda não está em uso (conferindo o campo MUC)
   const ctx = { idadeMeses: m, prematuroOuBaixoPeso: false, fatorRiscoVitaminaD: false }
   for (const r of [calcularFerro(ctx), calcularVitaminaD(ctx)]) {
-    if (r.status === 'iniciar') p.push(`${r.nome}: ${r.dose}.`)
+    const emUso = v('muc').toLowerCase().includes(r.nome.toLowerCase())
+    if (r.status === 'iniciar' && !emUso) p.push(`Prescrevo ${r.nome[0].toLowerCase()}${r.nome.slice(1)}: ${r.dose}.`)
   }
   const exames = f.exames.filter((x) => !/^Sem /i.test(x))
-  if (exames.length) p.push(`Exames/triagens: ${exames.join('; ')}.`)
+  const confirmar = exames.filter((x) => /^Confirmar/i.test(x))
+  const labs = exames.filter((x) => !/^Confirmar/i.test(x))
+  confirmar.forEach((x) => p.push(`${x}.`))
+  if (labs.length) p.push(`Solicito exames laboratoriais: ${labs.join('; ')}.`)
   const orient = orientacoesDaFaixa(f).filter((x) => !e.orientOff.has(x.id))
   if (orient.length) p.push(`Orientado(a) sobre ${orient.map((x) => x.texto).join(', ')}.`)
   if (e.planoExtra.trim()) p.push(e.planoExtra.trim())

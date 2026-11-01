@@ -12,6 +12,7 @@ const ICONES: Record<(typeof GRUPOS_ORDEM)[number], typeof ClipboardList> = {
   Consulta: ClipboardList,
   Nascimento: Baby,
   Alimentação: Utensils,
+  Recordatório: Utensils,
   Eliminações: Droplets,
   'Sono e hábitos': Moon,
   'Saúde bucal': SmilePlus,
@@ -103,7 +104,7 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
           </Secao>
 
           {GRUPOS_ORDEM.map((grupo) => {
-            const campos = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m) && (!c.quando || c.quando(s.valores)))
+            const campos = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m) && (!c.quando || c.quando(s.valores, m)))
             if (campos.length === 0 && grupo !== 'Consulta') return null
             return (
               <Secao key={grupo} titulo={grupo} icone={ICONES[grupo]}>
