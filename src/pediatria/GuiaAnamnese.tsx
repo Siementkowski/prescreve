@@ -101,7 +101,7 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
           </Secao>
 
           {GRUPOS_ORDEM.map((grupo) => {
-            const campos = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m))
+            const campos = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m) && (!c.quando || c.quando(s.valores)))
             if (campos.length === 0 && grupo !== 'Consulta') return null
             return (
               <Secao key={grupo} titulo={grupo} icone={ICONES[grupo]}>
@@ -140,26 +140,15 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
             </Secao>
           )}
 
-          <Secao titulo="Vacinação" icone={Syringe}>
-            <div className="flex flex-wrap items-center gap-2">
-              <ToggleChip ativo={v('vacSituacao') === 'emDia'} onClick={() => s.setValor('vacSituacao', v('vacSituacao') === 'emDia' ? '' : 'emDia')} label="Em dia, conforme caderneta" />
-              <ToggleChip
-                ativo={v('vacSituacao') === 'incompleto'}
-                onClick={() => s.setValor('vacSituacao', v('vacSituacao') === 'incompleto' ? '' : 'incompleto')}
-                label="Incompleto"
-                alerta
-              />
+          <Secao titulo="Calendário vacinal" icone={Syringe}>
+            <p className="text-xs text-text-dim mb-2">
+              Marque as vacinas que estão <b>faltando</b> para a idade. Sem marcar nada, o cabeçalho sai como "em dia".
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {devidas.map((n) => (
+                <ToggleChip key={n} ativo={s.vacFaltando.has(n)} onClick={() => s.alternarVacina(n)} label={n} alerta />
+              ))}
             </div>
-            {v('vacSituacao') === 'incompleto' && (
-              <div className="mt-3">
-                <p className="text-xs text-text-dim mb-2">Quais estão faltando?</p>
-                <div className="flex flex-wrap gap-2">
-                  {devidas.map((n) => (
-                    <ToggleChip key={n} ativo={s.vacFaltando.has(n)} onClick={() => s.alternarVacina(n)} label={n} alerta />
-                  ))}
-                </div>
-              </div>
-            )}
           </Secao>
 
           <Secao titulo="Exame físico" icone={Stethoscope}>

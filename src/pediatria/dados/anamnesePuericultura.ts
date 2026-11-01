@@ -19,6 +19,10 @@ export interface Campo {
   placeholder?: string
   min?: number
   max?: number
+  /** Só aparece quando a condição sobre os valores já preenchidos é verdadeira. */
+  quando?: (valores: Record<string, string>) => boolean
+  /** Até essa idade (em meses) o campo sai no cabeçalho (#), não no S. */
+  cabAte?: number
   /** Frase que entra no texto quando o campo está preenchido (check: valor = '1'). */
   frase: (valor: string) => string
 }
@@ -49,50 +53,96 @@ export const CAMPOS: Campo[] = [
     frase: () => 'Nega febre, vômitos, diarreia, dispneia, convulsões e outras queixas.',
   },
 
-  // ---- Nascimento (só nas primeiras consultas) ----
+  // ---- Nascimento (cabeçalho — 7 dias a 4 meses) ----
+  { id: 'capurro', grupo: 'Nascimento', label: 'IG (Capurro), semanas', tipo: 'text', max: 4, frase: (v) => v },
   {
-    id: 'parto',
+    id: 'classPeso',
     grupo: 'Nascimento',
-    label: 'Tipo de parto',
+    label: 'Peso para a IG',
     tipo: 'select',
     opcoes: [
-      ['vaginal', 'Vaginal'],
-      ['cesárea', 'Cesárea'],
+      ['PIG', 'PIG'],
+      ['AIG', 'AIG'],
+      ['GIG', 'GIG'],
     ],
-    max: 2,
-    frase: (v) => `Parto ${v}.`,
+    max: 4,
+    frase: (v) => v,
   },
-  { id: 'igNasc', grupo: 'Nascimento', label: 'IG ao nascer (semanas)', tipo: 'text', max: 2, frase: (v) => `RN de ${v} semanas.` },
-  { id: 'pesoNasc', grupo: 'Nascimento', label: 'Peso ao nascer (g)', tipo: 'text', max: 2, frase: (v) => `Peso ao nascer: ${v}g.` },
+  { id: 'apgar', grupo: 'Nascimento', label: 'Apgar', tipo: 'text', placeholder: 'ex: 9/10', max: 4, frase: (v) => v },
+  { id: 'doencasGest', grupo: 'Nascimento', label: 'Doenças prévias na gestação', tipo: 'select', opcoes: NEGA_REFERE, max: 4, frase: (v) => v },
   {
-    id: 'pesoAlta',
+    id: 'doencasGestDet',
     grupo: 'Nascimento',
-    label: 'Peso de alta e perda %',
+    label: 'Quais doenças?',
     tipo: 'text',
-    placeholder: 'ex: 3100 g (-6%)',
-    max: 0,
-    frase: (v) => `Peso de alta: ${v}.`,
+    max: 4,
+    quando: (x) => x.doencasGest === 'refere',
+    frase: (v) => v,
   },
-  { id: 'intercNasc', grupo: 'Nascimento', label: 'Intercorrências neonatais', tipo: 'select', opcoes: NEGA_REFERE, max: 2, frase: (v) => `${nr(v)} intercorrências neonatais.` },
-  { id: 'triagens', grupo: 'Nascimento', label: 'Triagens neonatais realizadas, sem alterações', tipo: 'check', max: 2, frase: () => 'Triagens neonatais realizadas, sem alterações.' },
+  { id: 'pesoNasc', grupo: 'Nascimento', label: 'Peso ao nascimento (g)', tipo: 'text', max: 1, frase: (v) => v },
+  { id: 'compNasc', grupo: 'Nascimento', label: 'Comprimento ao nascimento (cm)', tipo: 'text', max: 1, frase: (v) => v },
+  { id: 'pcNasc', grupo: 'Nascimento', label: 'PC ao nascimento (cm)', tipo: 'text', max: 1, frase: (v) => v },
+  { id: 'pesoAlta', grupo: 'Nascimento', label: 'Peso de alta (g) e perda em %', tipo: 'text', placeholder: 'ex: 3100 g (-6%)', max: 4, frase: (v) => v },
+  {
+    id: 'triagens',
+    grupo: 'Nascimento',
+    label: 'Triagens neonatais',
+    tipo: 'select',
+    opcoes: [
+      ['realizadas, sem alterações', 'Realizadas, sem alterações'],
+      ['realizadas, com alterações', 'Realizadas, com alterações'],
+      ['pendentes', 'Pendentes'],
+    ],
+    max: 4,
+    frase: (v) => v,
+  },
 
   // ---- Alimentação ----
   {
     id: 'aleitamento',
     grupo: 'Alimentação',
-    label: 'Aleitamento',
+    label: 'Aleitamento materno',
     tipo: 'select',
     opcoes: [
-      ['exclusivo', 'Materno exclusivo'],
-      ['misto', 'Materno + complemento'],
-      ['formula', 'Fórmula'],
+      ['exclusivo', 'Exclusivo'],
+      ['parcial', 'Parcial'],
       ['desmamado', 'Desmamado'],
     ],
     max: 23,
-    frase: (v) =>
-      ({ exclusivo: 'Aleitamento materno exclusivo.', misto: 'Aleitamento materno com complemento.', formula: 'Em uso de fórmula infantil.', desmamado: 'Desmamado.' })[v] ?? '',
+    cabAte: 4,
+    frase: (v) => `Aleitamento materno ${v}.`,
   },
-  { id: 'mamadas', grupo: 'Alimentação', label: 'Mamadas (nº/dia ou intervalo)', tipo: 'text', max: 6, frase: (v) => `Mamadas: ${v}.` },
+  {
+    id: 'desmameIdade',
+    grupo: 'Alimentação',
+    label: 'Desmamado com que idade?',
+    tipo: 'text',
+    max: 23,
+    cabAte: 4,
+    quando: (x) => x.aleitamento === 'desmamado',
+    frase: (v) => `Desmame aos ${v}.`,
+  },
+  {
+    id: 'desmameMotivo',
+    grupo: 'Alimentação',
+    label: 'Motivo do desmame',
+    tipo: 'text',
+    max: 23,
+    cabAte: 4,
+    quando: (x) => x.aleitamento === 'desmamado',
+    frase: (v) => `Motivo do desmame: ${v}.`,
+  },
+  {
+    id: 'formulaLeite',
+    grupo: 'Alimentação',
+    label: 'Fórmula/leite em uso',
+    tipo: 'text',
+    max: 23,
+    cabAte: 4,
+    quando: (x) => x.aleitamento === 'desmamado',
+    frase: (v) => `Em uso de ${v}.`,
+  },
+    { id: 'mamadas', grupo: 'Alimentação', label: 'Mamadas (nº/dia ou intervalo)', tipo: 'text', max: 6, frase: (v) => `Mamadas: ${v}.` },
   { id: 'fissuras', grupo: 'Alimentação', label: 'Dor ou fissuras mamárias (mãe)', tipo: 'select', opcoes: NEGA_REFERE, max: 1, frase: (v) => `${nr(v)} dor ou fissuras mamárias.` },
   { id: 'semAgua', grupo: 'Alimentação', label: 'Nega água, chás ou outros alimentos', tipo: 'check', max: 5, frase: () => 'Nega oferta de água, chás ou outros alimentos.' },
   { id: 'introAlim', grupo: 'Alimentação', label: 'Introdução alimentar aos (meses)', tipo: 'text', min: 6, max: 23, frase: (v) => `Introdução alimentar aos ${v} meses.` },
@@ -274,7 +324,8 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   s.push(`Consulta de puericultura (${rotuloIdade(f)})${acompanhante ? `, acompanhado(a) de ${acompanhante}` : ''}.`)
 
   for (const grupo of GRUPOS_ORDEM) {
-    const frases = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m))
+    if (grupo === 'Nascimento') continue // vai no cabeçalho
+    const frases = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m) && (!c.quando || c.quando(e.valores)) && !(c.cabAte != null && m <= c.cabAte))
       .map((c) => (v(c.id) ? c.frase(v(c.id)) : ''))
       .filter(Boolean)
     if (!frases.length) continue
@@ -295,8 +346,6 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   if (v('dnpmObs')) s.push(`Obs. DNPM: ${v('dnpmObs')}`)
 
   const faltando = nomesVacinasDevidas.filter((n) => e.vacFaltando.has(n))
-  if (v('vacSituacao') === 'emDia') s.push('Calendário vacinal: em dia, conforme caderneta.')
-  else if (v('vacSituacao') === 'incompleto') s.push(faltando.length ? `Calendário vacinal: incompleto, faltam ${faltando.join(', ')}.` : 'Calendário vacinal: incompleto.')
 
   // ---- O ----
   const o: string[] = []
@@ -316,7 +365,7 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
 
   // ---- P ----
   const p: string[] = []
-  if (v('vacSituacao') === 'incompleto' && faltando.length) p.push(`Atualizar vacinas pendentes: ${faltando.join(', ')}.`)
+  if (faltando.length) p.push(`Atualizar vacinas pendentes: ${faltando.join(', ')}.`)
   else if (f.vacinas.length) p.push(`Vacinas previstas para esta consulta: ${f.vacinas.join('; ')}.`)
 
   const ctx = { idadeMeses: m, prematuroOuBaixoPeso: false, fatorRiscoVitaminaD: false }
@@ -332,9 +381,42 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   p.push(prox ? `Retorno para ${prox.titulo.replace('Consulta de ', 'consulta de ')}.` : 'Retorno para acompanhamento anual.')
   p.push('Responsável entende, concorda e afirma não haver dúvidas.')
 
-  // ---- Cabeçalho (todas as idades): MUC, comorbidades e alergias ----
+  // ---- Cabeçalho ----
   const linhaCab = (rotulo: string, id: string) => (v(id) ? `# ${rotulo}: ${v(id)}` : `# Nega ${rotulo}`)
-  const cabecalho = [linhaCab('MUC', 'muc'), linhaCab('comorbidades', 'comorbidades'), linhaCab('alergias', 'alergias')].join('\n')
+  const cab: string[] = [linhaCab('MUC', 'muc'), linhaCab('comorbidades', 'comorbidades'), linhaCab('alergias', 'alergias')]
+  const bl = (x: string) => x || '___'
+
+  // Dados do nascimento e aleitamento: só nas consultas de 7 dias a 4 meses
+  if (m <= 4) {
+    cab.push(`# IG (Capurro): ${v('capurro') ? v('capurro') + ' semanas' : '___'}`)
+    cab.push(`# Peso para a IG: ${bl(v('classPeso'))}`)
+    cab.push(`# Apgar: ${bl(v('apgar'))}`)
+    cab.push(
+      `# Doenças prévias na gestação: ${v('doencasGest') === 'refere' ? 'refere' + (v('doencasGestDet') ? ' — ' + v('doencasGestDet') : '') : v('doencasGest') === 'nega' ? 'nega' : '___'}`
+    )
+    if (m <= 1) {
+      cab.push(`# Ao nascimento: peso ${bl(v('pesoNasc'))}g, comprimento ${bl(v('compNasc'))}cm, PC ${bl(v('pcNasc'))}cm`)
+    }
+    cab.push(`# Peso de alta: ${bl(v('pesoAlta'))}`)
+    cab.push(`# Triagens neonatais: ${bl(v('triagens'))}`)
+
+    const al = v('aleitamento')
+    let linhaAl = `# Aleitamento materno: ${al || '___'}`
+    if (al === 'desmamado') {
+      const partes = [
+        v('desmameIdade') ? `aos ${v('desmameIdade')}` : '',
+        v('desmameMotivo') ? `motivo: ${v('desmameMotivo')}` : '',
+        v('formulaLeite') ? `em uso de ${v('formulaLeite')}` : '',
+      ].filter(Boolean)
+      if (partes.length) linhaAl += ` (${partes.join('; ')})`
+    }
+    cab.push(linhaAl)
+  }
+
+  // Calendário vacinal (todas as idades): sem marcar nada = em dia
+  const faltandoCab = nomesVacinasDevidas.filter((n) => e.vacFaltando.has(n))
+  cab.push(`# Calendário vacinal: ${faltandoCab.length ? 'faltando ' + faltandoCab.join(', ') : 'em dia'}`)
+  const cabecalho = cab.join('\n')
 
   return [
     cabecalho,
