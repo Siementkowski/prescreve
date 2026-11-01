@@ -2,7 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import { medicamentosApi } from './api'
 import type { Medicamento, MedicamentoInput, StatusRisco } from './types'
-import { LABEL_STATUS_RISCO } from './types'
+import {
+  LABEL_STATUS_RISCO,
+  LABEL_AJUSTE,
+  LABEL_CATEGORIA_GESTACAO,
+  LABEL_CATEGORIA_LACTACAO,
+  type AjusteClinico,
+  type CategoriaGestacao,
+  type CategoriaLactacao,
+} from './types'
 import { SearchInput } from './components/SearchInput'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { StatusRiscoBadge } from './components/StatusRiscoBadge'
@@ -25,6 +33,15 @@ const VAZIO: MedicamentoInput = {
   ped_volume_ref: null,
   ped_obs: '',
   incompleto: false,
+  idade_minima: '',
+  ajuste_renal: null,
+  ajuste_renal_obs: '',
+  ajuste_hepatico: null,
+  ajuste_hepatico_obs: '',
+  gestacao_categoria: null,
+  lactacao_categoria: null,
+  obs_gest_lact: '',
+  clinico_revisado: false,
 }
 
 const CORES_BORDA_GESTACAO: Record<StatusRisco, string> = {
@@ -107,37 +124,10 @@ export function MedicamentosPage() {
         // Só os campos editáveis — `form` vem de setForm(m) ao selecionar e carrega o id
         // junto; mandá-lo no payload de update quebra ("column id can only be updated to
         // DEFAULT").
-        const {
-          nome,
-          nome_comercial,
-          classe,
-          apresentacoes,
-          gestacao_status,
-          gestacao_obs,
-          lactacao_status,
-          contraindicacoes,
-          ped_mg_kg_dia,
-          ped_dose_max_dia,
-          ped_concentracao,
-          ped_volume_ref,
-          ped_obs,
-          incompleto,
-        } = form
+        const { id: _id, ...campos } = form as Medicamento
         const atualizado = await medicamentosApi.update(selecionadoId, {
-          nome,
-          nome_comercial,
-          classe: classe?.trim() || null,
-          apresentacoes,
-          gestacao_status,
-          gestacao_obs,
-          lactacao_status,
-          contraindicacoes,
-          ped_mg_kg_dia,
-          ped_dose_max_dia,
-          ped_concentracao,
-          ped_volume_ref,
-          ped_obs,
-          incompleto,
+          ...campos,
+          classe: campos.classe?.trim() || null,
         })
         setMedicamentos((prev) => prev.map((m) => (m.id === selecionadoId ? atualizado : m)))
       } else {
@@ -274,6 +264,81 @@ export function MedicamentosPage() {
               />
 
               <ApresentacoesEditor medicamentoId={selecionadoId} />
+
+              {/* Dados clínicos de referência — mostrados na ficha da aba Medicamentos */}
+              <div className="rounded-md border border-border p-3 flex flex-col gap-3">
+                <p className="text-xs font-semibold text-text-dim uppercase tracking-wide">Dados clínicos de referência</p>
+                <TextField
+                  label="Idade mínima de uso"
+                  value={form.idade_minima ?? ''}
+                  onChange={(e) => setForm({ ...form, idade_minima: e.target.value })}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <SelectField
+                    label="Ajuste renal"
+                    value={form.ajuste_renal ?? ''}
+                    onChange={(e) => setForm({ ...form, ajuste_renal: (e.target.value || null) as AjusteClinico | null })}
+                  >
+                    <option value="">— selecione —</option>
+                    {Object.entries(LABEL_AJUSTE).map(([v, l]) => (
+                      <option key={v} value={v}>{l}</option>
+                    ))}
+                  </SelectField>
+                  <SelectField
+                    label="Ajuste hepático"
+                    value={form.ajuste_hepatico ?? ''}
+                    onChange={(e) => setForm({ ...form, ajuste_hepatico: (e.target.value || null) as AjusteClinico | null })}
+                  >
+                    <option value="">— selecione —</option>
+                    {Object.entries(LABEL_AJUSTE).map(([v, l]) => (
+                      <option key={v} value={v}>{l}</option>
+                    ))}
+                  </SelectField>
+                </div>
+                <TextField
+                  label="Como ajustar (renal)"
+                  value={form.ajuste_renal_obs ?? ''}
+                  onChange={(e) => setForm({ ...form, ajuste_renal_obs: e.target.value })}
+                />
+                <TextField
+                  label="Como ajustar (hepático)"
+                  value={form.ajuste_hepatico_obs ?? ''}
+                  onChange={(e) => setForm({ ...form, ajuste_hepatico_obs: e.target.value })}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <SelectField
+                    label="Categoria na gestação"
+                    value={form.gestacao_categoria ?? ''}
+                    onChange={(e) => setForm({ ...form, gestacao_categoria: (e.target.value || null) as CategoriaGestacao | null })}
+                  >
+                    <option value="">— selecione —</option>
+                    {Object.entries(LABEL_CATEGORIA_GESTACAO).map(([v, l]) => (
+                      <option key={v} value={v}>{l}</option>
+                    ))}
+                  </SelectField>
+                  <SelectField
+                    label="Categoria na lactação"
+                    value={form.lactacao_categoria ?? ''}
+                    onChange={(e) => setForm({ ...form, lactacao_categoria: (e.target.value || null) as CategoriaLactacao | null })}
+                  >
+                    <option value="">— selecione —</option>
+                    {Object.entries(LABEL_CATEGORIA_LACTACAO).map(([v, l]) => (
+                      <option key={v} value={v}>{l}</option>
+                    ))}
+                  </SelectField>
+                </div>
+                <TextAreaField
+                  label="Observações (gestação/lactação)"
+                  value={form.obs_gest_lact ?? ''}
+                  onChange={(e) => setForm({ ...form, obs_gest_lact: e.target.value })}
+                  rows={2}
+                />
+                <CheckboxField
+                  label="Dados clínicos revisados por um profissional"
+                  checked={form.clinico_revisado}
+                  onChange={(v) => setForm({ ...form, clinico_revisado: v })}
+                />
+              </div>
 
               <TextAreaField
                 label="Contraindicações"

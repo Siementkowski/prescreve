@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { AlertTriangle, Baby, Calculator, ChevronDown, FlaskConical, Heart, Pill } from 'lucide-react'
+import { AlertTriangle, Baby, Bean, CalendarClock, Calculator, ChevronDown, Droplets, FlaskConical, Heart, Pill } from 'lucide-react'
 import { useSyncStore } from '../core/sync'
 import { usePediatriaStore } from '../pediatria/store'
 import { calcularDosePediatrica, formatarNumero, textoFormula, textoPrescricaoPediatrica } from '../core/pediatria'
 import { formatarApresentacao } from '../core/apresentacao'
 import { FORMAS_CONFIG, type FormaFarmaceutica } from '../core/formas'
-import { LABEL_STATUS_RISCO, type Medicamento } from '../admin/types'
+import { LABEL_AJUSTE, LABEL_STATUS_RISCO, type Medicamento } from '../admin/types'
 import { HeroPagina } from '../core/components/HeroPagina'
 import { CopyButton } from '../consulta/components/CopyButton'
 
@@ -64,6 +64,13 @@ export function MedicamentoDetalhe() {
   ]
   const advertencias = montarAdvertencias(medicamento)
   const classe = medicamento.classe?.trim() || 'Outros'
+  const temDadosClinicos = !!(
+    medicamento.idade_minima ||
+    medicamento.ajuste_renal ||
+    medicamento.ajuste_hepatico ||
+    medicamento.gestacao_categoria ||
+    medicamento.lactacao_categoria
+  )
 
   return (
     <div className="h-full overflow-y-auto">
@@ -95,14 +102,36 @@ export function MedicamentoDetalhe() {
 
         <div className="flex items-center gap-x-5 gap-y-2 flex-wrap text-[13px]">
           {formas.length > 0 && <Atalho icone={Pill}>{formas.join(' · ')}</Atalho>}
-          {medicamento.gestacao_status && (
-            <Atalho icone={Heart}>
-              <b>Gestação:</b> {LABEL_STATUS_RISCO[medicamento.gestacao_status]}
+          {medicamento.idade_minima && (
+            <Atalho icone={CalendarClock}>
+              <b>Uso:</b> {medicamento.idade_minima.split(' (')[0]}
             </Atalho>
           )}
-          {medicamento.lactacao_status && (
+          {medicamento.ajuste_renal && (
+            <Atalho icone={Bean}>
+              <b>Ajuste renal:</b> {LABEL_AJUSTE[medicamento.ajuste_renal]}
+            </Atalho>
+          )}
+          {medicamento.ajuste_hepatico && (
+            <Atalho icone={Droplets}>
+              <b>Ajuste hepático:</b> {LABEL_AJUSTE[medicamento.ajuste_hepatico]}
+            </Atalho>
+          )}
+          {(medicamento.gestacao_categoria || medicamento.gestacao_status) && (
+            <Atalho icone={Heart}>
+              <b>Gestação:</b>{' '}
+              {medicamento.gestacao_categoria
+                ? medicamento.gestacao_categoria === 'ND'
+                  ? 'não categorizado'
+                  : `categoria ${medicamento.gestacao_categoria}`
+                : LABEL_STATUS_RISCO[medicamento.gestacao_status as keyof typeof LABEL_STATUS_RISCO]}
+            </Atalho>
+          )}
+          {(medicamento.lactacao_categoria || medicamento.lactacao_status) && (
             <Atalho icone={Baby}>
-              <b>Lactação:</b> {LABEL_STATUS_RISCO[medicamento.lactacao_status]}
+              <b>Lactação:</b>{' '}
+              {medicamento.lactacao_categoria ??
+                LABEL_STATUS_RISCO[medicamento.lactacao_status as keyof typeof LABEL_STATUS_RISCO]}
             </Atalho>
           )}
           {temDosePediatrica && (
@@ -112,6 +141,19 @@ export function MedicamentoDetalhe() {
           )}
         </div>
       </HeroPagina>
+
+      {temDadosClinicos && !medicamento.clinico_revisado && (
+        <div className="px-6 sm:px-9 pt-6">
+          <div className="flex items-start gap-2.5 text-[13px] text-warn bg-warn-dim border border-warn/30 rounded-[var(--radius-item,11px)] px-4 py-3">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>
+              Idade mínima, ajustes renal/hepático e categorias de gestação e lactação foram preenchidos a partir de bulas
+              e fontes públicas e <b>ainda não foram revisados por um profissional</b> — confira na bula ou no UpToDate
+              antes de prescrever.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* corpo */}
       <div className="px-6 sm:px-9 py-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
@@ -176,6 +218,24 @@ export function MedicamentoDetalhe() {
 
 function montarAdvertencias(m: Medicamento): { titulo: string; texto: string }[] {
   const lista: { titulo: string; texto: string }[] = []
+  if (m.idade_minima?.trim()) lista.push({ titulo: 'Idade de uso', texto: m.idade_minima.trim() })
+  if (m.ajuste_renal && m.ajuste_renal !== 'na' && m.ajuste_renal !== 'nao') {
+    lista.push({
+      titulo: `Ajuste renal — ${LABEL_AJUSTE[m.ajuste_renal]}`,
+      texto: m.ajuste_renal_obs?.trim() || 'Ver bula.',
+    })
+  } else if (m.ajuste_renal_obs?.trim()) {
+    lista.push({ titulo: 'Função renal', texto: m.ajuste_renal_obs.trim() })
+  }
+  if (m.ajuste_hepatico && m.ajuste_hepatico !== 'na' && m.ajuste_hepatico !== 'nao') {
+    lista.push({
+      titulo: `Ajuste hepático — ${LABEL_AJUSTE[m.ajuste_hepatico]}`,
+      texto: m.ajuste_hepatico_obs?.trim() || 'Ver bula.',
+    })
+  } else if (m.ajuste_hepatico_obs?.trim()) {
+    lista.push({ titulo: 'Função hepática', texto: m.ajuste_hepatico_obs.trim() })
+  }
+  if (m.obs_gest_lact?.trim()) lista.push({ titulo: 'Gestação e lactação', texto: m.obs_gest_lact.trim() })
   if (m.contraindicacoes?.trim()) lista.push({ titulo: 'Contraindicações', texto: m.contraindicacoes.trim() })
   if (m.gestacao_status && m.gestacao_status !== 'seguro') {
     lista.push({

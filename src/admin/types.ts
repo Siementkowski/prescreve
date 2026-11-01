@@ -3,6 +3,9 @@
 export type ModoArea = 'ambulatorial' | 'hospitalar' | 'ambos'
 export type ModoTratamento = 'ambulatorial' | 'hospitalar' | 'ambos'
 export type Linha = '1a_linha' | 'alternativa' | 'opcao' | 'off_label'
+export type AjusteClinico = 'sim' | 'nao' | 'cautela' | 'na'
+export type CategoriaGestacao = 'A' | 'B' | 'C' | 'D' | 'X' | 'ND'
+export type CategoriaLactacao = 'L1' | 'L2' | 'L3' | 'L4' | 'L5'
 export type StatusRisco = 'seguro' | 'cautela' | 'contraindicado' | 'sem_dados'
 export type PapelTratamento = 'principal' | 'complemento'
 
@@ -47,6 +50,18 @@ export interface Medicamento {
   // + forma + concentração preenchidos, sem gestação/lactação/pediatria/contraindicações.
   // Entra na fila de Revisão e a Consulta mostra "gestação não avaliada" em vez de nada.
   incompleto: boolean
+  // Dados clínicos de referência (idade, ajuste renal/hepático, categoria de risco). Entraram
+  // preenchidos a partir de bulas/fontes públicas — `clinico_revisado` só vira true quando o
+  // editor conferir; enquanto false, a ficha avisa que o dado ainda não foi revisado.
+  idade_minima: string | null
+  ajuste_renal: AjusteClinico | null
+  ajuste_renal_obs: string | null
+  ajuste_hepatico: AjusteClinico | null
+  ajuste_hepatico_obs: string | null
+  gestacao_categoria: CategoriaGestacao | null
+  lactacao_categoria: CategoriaLactacao | null
+  obs_gest_lact: string | null
+  clinico_revisado: boolean
 }
 export type MedicamentoInput = Omit<Medicamento, 'id'>
 
@@ -203,4 +218,28 @@ export const LABEL_STATUS_RISCO: Record<StatusRisco, string> = {
   cautela: 'Cautela',
   contraindicado: 'Contraindicado',
   sem_dados: 'Sem dados',
+}
+
+export const LABEL_AJUSTE: Record<AjusteClinico, string> = {
+  sim: 'Sim',
+  nao: 'Não',
+  cautela: 'Cautela',
+  na: 'Não se aplica',
+}
+
+export const LABEL_CATEGORIA_GESTACAO: Record<CategoriaGestacao, string> = {
+  A: 'A — sem risco demonstrado',
+  B: 'B — sem evidência de risco em humanos',
+  C: 'C — risco não descartado',
+  D: 'D — evidência de risco',
+  X: 'X — contraindicado',
+  ND: 'Não categorizado',
+}
+
+export const LABEL_CATEGORIA_LACTACAO: Record<CategoriaLactacao, string> = {
+  L1: 'L1 — mais seguro',
+  L2: 'L2 — seguro',
+  L3: 'L3 — moderadamente seguro',
+  L4: 'L4 — possivelmente perigoso',
+  L5: 'L5 — contraindicado',
 }

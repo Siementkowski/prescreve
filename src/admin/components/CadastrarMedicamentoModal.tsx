@@ -84,6 +84,15 @@ export function CadastrarMedicamentoModal({
         ped_volume_ref: null,
         ped_obs: null,
         incompleto: true,
+        idade_minima: null,
+        ajuste_renal: null,
+        ajuste_renal_obs: null,
+        ajuste_hepatico: null,
+        ajuste_hepatico_obs: null,
+        gestacao_categoria: null,
+        lactacao_categoria: null,
+        obs_gest_lact: null,
+        clinico_revisado: false,
       })
       const apresentacao = await onCriarApresentacao(medicamento.id, {
         forma: forma.trim(),
