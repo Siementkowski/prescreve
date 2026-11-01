@@ -32,6 +32,8 @@ export function PuericulturaPage() {
   const setFaixaId = usePediatriaStore((s) => s.setFaixaPuericultura)
   const telaReferencia = usePediatriaStore((s) => s.telaReferenciaPuericultura)
   const setTelaReferencia = usePediatriaStore((s) => s.setTelaReferenciaPuericultura)
+  const aba = usePediatriaStore((s) => s.abaFaixaPuericultura)
+  const setAba = usePediatriaStore((s) => s.setAbaFaixaPuericultura)
 
   if (telaReferencia) {
     return (
@@ -83,9 +85,6 @@ export function PuericulturaPage() {
       </div>
     )
   }
-
-  const aba = usePediatriaStore((s) => s.abaFaixaPuericultura)
-  const setAba = usePediatriaStore((s) => s.setAbaFaixaPuericultura)
 
   return (
     <div className="h-full overflow-y-auto p-6">
