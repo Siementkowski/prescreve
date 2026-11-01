@@ -9,6 +9,7 @@ import { formatarApresentacao } from '../core/apresentacao'
 import { FORMAS_CONFIG, type FormaFarmaceutica } from '../core/formas'
 import { LABEL_AJUSTE, LABEL_STATUS_RISCO, type Medicamento } from '../admin/types'
 import { HeroPagina } from '../core/components/HeroPagina'
+import { visualCategoria } from './categorias'
 import { CopyButton } from '../consulta/components/CopyButton'
 
 const OPCOES_TOMADAS = [1, 2, 3, 4, 6]
@@ -83,6 +84,7 @@ export function MedicamentoDetalhe() {
         ]}
         titulo={medicamento.nome}
         subtitulo={medicamento.nome_comercial}
+        cor={visualCategoria(classe).fg}
       >
         {/* campo de peso — sem ele não há dose pra calcular */}
         <label className="flex items-center bg-surface text-text rounded-[var(--radius-control,12px)] p-1.5 max-w-lg focus-within:ring-2 focus-within:ring-white/60">

@@ -142,7 +142,7 @@ function ListaDaClasse({
   apenasDose: boolean
 }) {
   const [busca, setBusca] = useState('')
-  const { icone: Icone } = visualCategoria(nome)
+  const { icone: Icone, fg } = visualCategoria(nome)
   const t = busca.trim().toLowerCase()
   const filtrados = t
     ? lista.filter((m) => m.nome.toLowerCase().includes(t) || (m.nome_comercial ?? '').toLowerCase().includes(t))
@@ -157,6 +157,7 @@ function ListaDaClasse({
           { label: nome },
         ]}
         titulo={nome}
+        cor={fg}
       >
         <p className="inline-flex items-center gap-1.5 text-[13px] text-white/90">
           <Icone className="w-3.5 h-3.5" />
