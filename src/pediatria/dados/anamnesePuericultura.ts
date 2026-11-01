@@ -69,7 +69,7 @@ export const CAMPOS: Campo[] = [
     frase: (v) => v,
   },
   { id: 'apgar', grupo: 'Nascimento', label: 'Apgar', tipo: 'text', placeholder: 'ex: 9/10', max: 4, frase: (v) => v },
-  { id: 'doencasGest', grupo: 'Nascimento', label: 'Doenças prévias na gestação', tipo: 'select', opcoes: NEGA_REFERE, max: 4, frase: (v) => v },
+  { id: 'doencasGest', grupo: 'Nascimento', label: 'Doenças obstétricas', tipo: 'select', opcoes: NEGA_REFERE, max: 4, frase: (v) => v },
   {
     id: 'doencasGestDet',
     grupo: 'Nascimento',
@@ -94,6 +94,15 @@ export const CAMPOS: Campo[] = [
       ['pendentes', 'Pendentes'],
     ],
     max: 4,
+    frase: (v) => v,
+  },
+  {
+    id: 'triagensDet',
+    grupo: 'Nascimento',
+    label: 'Quais alterações?',
+    tipo: 'text',
+    max: 4,
+    quando: (x) => x.triagens === 'realizadas, com alterações',
     frase: (v) => v,
   },
 
@@ -192,7 +201,8 @@ export const CAMPOS: Campo[] = [
   // ---- Eliminações ----
   { id: 'fraldas', grupo: 'Eliminações', label: 'Trocas de fralda/dia (urina)', tipo: 'text', max: 17, frase: (v) => `Urina: troca de fralda ${v}x/dia.` },
   { id: 'evacuacoes', grupo: 'Eliminações', label: 'Evacuações/dia', tipo: 'text', frase: (v) => `Evacuações: ${v}/dia.` },
-  { id: 'fezes', grupo: 'Eliminações', label: 'Fezes (cor e consistência)', tipo: 'text', frase: (v) => `Fezes: ${v}.` },
+  { id: 'consistencia', grupo: 'Eliminações', label: 'Consistência das fezes', tipo: 'text', placeholder: 'ex: pastosa', frase: (v) => v },
+  { id: 'corFezes', grupo: 'Eliminações', label: 'Cor das fezes', tipo: 'text', placeholder: 'ex: amarelada', frase: (v) => v },
   { id: 'colicas', grupo: 'Eliminações', label: 'Cólicas', tipo: 'select', opcoes: NEGA_REFERE, max: 4, frase: (v) => `${nr(v)} cólicas.` },
   {
     id: 'desfralde',
@@ -313,6 +323,8 @@ export function chaveMarco(faixaId: string, marco: string) {
   return `${faixaId}|${marco}`
 }
 
+const DESMAME = ['desmameIdade', 'desmameMotivo', 'formulaLeite']
+
 /** Monta o texto final (S / O / A / P) — mesmo formato das Gestantes. */
 export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[], e: EstadoAnamnese): string {
   const m = f.idadeReferenciaMeses
@@ -325,9 +337,34 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
 
   for (const grupo of GRUPOS_ORDEM) {
     if (grupo === 'Nascimento') continue // vai no cabeçalho
-    const frases = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m) && (!c.quando || c.quando(e.valores)) && !(c.cabAte != null && m <= c.cabAte))
-      .map((c) => (v(c.id) ? c.frase(v(c.id)) : ''))
+    const frases = CAMPOS.filter((c) => c.grupo === grupo && visivel(c, m) && (!c.quando || c.quando(e.valores)) && !DESMAME.includes(c.id))
+      .map((c) => {
+        if (!v(c.id)) return ''
+        if (c.id === 'aleitamento' && v(c.id) === 'desmamado') {
+          return `Desmamado${v('desmameIdade') ? ' ao ' + v('desmameIdade') : ''}${v('desmameMotivo') ? ' por ' + v('desmameMotivo') : ''}${v('formulaLeite') ? ', atualmente em uso de ' + v('formulaLeite') : ''}.`
+        }
+        return c.frase(v(c.id))
+      })
       .filter(Boolean)
+    if (grupo === 'Eliminações') {
+      const linhas: string[] = []
+      if (v('fraldas') && visivel({ max: 17 }, m)) linhas.push(`Eliminações vesicais: presentes, sem alterações. Troca de fralda ${v('fraldas')}x ao dia.`)
+      if (v('evacuacoes') || v('consistencia') || v('corFezes')) {
+        const partes = [
+          v('evacuacoes') ? `${v('evacuacoes')}x ao dia` : '',
+          v('consistencia') ? `consistência ${v('consistencia')}` : '',
+          v('corFezes') ? `cor ${v('corFezes')}` : '',
+        ].filter(Boolean)
+        linhas.push(`Evacuações: ${partes.join(', ')}.`)
+      }
+      const outras = ['colicas', 'desfralde']
+        .map((id) => CAMPOS.find((c) => c.id === id)!)
+        .filter((c) => visivel(c, m) && v(c.id))
+        .map((c) => c.frase(v(c.id)))
+      if (outras.length) linhas.push(outras.join(' '))
+      s.push(...linhas)
+      continue
+    }
     if (!frases.length) continue
     if (grupo === 'Consulta') s.push(frases.join(' '))
     else s.push(`${grupo}: ${frases.join(' ')}`)
@@ -392,23 +429,23 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
     cab.push(`# Peso para a IG: ${bl(v('classPeso'))}`)
     cab.push(`# Apgar: ${bl(v('apgar'))}`)
     cab.push(
-      `# Doenças prévias na gestação: ${v('doencasGest') === 'refere' ? 'refere' + (v('doencasGestDet') ? ' — ' + v('doencasGestDet') : '') : v('doencasGest') === 'nega' ? 'nega' : '___'}`
+      `# Doenças obstétricas: ${v('doencasGest') === 'refere' ? 'refere ' + (v('doencasGestDet') ? v('doencasGestDet') + ' ' : 'doenças ') + 'durante a gestação' : v('doencasGest') === 'nega' ? 'nega' : '___'}`
     )
     if (m <= 1) {
-      cab.push(`# Ao nascimento: peso ${bl(v('pesoNasc'))}g, comprimento ${bl(v('compNasc'))}cm, PC ${bl(v('pcNasc'))}cm`)
+      cab.push(`# Ao nascimento:
+ - Peso: ${bl(v('pesoNasc'))}g
+ - Comprimento: ${bl(v('compNasc'))}cm
+ - PC: ${bl(v('pcNasc'))}cm`)
     }
     cab.push(`# Peso de alta: ${bl(v('pesoAlta'))}`)
-    cab.push(`# Triagens neonatais: ${bl(v('triagens'))}`)
+    cab.push(`# Triagens neonatais: ${bl(v('triagens'))}${v('triagens') === 'realizadas, com alterações' && v('triagensDet') ? ': ' + v('triagensDet') : ''}`)
 
     const al = v('aleitamento')
     let linhaAl = `# Aleitamento materno: ${al || '___'}`
     if (al === 'desmamado') {
-      const partes = [
-        v('desmameIdade') ? `aos ${v('desmameIdade')}` : '',
-        v('desmameMotivo') ? `motivo: ${v('desmameMotivo')}` : '',
-        v('formulaLeite') ? `em uso de ${v('formulaLeite')}` : '',
-      ].filter(Boolean)
-      if (partes.length) linhaAl += ` (${partes.join('; ')})`
+      if (v('desmameIdade')) linhaAl += ` ao ${v('desmameIdade')}`
+      if (v('desmameMotivo')) linhaAl += ` por ${v('desmameMotivo')}`
+      if (v('formulaLeite')) linhaAl += `, atualmente em uso de ${v('formulaLeite')}`
     }
     cab.push(linhaAl)
   }
