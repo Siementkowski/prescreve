@@ -237,7 +237,7 @@ export const CAMPOS: Campo[] = [
 
   // ---- Sono e hábitos ----
   { id: 'sono', grupo: 'Sono e hábitos', label: 'Sono (h/noite)', tipo: 'text', frase: (v) => `Sono: ${v}h/noite.` },
-  { id: 'despertares', grupo: 'Sono e hábitos', label: 'Despertares noturnos', tipo: 'text', frase: (v) => `${v} despertares noturnos.` },
+  { id: 'despertares', grupo: 'Sono e hábitos', label: 'Despertares noturnos', tipo: 'text', frase: (v) => (v === '1' ? '1 despertar noturno.' : `${v} despertares noturnos.`) },
   { id: 'dorsal', grupo: 'Sono e hábitos', label: 'Dorme de barriga pra cima, em superfície firme', tipo: 'check', max: 11, frase: () => 'Dorme em decúbito dorsal, em superfície firme.' },
   {
     id: 'dormeCom',
@@ -392,14 +392,15 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
     else s.push(`${grupo}: ${frases.join(' ')}`)
   }
 
+  const adaptar = (t: string) => t.replace(/sozinho\(a\)/g,gen(v('sexo'), 'sozinho', 'sozinha', 'sozinho(a)'))
   const marcosDaFaixa = f.marcos.filter((x) => !ehMarcoReflexo(x))
   const marcados = marcosDaFaixa.filter((x) => e.marcos.has(chaveMarco(f.id, x)))
   if (marcosDaFaixa.length > 0 && marcados.length > 0) {
     const faltam = marcosDaFaixa.filter((x) => !e.marcos.has(chaveMarco(f.id, x)))
     s.push(
       faltam.length === 0
-        ? `DNPM: adquiriu os marcos esperados para a idade (${marcados.join('; ')}).`
-        : `DNPM: ${marcados.join('; ')}. Marcos esperados não adquiridos: ${faltam.join('; ')}.`
+        ? `DNPM: adquiriu os marcos esperados para a idade (${marcados.map(adaptar).join('; ')}).`
+        : `DNPM: ${marcados.map(adaptar).join('; ')}. Marcos esperados não adquiridos: ${faltam.map(adaptar).join('; ')}.`
     )
   }
   if (mostraReflexos(m) && e.reflexos.size > 0) {
@@ -446,7 +447,8 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   // ---- Cabeçalho ----
   const cap = (x: string) => (x ? x[0].toUpperCase() + x.slice(1) : x)
   const bl = (x: string) => x || '___'
-  const linhaCab = (rotulo: string, id: string) => (v(id) ? `# ${rotulo}: ${cap(v(id))}` : `# Nega ${rotulo}`)
+  const linhaCab = (rotulo: string, id: string) =>
+    v(id) && !v(id).toLowerCase().startsWith('nega') ? `# ${rotulo === 'MUC' ? rotulo : cap(rotulo)}: ${cap(v(id))}` : `# Nega ${rotulo}`
   const cab: string[] = [linhaCab('MUC', 'muc'), linhaCab('comorbidades', 'comorbidades'), linhaCab('alergias', 'alergias')]
 
   // Dados do nascimento e aleitamento: só nas consultas de 7 dias a 4 meses

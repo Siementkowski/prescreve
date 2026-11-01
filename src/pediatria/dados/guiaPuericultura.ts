@@ -191,7 +191,7 @@ export const FAIXAS_PUERICULTURA: FaixaPuericultura[] = [
     queixas: ['Alimentação (transição pra comida da família)', 'Marcha e linguagem', 'Padrão de sono'],
     vacinas: ['Pneumocócica (reforço)', 'Meningocócica ACWY (dose única)', 'Tríplice viral — SCR (1ª dose)'],
     marcos: [
-      'Dá alguns passos sozinha ou com apoio',
+      'Dá alguns passos sozinho(a) ou com apoio',
       'Entrega objetos a outras pessoas',
       'Fala as primeiras palavras com significado',
       'Chora quando os pais saem; ri de brincadeiras',
@@ -217,8 +217,8 @@ export const FAIXAS_PUERICULTURA: FaixaPuericultura[] = [
     queixas: ['Linguagem', 'Seletividade alimentar', 'Comportamento', 'Sono'],
     vacinas: ['VIP (1º reforço)', 'DTP (1º reforço)', 'Tríplice viral (2ª dose)', 'Varicela (1ª dose)', 'Hepatite A (dose única)'],
     marcos: [
-      'Anda bem sozinha; sobe escada com apoio',
-      'Come sozinha com colher; tira o próprio calçado',
+      'Anda bem sozinho(a); sobe escada com apoio',
+      'Come sozinho(a) com colher; tira o próprio calçado',
       'Fala cerca de 10 palavras; aponta partes do corpo',
       'Começa a brincar de forma mais interativa',
     ],
