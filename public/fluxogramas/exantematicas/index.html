@@ -3,292 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Doenças Exantemáticas — Consulta Guiada</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap">
+<title>Doenças Exantemáticas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   TOKENS — base do Painel Editorial (Prescreve), 1:1
-   ============================================================ */
-:root {
-  --paper: #f5f2eb;
-  --surface: #fbfaf7;
-  --surface-2: #f0ede6;
-  --surface-3: #ebe7de;
-  --ink: #111111;
-  --muted: #706f69;
-  --on-ink: #ffffff;
-  --line: #d9d6ce;
-  --line-strong: #c8c5bc;
-
-  --blue: #1857d1;   --soft-blue: #e8eefc;   --on-soft-blue: #1857d1;
-  --mint: #00b989;   --soft-mint: #def5ee;   --on-soft-mint: #087d62;
-  --orange: #ef6b17; --soft-orange: #fcebdc; --on-soft-orange: #a54e12;
-  --red: #e9443d;    --soft-red: #fae7e4;    --on-soft-red: #ad342f;
-
-  --shadow-soft: rgba(17, 17, 17, .08);
-  --shadow-hard: var(--ink);
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0d0d0b; --surface: #151512; --surface-2: #1b1b17; --surface-3: #24231f;
-    --ink: #f5f2eb; --muted: #aaa69c; --on-ink: #111111;
-    --line: #2d2c28; --line-strong: #3a3832;
-    --soft-blue: #152650;   --on-soft-blue: #79a4ff;
-    --soft-mint: #103b31;   --on-soft-mint: #7edfc4;
-    --soft-orange: #432716; --on-soft-orange: #ffb77e;
-    --soft-red: #3e1b1a;    --on-soft-red: #ff9d94;
-    --shadow-soft: rgba(0,0,0,.5);
+  /* Layout: coluna única de leitura (máx. 760px). Cabeçalho com alternância de modo; abaixo, wizard (Consulta) ou accordion (Mapa Geral). */
+  /* Identidade: Painel Editorial. Tokens claros em :root, escuros redefinidos abaixo. */
+  :root{
+    --paper:#f5f2eb; --surface:#fbfaf7; --surface-2:#f0ede6;
+    --ink:#111111; --muted:#706f69; --line:#d9d6ce; --line-strong:#c8c5bc;
+    --blue:#1857d1; --soft-blue:#e8eefc;
+    --mint:#007f5f; --soft-mint:#def5ee;
+    --orange:#b84a07; --soft-orange:#fcebdc;
+    --red:#b8312b; --soft-red:#fae7e4;
+    --shadow-hard:#111111;
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'DM Sans', system-ui, sans-serif;
+    --radius-card:14px; --radius-control:12px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#131311; --surface:#1b1b18; --surface-2:#242420;
+      --ink:#f2efe8; --muted:#a09c91; --line:#34342f; --line-strong:#4a4a43;
+      --blue:#7aa2ff; --soft-blue:#1c2848;
+      --mint:#35d3a3; --soft-mint:#0f3128;
+      --orange:#ff9355; --soft-orange:#3b2213;
+      --red:#ff8f86; --soft-red:#3e1b1a;
+      --shadow-hard:#000000;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#131311; --surface:#1b1b18; --surface-2:#242420;
+    --ink:#f2efe8; --muted:#a09c91; --line:#34342f; --line-strong:#4a4a43;
+    --blue:#7aa2ff; --soft-blue:#1c2848;
+    --mint:#35d3a3; --soft-mint:#0f3128;
+    --orange:#ff9355; --soft-orange:#3b2213;
+    --red:#ff8f86; --soft-red:#3e1b1a;
+    --shadow-hard:#000000;
     color-scheme: dark;
   }
-}
-:root[data-theme="dark"] {
-  --paper: #0d0d0b; --surface: #151512; --surface-2: #1b1b17; --surface-3: #24231f;
-  --ink: #f5f2eb; --muted: #aaa69c; --on-ink: #111111;
-  --line: #2d2c28; --line-strong: #3a3832;
-  --soft-blue: #152650;   --on-soft-blue: #79a4ff;
-  --soft-mint: #103b31;   --on-soft-mint: #7edfc4;
-  --soft-orange: #432716; --on-soft-orange: #ffb77e;
-  --soft-red: #3e1b1a;    --on-soft-red: #ff9d94;
-  --shadow-soft: rgba(0,0,0,.5);
-  color-scheme: dark;
-}
 
-* { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; }
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: 'DM Sans', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  display: flex; flex-direction: column;
-}
-h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; margin: 0; }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:16px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 48px;
+  }
+  .coluna{ max-width:760px; margin-inline:auto; display:flex; flex-direction:column; gap:20px; }
+  button{ font:inherit; color:inherit; }
+  img{ max-width:100%; }
+  :focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
 
-/* ---- topbar ---- */
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  height: 56px; padding: 0 18px; flex-shrink: 0;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
-}
-.wordmark { font-weight: 700; font-size: 15px; }
+  /* Cabeçalho */
+  .eyebrow{ margin:0 0 6px; font-size:.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--blue); }
+  h1{
+    margin:0; font-family:var(--font-display); font-weight:700;
+    font-size:clamp(1.7rem, 5.4vw, 2.3rem); line-height:1.08; letter-spacing:-1.1px; text-wrap:balance;
+  }
+  .sub{ margin:8px 0 0; color:var(--muted); font-size:.95rem; max-width:60ch; }
+  .barra{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }
+  .modos{
+    display:inline-flex; border:1.5px solid var(--ink); border-radius:var(--radius-control);
+    overflow:hidden; background:var(--surface); box-shadow:3px 3px 0 var(--shadow-hard);
+  }
+  .modos button{
+    border:0; background:transparent; padding:10px 16px; cursor:pointer;
+    font-size:.78rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+  }
+  .modos button + button{ border-left:1.5px solid var(--ink); }
+  .modos button[aria-pressed="true"]{ background:var(--ink); color:var(--paper); }
+  .tema{
+    border:1.5px solid var(--line-strong); background:var(--surface); border-radius:var(--radius-control);
+    padding:9px 14px; cursor:pointer; font-size:.78rem; font-weight:600; color:var(--muted);
+  }
+  .tema:hover{ border-color:var(--ink); color:var(--ink); }
 
-.mode-switch { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 12px; }
-.mode-btn {
-  font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 600;
-  padding: 7px 14px; border-radius: 9px; cursor: pointer; border: none; background: none; color: var(--muted);
-}
-.mode-btn.active { background: var(--ink); color: var(--on-ink); }
+  /* Trilha clicável */
+  .trilha{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0; padding:0; list-style:none; }
+  .trilha[hidden]{ display:none; }
+  .trilha .rotulo{ font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-right:2px; }
+  .trilha button{
+    border:1.5px solid var(--line-strong); background:var(--surface); border-radius:999px;
+    padding:6px 12px; font-size:.82rem; cursor:pointer; text-align:left; max-width:100%;
+  }
+  .trilha button:hover{ border-color:var(--blue); background:var(--soft-blue); }
+  .trilha b{ font-weight:600; color:var(--muted); }
 
-.theme-btn {
-  width: 34px; height: 34px; border-radius: 999px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
-  display: grid; place-items: center; cursor: pointer;
-}
-.theme-btn svg { width: 15px; height: 15px; }
+  /* Cartão de pergunta */
+  .painel{
+    background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-card);
+    box-shadow:5px 5px 0 var(--shadow-hard); padding:22px;
+  }
+  .passo{ margin:0 0 6px; font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--blue); }
+  .pergunta{ margin:0; font-family:var(--font-display); font-weight:600; font-size:1.35rem; line-height:1.2; letter-spacing:-.4px; text-wrap:balance; }
+  .pergunta:focus{ outline:none; }
+  .ajuda{ margin:8px 0 0; color:var(--muted); font-size:.92rem; }
+  .opcoes{ display:flex; flex-direction:column; gap:12px; margin-top:18px; }
+  .opcao{
+    display:block; width:100%; text-align:left; cursor:pointer;
+    background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-control);
+    padding:14px 16px; box-shadow:3px 3px 0 var(--shadow-hard);
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .opcao:hover{ background:var(--soft-blue); transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--shadow-hard); }
+  .opcao:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--shadow-hard); }
+  .opcao.perigo{ border-color:var(--red); }
+  .opcao.perigo:hover{ background:var(--soft-red); }
+  .opcao strong{ display:block; font-family:var(--font-display); font-weight:600; font-size:1.02rem; }
+  .opcao span{ display:block; margin-top:2px; color:var(--muted); font-size:.88rem; line-height:1.4; }
+  .acoes{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  .ghost{
+    border:1.5px solid var(--line-strong); background:transparent; border-radius:var(--radius-control);
+    padding:9px 14px; font-size:.82rem; font-weight:600; cursor:pointer; color:var(--muted);
+  }
+  .ghost:hover{ border-color:var(--ink); color:var(--ink); }
 
-main { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 32px 20px 60px; }
-.wizard { width: 100%; max-width: 640px; }
+  /* Selos e cores de categoria */
+  .selo{
+    display:inline-block; padding:4px 11px; border-radius:999px; font-size:.7rem; font-weight:700;
+    letter-spacing:1px; text-transform:uppercase; border:1.5px solid currentColor;
+  }
+  .selo.mint{ color:var(--mint); background:var(--soft-mint); }
+  .selo.blue{ color:var(--blue); background:var(--soft-blue); }
+  .selo.orange{ color:var(--orange); background:var(--soft-orange); }
+  .selo.red{ color:var(--red); background:var(--soft-red); }
 
-/* ============================================================
-   TRILHA — respostas já dadas, tipo breadcrumb de perguntas
-   ============================================================ */
-.trail { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; min-height: 26px; align-items: center; }
-.trail-pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 11.5px; font-weight: 600; color: var(--ink);
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: 999px; padding: 5px 11px; cursor: pointer;
-}
-.trail-pill:hover { border-color: var(--line-strong); }
-.trail-arrow { color: var(--line-strong); font-size: 11px; display: flex; align-items: center; }
+  /* Resultado */
+  .resultado h2{ margin:12px 0 0; font-family:var(--font-display); font-weight:700; font-size:1.7rem; line-height:1.12; letter-spacing:-.7px; text-wrap:balance; }
+  .contexto{ margin:8px 0 0; color:var(--muted); font-size:.92rem; }
+  .selos{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .galeria{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; margin-top:16px; }
+  .foto{ margin:0; border:1.5px solid var(--line-strong); border-radius:var(--radius-control); overflow:hidden; background:var(--surface-2); }
+  .foto img{ display:block; width:100%; height:auto; object-fit:contain; }
+  .foto figcaption{ padding:7px 10px; font-size:.78rem; font-weight:600; border-top:1.5px solid var(--line-strong); }
+  .conduta{ border:1.5px solid var(--line-strong); border-radius:var(--radius-control); padding:12px 14px; background:var(--surface-2); min-width:0; margin-top:14px; }
+  .conduta .k{ margin:0; font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+  .conduta .v{ margin:4px 0 0; font-size:.95rem; line-height:1.45; }
+  .conduta.sim{ border-color:var(--ink); background:var(--surface); }
+  .conduta.alerta{ border-color:var(--red); background:var(--soft-red); }
+  .conduta.alerta .k{ color:var(--red); }
+  .conduta ul{ margin:6px 0 0; padding-left:1.1em; font-size:.92rem; }
+  .conduta li + li{ margin-top:4px; }
+  .conduta ul ul{ margin-top:4px; }
+  .nota{ margin:8px 0 0; color:var(--muted); font-size:.85rem; font-style:italic; }
+  .secao{ margin:20px 0 0; font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--blue); }
+  .tag{ margin-left:8px; font-size:.62rem; letter-spacing:.8px; color:var(--red); }
 
-/* ============================================================
-   CARD DE PERGUNTA
-   ============================================================ */
-.q-card {
-  background: var(--surface); border: 1.5px solid var(--line);
-  border-radius: 18px; padding: 26px 26px 20px;
-  animation: fadein .22s ease;
-}
-@keyframes fadein { from { opacity:0; transform: translateY(6px);} to {opacity:1; transform: translateY(0);} }
+  /* Mapa Geral */
+  .mapa{ display:flex; flex-direction:column; gap:16px; }
+  .tema-titulo{ margin:8px 0 -4px; font-family:var(--font-display); font-weight:700; font-size:1.3rem; letter-spacing:-.4px; padding-bottom:6px; border-bottom:2px solid var(--ink); }
+  .bloco{ background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-card); overflow:hidden; }
+  .bloco > summary{
+    list-style:none; cursor:pointer; padding:14px 18px; background:var(--surface-2);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    font-family:var(--font-display); font-weight:600; font-size:1.05rem; border-bottom:1.5px solid transparent;
+  }
+  .bloco > summary small{ display:block; font-family:var(--font-body); font-weight:400; font-size:.8rem; color:var(--muted); }
+  .bloco > summary::-webkit-details-marker{ display:none; }
+  .bloco > summary::after{ content:"+"; color:var(--blue); font-size:1.3rem; font-weight:700; }
+  .bloco[open] > summary{ border-bottom-color:var(--ink); }
+  .bloco[open] > summary::after{ content:"\2212"; }
+  .corpo{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:16px; }
+  .doenca{ border:1.5px solid var(--line-strong); border-radius:var(--radius-control); padding:16px; background:var(--surface); }
+  .doenca h3{ margin:10px 0 0; font-family:var(--font-display); font-weight:700; font-size:1.3rem; letter-spacing:-.4px; }
 
-.q-card h2 { font-size: 21px; line-height: 1.3; margin-bottom: 4px; }
-.q-card .q-hint { font-size: 12.5px; color: var(--muted); margin-bottom: 18px; }
-
-.options { display: flex; flex-direction: column; gap: 10px; }
-.option-btn {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  background: var(--paper); border: 1.5px solid var(--line); border-radius: 12px;
-  padding: 13px 16px; cursor: pointer; text-align: left;
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--ink);
-  transition: border-color .15s ease, box-shadow .15s ease, transform .12s ease;
-}
-.option-btn:hover { border-color: var(--ink); box-shadow: 3px 3px 0 var(--shadow-hard); transform: translateY(-1px); }
-.option-btn .o-sub { display: block; font-size: 11.5px; font-weight: 400; color: var(--muted); margin-top: 2px; }
-.option-btn .o-arrow { flex-shrink: 0; font-size: 16px; color: var(--muted); }
-
-.back-link {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 12.5px; font-weight: 600; color: var(--muted);
-  cursor: pointer; margin-top: 16px;
-}
-.back-link:hover { color: var(--ink); }
-
-.restart-link {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 12px; font-weight: 600; color: var(--muted);
-  cursor: pointer; margin-top: 22px;
-}
-.restart-link:hover { color: var(--ink); }
-
-/* ============================================================
-   CARD DE DIAGNÓSTICO FINAL
-   ============================================================ */
-.dx-card {
-  background: var(--surface); border: 1.5px solid var(--line);
-  border-left: 6px solid var(--accent, var(--ink));
-  border-radius: 18px; padding: 26px;
-  animation: fadein .25s ease;
-}
-.dx-eyebrow {
-  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
-  color: var(--accent-text, var(--muted)); margin-bottom: 6px;
-}
-.dx-card h2 { font-size: 33px; font-weight: 700; margin-bottom: 2px; }
-.dx-card .dx-subtitle { font-size: 15px; color: var(--ink); margin-bottom: 14px; }
-.dx-image { margin: 4px 0 14px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
-.dx-image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 4px 0 14px; }
-.dx-image-gallery .dx-image { margin: 0; }
-.dx-image-gallery .dx-image img { max-height: none; }
-.dx-image img { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; }
-.dx-image-caption { font-size: 11px; color: var(--ink); padding: 6px 10px; background: var(--surface-2); font-weight: 600; }
-
-.dx-tx-note { font-size: 11.5px; font-style: italic; color: var(--muted); margin-top: 10px; }
-
-.dx-exantema-banner {
-  background: var(--surface-2); border: 1px solid var(--line);
-  border-radius: 10px; padding: 11px 14px; margin-bottom: 18px;
-}
-.dx-exantema-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--accent-text, var(--muted)); margin-bottom: 4px; }
-.dx-exantema-text { font-size: 13px; line-height: 1.5; }
-
-.d-block { margin-bottom: 15px; }
-.d-block:last-of-type { margin-bottom: 0; }
-.d-block-label {
-  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
-  color: var(--ink); margin-bottom: 6px;
-  border-bottom: 1.5px solid var(--line-strong); display: inline-block; padding-bottom: 2px;
-}
-.d-block ul { margin: 0; padding-left: 17px; }
-.d-block li { font-size: 13.5px; line-height: 1.55; margin-bottom: 4px; }
-
-.dx-treatment {
-  margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line);
-}
-.dx-treatment-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--ink); margin-bottom: 8px; }
-.dx-exames-tag {
-  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-  color: var(--on-soft-red); background: var(--soft-red);
-  padding: 2px 7px; border-radius: 999px; margin-left: 7px; vertical-align: middle;
-}
-.dx-tx-list { margin: 10px 0 0; padding-left: 17px; }
-.dx-tx-list li { font-size: 13px; line-height: 1.55; margin-bottom: 4px; color: var(--ink); }
-.dx-tx-sublist { list-style: none; margin: 6px 0 10px; padding-left: 4px; }
-.dx-tx-sublist li {
-  position: relative; padding-left: 16px; margin-bottom: 4px;
-  font-size: 13px; line-height: 1.5; color: var(--ink);
-}
-.dx-tx-sublist li::before {
-  content: ''; position: absolute; left: 0; top: 0.42em;
-  width: 6px; height: 6px; border-radius: 50%;
-  border: 1.4px solid var(--ink); background: transparent;
-}
-.dx-internacao {
-  margin-top: 12px; padding: 10px 13px; border-radius: 8px;
-  background: var(--soft-red); border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
-  font-size: 12.5px; line-height: 1.5; color: var(--on-soft-red);
-}
-.dx-internacao b { font-weight: 700; }
-.status-pill {
-  display: inline-flex; align-items: center; font-size: 12px; font-weight: 600;
-  padding: 5px 12px; border-radius: 999px; border: 1px solid transparent; margin: 0 6px 6px 0;
-}
-.status-pill.mint   { color: var(--on-soft-mint);   background: var(--soft-mint);   border-color: color-mix(in srgb, var(--mint) 40%, transparent); }
-.status-pill.orange { color: var(--on-soft-orange); background: var(--soft-orange); border-color: color-mix(in srgb, var(--orange) 40%, transparent); }
-.status-pill.blue   { color: var(--on-soft-blue);   background: var(--soft-blue);   border-color: color-mix(in srgb, var(--blue) 40%, transparent); }
-.status-pill.red    { color: var(--on-soft-red);    background: var(--soft-red);    border-color: color-mix(in srgb, var(--red) 40%, transparent); }
-
-/* ============================================================
-   MODO MAPA — toggle por categoria, cards de doença dentro
-   (mesmo visual do card de diagnóstico do modo Consulta)
-   ============================================================ */
-#mainMapa { display: block; padding: 32px 24px 70px; overflow-y: auto; }
-.mapa-wrap { max-width: 900px; margin: 0 auto; }
-
-.mapa-cat { margin-bottom: 0.75rem; }
-
-.mapa-cat-toggle {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 16px 4px; cursor: pointer;
-  border-bottom: 2px solid var(--accent, var(--ink));
-}
-.mapa-cat-toggle-text h2 { font-size: 18px; }
-.mapa-cat-toggle-text .mapa-cat-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 2px; }
-.mapa-chevron { font-size: 18px; color: var(--muted); transition: transform .2s ease; flex-shrink: 0; }
-.mapa-cat.open .mapa-chevron { transform: rotate(180deg); }
-
-.mapa-cat-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s ease; }
-.mapa-cat.open .mapa-cat-body { grid-template-rows: 1fr; }
-.mapa-cat-body-inner { overflow: hidden; }
-
-.mapa-disease-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; padding: 18px 4px 6px; }
-
-.mapa-disease-card {
-  background: var(--surface); border: 1.5px solid var(--line);
-  border-left: 4px solid var(--accent, var(--ink));
-  border-radius: 14px; padding: 18px 20px;
-}
-.mapa-disease-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
-.mapa-disease-card .mapa-dc-meta { font-size: 12.5px; color: var(--ink); margin-bottom: 12px; }
-
-@media (max-width: 480px) {
-  .q-card, .dx-card { padding: 20px 18px 16px; border-radius: 14px; }
-}
+  @media (max-width:560px){ .painel{ padding:18px; } .corpo{ padding:14px; } }
+  @media (prefers-reduced-motion: reduce){ .opcao{ transition:none; } }
+  [hidden]{ display:none !important; }
 </style>
 </head>
 <body>
+<div class="coluna">
+  <header>
+    <p class="eyebrow">Mapas clínicos</p>
+    <h1>Doenças exantemáticas</h1>
+    <p class="sub">Diagnóstico diferencial guiado das doenças com exantema na infância, com quadro clínico e conduta.</p>
+  </header>
 
-<header class="topbar">
-  <span class="wordmark">Exantemáticas</span>
-  <div class="mode-switch">
-    <button class="mode-btn active" id="modeConsulta" onclick="setMode('consulta')">Consulta</button>
-    <button class="mode-btn" id="modeMapa" onclick="setMode('mapa')">Mapa Geral</button>
+  <div class="barra">
+    <div class="modos" role="group" aria-label="Modo de visualização">
+      <button type="button" id="btn-consulta" aria-pressed="true">Modo consulta</button>
+      <button type="button" id="btn-mapa" aria-pressed="false">Mapa geral</button>
+    </div>
+    <button type="button" class="tema" id="btn-tema">Tema escuro</button>
   </div>
-  <button class="theme-btn" id="themeBtn" title="Alternar tema">
-    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14.2A7.5 7.5 0 0 1 9.8 5 7.5 7.5 0 1 0 19 14.2Z"></path></svg>
-  </button>
-</header>
 
-<main id="mainConsulta">
-  <div class="wizard">
-    <div class="trail" id="trail"></div>
-    <div id="stepArea"></div>
-  </div>
-</main>
+  <section id="vista-consulta" aria-label="Modo consulta">
+    <ol class="trilha" id="trilha" aria-label="Respostas anteriores" hidden></ol>
+    <div id="palco" aria-live="polite" style="margin-top:16px;"></div>
+  </section>
 
-<main id="mainMapa" style="display:none">
-  <div class="mapa-wrap" id="mapaWrap"></div>
-</main>
-
+  <section id="vista-mapa" class="mapa" aria-label="Mapa geral" hidden></section>
+</div>
 
 <script>
-/* ============================================================
-   ÁRVORE DE DECISÃO — cada nó é uma pergunta com opções.
-   Cada opção leva a outro nó (next) ou a um diagnóstico (dx).
-   Isso reproduz a sequência real de perguntas de consultório.
-   ============================================================ */
+const CFG = { resultado: 'Diagnóstico mais provável', tratamento: 'Tratamento / conduta', internacao: 'Indicação de internação' };
+
+const mapaCategories = [
+  { title:'Exantema com febre', hint:'rash surge com a febre ainda presente', accent:'var(--orange)', diseases:['sarampo','rubeola'] },
+  { title:'Exantema após febre', hint:'rash só surge quando a febre cessa', accent:'var(--blue)', diseases:['subito','eritema'] },
+  { title:'Exantema vesicular', hint:'lesões evoluem para vesícula/crosta', accent:'var(--mint)', diseases:['varicela','maopeboca'] },
+  { title:'Alterações na cavidade oral', hint:'enantema/mucosa associados', accent:'var(--red)', diseases:['escarlatina','kawasaki','mono'] }
+];
+
 const tree = {
   start: {
     q: 'As lesões têm vesículas (bolhas com líquido)?',
@@ -513,252 +434,211 @@ const diagnoses = {
   }
 };
 
+
 /* ============================================================
-   ESTADO E RENDERIZAÇÃO
+   Motor comum (mesmo do Profilaxia do Tétano): trilha, perguntas,
+   resultado, mapa geral em accordion, modos e tema.
+   Espera: tree, diagnoses, mapaCategories, CFG.
    ============================================================ */
 let history = []; // [{nodeId, answerLabel, nextNode, dx}]
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, txt) => {
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined) e.textContent = txt;
+  return e;
+};
+const cor = (accent) => (/--(\w+)/.exec(accent) || [])[1] || 'blue';
 
-function currentNodeId() {
-  return history.length === 0 ? 'start' : history[history.length - 1].nextNode;
-}
+function currentNodeId(){ return history.length === 0 ? 'start' : history[history.length - 1].nextNode; }
 
-function renderTrail() {
-  const trail = document.getElementById('trail');
-  if (history.length === 0) { trail.innerHTML = ''; return; }
-  trail.innerHTML = history.map((h, i) => `
-    <span class="trail-pill" onclick="jumpTo(${i})">${h.answerLabel}</span>
-    <span class="trail-arrow">→</span>
-  `).join('');
-}
-
-function jumpTo(index) {
-  history = history.slice(0, index);
-  render();
-}
-
-function render() {
-  renderTrail();
-  const area = document.getElementById('stepArea');
-
-  // se o último passo levou a um diagnóstico, mostra o card final
-  if (history.length > 0 && history[history.length - 1].dx) {
-    renderDiagnosis(history[history.length - 1].dx, area);
-    return;
-  }
-
-  const nodeId = currentNodeId();
-  const node = tree[nodeId];
-  area.innerHTML = `
-    <div class="q-card">
-      <h2>${node.q}</h2>
-      <div class="q-hint">${node.hint}</div>
-      <div class="options">
-        ${node.options.map((opt, i) => `
-          <div class="option-btn" onclick="answer(${i})">
-            <div>
-              ${opt.label}
-              ${opt.sub ? `<span class="o-sub">${opt.sub}</span>` : ''}
-            </div>
-            <span class="o-arrow">→</span>
-          </div>
-        `).join('')}
-      </div>
-      ${history.length > 0 ? `<div class="back-link" onclick="goBack()">← Voltar uma pergunta</div>` : ''}
-    </div>
-  `;
-}
-
-function answer(index) {
-  const nodeId = currentNodeId();
-  const node = tree[nodeId];
-  const opt = node.options[index];
-  history.push({
-    nodeId: nodeId,
-    answerLabel: opt.label,
-    nextNode: opt.next || null,
-    dx: opt.dx || null
+function renderTrail(){
+  const ol = $('#trilha');
+  ol.replaceChildren();
+  ol.hidden = history.length === 0;
+  if(!history.length) return;
+  ol.append(el('li', 'rotulo', 'Trilha'));
+  history.forEach((h, i) => {
+    const li = el('li');
+    const b = el('button');
+    b.type = 'button';
+    b.title = 'Voltar a esta etapa';
+    b.append(el('b', null, 'Resposta: '), document.createTextNode(h.answerLabel));
+    b.addEventListener('click', () => { history = history.slice(0, i); render(); });
+    li.append(b);
+    ol.append(li);
   });
-  render();
 }
 
-function goBack() {
-  history.pop();
-  render();
+function acoes(){
+  const box = el('div', 'acoes');
+  const v = el('button', 'ghost', 'Voltar'); v.type = 'button';
+  v.addEventListener('click', () => { history.pop(); render(); });
+  const r = el('button', 'ghost', 'Recomeçar'); r.type = 'button';
+  r.addEventListener('click', () => { history = []; render(); });
+  box.append(v, r);
+  return box;
 }
 
-function restart() {
-  history = [];
-  render();
+function renderPergunta(nodeId){
+  const node = tree[nodeId];
+  const painel = el('div', 'painel');
+  painel.append(el('p', 'passo', 'Pergunta ' + (history.length + 1)));
+  const h = el('h2', 'pergunta', node.q);
+  h.tabIndex = -1; h.id = 'foco';
+  painel.append(h, el('p', 'ajuda', node.hint));
+  const lista = el('div', 'opcoes');
+  node.options.forEach(opt => {
+    const b = el('button', 'opcao' + (opt.perigo ? ' perigo' : ''));
+    b.type = 'button';
+    b.append(el('strong', null, opt.label));
+    if(opt.sub) b.append(el('span', null, opt.sub));
+    b.addEventListener('click', () => {
+      history.push({ nodeId, answerLabel: opt.label, nextNode: opt.next || null, dx: opt.dx || null });
+      render();
+    });
+    lista.append(b);
+  });
+  painel.append(lista);
+  if(history.length) painel.append(acoes());
+  return painel;
 }
 
-function renderImages(images) {
-  if (!images || !images.length) return '';
-  if (images.length === 1) {
-    const img = images[0];
-    return `<div class="dx-image"><img src="${img.src}" alt="${img.caption}"><div class="dx-image-caption">${img.caption}</div></div>`;
+function imagens(imgs){
+  if(!imgs || !imgs.length) return null;
+  const g = el('div', 'galeria');
+  imgs.forEach(i => {
+    const f = el('figure', 'foto');
+    const im = el('img'); im.src = i.src; im.alt = i.caption; im.loading = 'lazy';
+    f.append(im, el('figcaption', null, i.caption));
+    g.append(f);
+  });
+  return g;
+}
+
+function lista(itens){
+  const ul = el('ul');
+  itens.forEach(i => {
+    const li = el('li');
+    if(typeof i === 'string'){ li.textContent = i; }
+    else {
+      li.append(document.createTextNode(i.t));
+      const sub = el('ul');
+      i.subs.forEach(s => sub.append(el('li', null, s)));
+      li.append(sub);
+    }
+    ul.append(li);
+  });
+  return ul;
+}
+
+function caixa(rotulo, conteudo, extra){
+  const d = el('div', 'conduta' + (extra ? ' ' + extra : ''));
+  d.append(el('p', 'k', rotulo));
+  if(typeof conteudo === 'string') d.append(el('p', 'v', conteudo)); else d.append(conteudo);
+  return d;
+}
+
+/* Conteúdo clínico da doença/conduta (usado no Consulta e no Mapa geral) */
+function conteudoDoenca(d, alvo){
+  const g = imagens(d.images);
+  if(g) alvo.append(g);
+  if(d.exantemaChar) alvo.append(caixa('Características do exantema', d.exantemaChar));
+  if(d.banner) alvo.append(caixa('Ponto-chave', d.banner));
+  d.fases.forEach(f => alvo.append(caixa(f.t, lista(f.items))));
+  if(d.exames){
+    const c = caixa('Exames', lista(d.exames));
+    c.firstChild.append(el('span', 'tag', 'Obrigatórios'));
+    alvo.append(c);
   }
-  return `<div class="dx-image-gallery">${images.map(img =>
-    `<div class="dx-image"><img src="${img.src}" alt="${img.caption}"><div class="dx-image-caption">${img.caption}</div></div>`
-  ).join('')}</div>`;
+  alvo.append(el('p', 'secao', CFG.tratamento));
+  const selos = el('div', 'selos');
+  d.pills.forEach(p => selos.append(el('span', 'selo ' + p.c, p.t)));
+  alvo.append(selos);
+  if(d.txNote) alvo.append(el('p', 'nota', d.txNote));
+  if(d.tx) alvo.append(caixa('Conduta', lista(d.tx), 'sim'));
+  if(d.internacao) alvo.append(caixa(CFG.internacao, d.internacao, 'alerta'));
 }
 
-function renderTxList(tx) {
-  const items = tx.map(i => {
-    if (typeof i === 'string') return `<li>${i}</li>`;
-    return `<li>${i.t}<ul class="dx-tx-sublist">${i.subs.map(s => `<li>${s}</li>`).join('')}</ul></li>`;
-  }).join('');
-  return `<ul class="dx-tx-list">${items}</ul>`;
-}
-
-function renderDiagnosis(dxId, area) {
+function renderDiagnostico(dxId){
   const d = diagnoses[dxId];
-  let html = `
-    <div class="dx-card" style="--accent:${d.accent};--accent-text:${d.accentText}">
-      <div class="dx-eyebrow">Diagnóstico mais provável</div>
-      <h2>${d.title}</h2>
-      <div class="dx-subtitle">${d.subtitle}</div>
-      ${renderImages(d.images)}
-      <div class="dx-exantema-banner">
-        <div class="dx-exantema-label">Características do Exantema</div>
-        <div class="dx-exantema-text">${d.exantemaChar}</div>
-      </div>
-  `;
-  d.fases.forEach(f => {
-    html += `<div class="d-block">
-      <div class="d-block-label">${f.t}</div>
-      <ul>${f.items.map(i => `<li>${i}</li>`).join('')}</ul>
-    </div>`;
-  });
-  if (d.exames) {
-    html += `<div class="d-block">
-      <div class="d-block-label">Exames<span class="dx-exames-tag">Obrigatórios</span></div>
-      <ul>${d.exames.map(i => `<li>${i}</li>`).join('')}</ul>
-    </div>`;
-  }
-  html += `
-      <div class="dx-treatment">
-        <div class="dx-treatment-label">Tratamento / Conduta</div>
-        ${d.pills.map(p => `<span class="status-pill ${p.c}">${p.t}</span>`).join('')}
-        ${d.txNote ? `<div class="dx-tx-note">${d.txNote}</div>` : ''}
-        ${d.tx ? renderTxList(d.tx) : ''}
-        ${d.internacao ? `<div class="dx-internacao"><b>Indicação de internação:</b> ${d.internacao}</div>` : ''}
-      </div>
-      <div class="back-link" onclick="goBack()" style="margin-top:18px">← Voltar e revisar uma resposta</div>
-      <div class="restart-link" onclick="restart()">↺ Começar nova consulta</div>
-    </div>
-  `;
-  area.innerHTML = html;
+  const painel = el('div', 'painel resultado');
+  painel.append(el('span', 'selo ' + cor(d.accent), CFG.resultado));
+  const h = el('h2', null, d.title);
+  h.tabIndex = -1; h.id = 'foco';
+  painel.append(h, el('p', 'contexto', d.subtitle));
+  conteudoDoenca(d, painel);
+  painel.append(acoes());
+  return painel;
 }
 
-/* ============================================================
-   TEMA CLARO/ESCURO
-   ============================================================ */
-const themeBtn = document.getElementById('themeBtn');
-const themeIcon = document.getElementById('themeIcon');
-const root = document.documentElement;
-function temaAtual() {
-  const attr = root.getAttribute('data-theme');
-  if (attr) return attr;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+function render(){
+  renderTrail();
+  const palco = $('#palco');
+  const ultimo = history[history.length - 1];
+  palco.replaceChildren(ultimo && ultimo.dx ? renderDiagnostico(ultimo.dx) : renderPergunta(currentNodeId()));
+  if(history.length){ const f = $('#foco'); if(f) f.focus(); }
 }
-function aplicarIconeTema(tema) {
-  themeIcon.innerHTML = tema === 'dark'
-    ? '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>'
-    : '<path d="M19 14.2A7.5 7.5 0 0 1 9.8 5 7.5 7.5 0 1 0 19 14.2Z"></path>';
+
+/* ---------- Mapa geral: categorias em accordion ---------- */
+function renderMapa(){
+  const mapa = $('#vista-mapa');
+  mapa.replaceChildren();
+  let temaAtual = null;
+  mapaCategories.forEach((cat, i) => {
+    if(cat.tema && cat.tema !== temaAtual){
+      temaAtual = cat.tema;
+      mapa.append(el('h2', 'tema-titulo', cat.tema));
+    }
+    const det = el('details', 'bloco');
+    if(i === 0) det.open = true;
+    const sum = el('summary');
+    const t = el('div'); t.append(document.createTextNode(cat.title), el('small', null, cat.hint));
+    sum.append(t);
+    const corpo = el('div', 'corpo');
+    cat.diseases.forEach(id => {
+      const d = diagnoses[id];
+      const card = el('article', 'doenca');
+      card.append(el('span', 'selo ' + cor(cat.accent), cat.title), el('h3', null, d.title), el('p', 'contexto', d.subtitle));
+      conteudoDoenca(d, card);
+      corpo.append(card);
+    });
+    det.append(sum, corpo);
+    mapa.append(det);
+  });
 }
-aplicarIconeTema(temaAtual());
-themeBtn.addEventListener('click', () => {
-  const novo = temaAtual() === 'dark' ? 'light' : 'dark';
-  root.setAttribute('data-theme', novo);
-  aplicarIconeTema(novo);
+
+/* ---------- Modos e tema ---------- */
+function setModo(modo){
+  const consulta = modo === 'consulta';
+  $('#vista-consulta').hidden = !consulta;
+  $('#vista-mapa').hidden = consulta;
+  $('#btn-consulta').setAttribute('aria-pressed', String(consulta));
+  $('#btn-mapa').setAttribute('aria-pressed', String(!consulta));
+  if(!consulta && !$('#vista-mapa').children.length) renderMapa();
+}
+$('#btn-consulta').addEventListener('click', () => setModo('consulta'));
+$('#btn-mapa').addEventListener('click', () => setModo('mapa'));
+
+const raiz = document.documentElement;
+function escuroAgora(){
+  const t = raiz.getAttribute('data-theme');
+  if(t) return t === 'dark';
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function rotuloTema(){ $('#btn-tema').textContent = escuroAgora() ? 'Tema claro' : 'Tema escuro'; }
+$('#btn-tema').addEventListener('click', () => {
+  raiz.setAttribute('data-theme', escuroAgora() ? 'light' : 'dark');
+  rotuloTema();
 });
-
-/* ============================================================
-   MODO MAPA — agrupamento por categoria, para visão geral
-   ============================================================ */
-const mapaCategories = [
-  { title:'Exantema com Febre', hint:'rash surge com a febre ainda presente', accent:'var(--orange)', accentText:'var(--on-soft-orange)', diseases:['sarampo','rubeola'] },
-  { title:'Exantema após Febre', hint:'rash só surge quando a febre cessa', accent:'var(--blue)', accentText:'var(--on-soft-blue)', diseases:['subito','eritema'] },
-  { title:'Exantema Vesicular', hint:'lesões evoluem para vesícula/crosta', accent:'var(--mint)', accentText:'var(--on-soft-mint)', diseases:['varicela','maopeboca'] },
-  { title:'Alterações na Cavidade Oral', hint:'enantema/mucosa associados', accent:'var(--red)', accentText:'var(--on-soft-red)', diseases:['escarlatina','kawasaki','mono'] }
-];
-
-let mapaOpenState = {}; // lembra quais categorias estão abertas entre re-renders
-
-function renderMapa() {
-  const wrap = document.getElementById('mapaWrap');
-  wrap.innerHTML = mapaCategories.map((cat, i) => `
-    <div class="mapa-cat ${mapaOpenState[i] ? 'open' : ''}" style="--accent:${cat.accent}">
-      <div class="mapa-cat-toggle" onclick="toggleMapaCat(${i})">
-        <div class="mapa-cat-toggle-text">
-          <h2>${cat.title}</h2>
-          <div class="mapa-cat-hint">${cat.hint}</div>
-        </div>
-        <span class="mapa-chevron">⌄</span>
-      </div>
-      <div class="mapa-cat-body">
-        <div class="mapa-cat-body-inner">
-          <div class="mapa-disease-grid">
-            ${cat.diseases.map(dId => mapaDiseaseCardHTML(dId, cat.accent, cat.accentText)).join('')}
-          </div>
-        </div>
-      </div>
-    </div>
-  `).join('');
+if(window.matchMedia){
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(rotuloTema);
 }
 
-function toggleMapaCat(i) {
-  mapaOpenState[i] = !mapaOpenState[i];
-  renderMapa();
-}
-
-function mapaDiseaseCardHTML(dId, accent, accentText) {
-  const d = diagnoses[dId];
-  let html = `<div class="mapa-disease-card" style="--accent:${accent}">
-    <h3>${d.title}</h3>
-    <div class="mapa-dc-meta">${d.subtitle}</div>
-    ${renderImages(d.images)}
-    <div class="dx-exantema-banner" style="--accent-text:${accentText}">
-      <div class="dx-exantema-label">Características do Exantema</div>
-      <div class="dx-exantema-text">${d.exantemaChar}</div>
-    </div>`;
-  d.fases.forEach(f => {
-    html += `<div class="d-block">
-      <div class="d-block-label">${f.t}</div>
-      <ul>${f.items.map(i => `<li>${i}</li>`).join('')}</ul>
-    </div>`;
-  });
-  if (d.exames) {
-    html += `<div class="d-block">
-      <div class="d-block-label">Exames<span class="dx-exames-tag">Obrigatórios</span></div>
-      <ul>${d.exames.map(i => `<li>${i}</li>`).join('')}</ul>
-    </div>`;
-  }
-  html += `<div class="dx-treatment">
-    <div class="dx-treatment-label">Tratamento / Conduta</div>
-    ${d.pills.map(p => `<span class="status-pill ${p.c}">${p.t}</span>`).join('')}
-    ${d.txNote ? `<div class="dx-tx-note">${d.txNote}</div>` : ''}
-    ${d.tx ? renderTxList(d.tx) : ''}
-    ${d.internacao ? `<div class="dx-internacao"><b>Indicação de internação:</b> ${d.internacao}</div>` : ''}
-  </div>`;
-  html += `</div>`;
-  return html;
-}
-
-function setMode(mode) {
-  document.getElementById('modeConsulta').classList.toggle('active', mode === 'consulta');
-  document.getElementById('modeMapa').classList.toggle('active', mode === 'mapa');
-  document.getElementById('mainConsulta').style.display = mode === 'consulta' ? 'flex' : 'none';
-  document.getElementById('mainMapa').style.display = mode === 'mapa' ? 'block' : 'none';
-  if (mode === 'mapa') renderMapa();
-}
-
-/* ============================================================
-   INICIALIZAÇÃO
-   ============================================================ */
+rotuloTema();
 render();
 </script>
-<style>html,body{height:auto!important}main{flex:none!important;overflow:visible!important}#mainMapa{overflow:visible!important}</style>
 <script>(function(){function a(){parent.postMessage({tipo:'prescreve:altura',altura:Math.ceil(document.body.getBoundingClientRect().height)},'*')}window.addEventListener('load',a);new ResizeObserver(a).observe(document.body)})()</script>
 </body>
 </html>

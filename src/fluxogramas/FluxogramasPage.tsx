@@ -1,59 +1,36 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { ChevronRight, Workflow } from 'lucide-react'
 import { useSyncStore } from '../core/sync'
 import { SearchInput } from '../admin/components/SearchInput'
+import { HeroPagina } from '../core/components/HeroPagina'
+import type { Fluxograma } from '../admin/types'
 import { corDaCategoria } from '../materiais/cores'
 import { FluxogramaViewer } from './FluxogramaViewer'
 
-/** Fluxogramas — aba do usuário, só leitura, mesmo espírito de Materiais/Patologias: quem
- *  cadastra é o editor (Painel → Fluxogramas). Entrada em grid de cards por categoria
- *  (mesmo visual de Materiais); ao abrir uma categoria, mostra o FluxogramaViewer (abas +
- *  sandbox + tela cheia — mesmo componente reaproveitado nas condutas da Pediatria). Usa
- *  o cache offline-first (useSyncStore), não a API direta do admin. */
+const porTitulo = (a: Fluxograma, b: Fluxograma) => a.titulo.localeCompare(b.titulo, 'pt-BR')
+
+/** Fluxogramas — aba do USUÁRIO, só leitura, no mesmo desenho de Medicamentos: grade de áreas
+ *  (/fluxogramas), lista da área escolhida (/fluxogramas?categoria=…) e o fluxograma aberto
+ *  em /fluxogramas/:id. Usa o cache offline-first (useSyncStore). Quem cadastra é o editor
+ *  (Painel → Fluxogramas). */
 export function FluxogramasPage() {
   const carregandoInicial = useSyncStore((s) => s.carregandoInicial)
-  const fluxogramasTodos = useSyncStore((s) => s.fluxogramas)
-
-  const [searchParams, setSearchParams] = useSearchParams()
-  const categoriaDaUrl = searchParams.get('categoria')
+  const fluxogramas = useSyncStore((s) => s.fluxogramas)
+  const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const categoriaAberta = searchParams.get('categoria')
   const [busca, setBusca] = useState('')
 
-  const todasCategorias = useMemo(() => fluxogramasTodos.map((f) => f.categoria), [fluxogramasTodos])
+  const todasCategorias = useMemo(() => fluxogramas.map((f) => f.categoria), [fluxogramas])
 
-  const filtrados = useMemo(() => {
-    const t = busca.trim().toLowerCase()
-    if (!t) return fluxogramasTodos
-    return fluxogramasTodos.filter(
-      (f) => f.titulo.toLowerCase().includes(t) || f.categoria.toLowerCase().includes(t)
-    )
-  }, [fluxogramasTodos, busca])
-
-  const grupos = useMemo(() => {
-    const mapa = new Map<string, typeof fluxogramasTodos>()
-    for (const f of filtrados) {
-      const lista = mapa.get(f.categoria) ?? []
-      lista.push(f)
-      mapa.set(f.categoria, lista)
-    }
+  const areas = useMemo(() => {
+    const mapa = new Map<string, Fluxograma[]>()
+    for (const f of fluxogramas) mapa.set(f.categoria, [...(mapa.get(f.categoria) ?? []), f])
     return [...mapa.entries()]
-      .map(([categoria, itens]) => ({
-        categoria,
-        itens: [...itens].sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR')),
-      }))
-      .sort((a, b) => a.categoria.localeCompare(b.categoria, 'pt-BR'))
-  }, [filtrados])
-
-  const categoriaAberta = categoriaDaUrl && grupos.some((g) => g.categoria === categoriaDaUrl) ? categoriaDaUrl : null
-  const grupoAberto = grupos.find((g) => g.categoria === categoriaAberta) ?? null
-
-  function abrirCategoria(categoria: string) {
-    setSearchParams({ categoria })
-  }
-
-  function voltar() {
-    setSearchParams({})
-  }
+      .map(([nome, lista]) => ({ nome, lista: lista.sort(porTitulo) }))
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  }, [fluxogramas])
 
   if (carregandoInicial) {
     return (
@@ -63,71 +40,160 @@ export function FluxogramasPage() {
     )
   }
 
-  // Categoria aberta — mostra o viewer ocupando a tela inteira disponível, sem limitar
-  // largura (max-w) como a grade de categorias faz: aqui o conteúdo é o fluxograma em si,
-  // então quanto mais área, melhor pra leitura durante o atendimento.
-  if (grupoAberto) {
+  // Fluxograma aberto
+  if (id) {
+    const f = fluxogramas.find((x) => String(x.id) === id)
+    if (!f) {
+      return (
+        <div className="h-full flex flex-col items-center justify-center gap-2">
+          <p className="text-sm text-text-dim">Fluxograma não encontrado.</p>
+          <Link to="/fluxogramas" className="text-sm font-medium text-accent">
+            Voltar aos fluxogramas
+          </Link>
+        </div>
+      )
+    }
     return (
-      <div className="h-full min-h-0 overflow-y-auto flex flex-col gap-3 p-4">
-        <button
-          onClick={voltar}
-          className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors shrink-0 w-fit"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Voltar pras categorias
-        </button>
-        <FluxogramaViewer fluxogramas={grupoAberto.itens} titulo={grupoAberto.categoria} />
+      <div className="h-full overflow-y-auto pb-10">
+        <HeroPagina
+          migalhas={[
+            { label: 'Página inicial', to: '/' },
+            { label: 'Fluxogramas', to: '/fluxogramas' },
+            { label: f.categoria, to: `/fluxogramas?categoria=${encodeURIComponent(f.categoria)}` },
+            { label: f.titulo },
+          ]}
+          titulo={f.titulo}
+        />
+        <div className="px-6 sm:px-9 pt-6">
+          <FluxogramaViewer fluxogramas={[f]} />
+        </div>
       </div>
     )
   }
 
+  // Lista da área escolhida
+  const area = categoriaAberta ? areas.find((a) => a.nome === categoriaAberta) ?? null : null
+  if (area) {
+    return <ListaDaArea nome={area.nome} lista={area.lista} />
+  }
+
+  // Grade de áreas (ou resultado de busca por título)
+  const t = busca.trim().toLowerCase()
+  const resultadoBusca = t
+    ? fluxogramas.filter((f) => f.titulo.toLowerCase().includes(t) || f.categoria.toLowerCase().includes(t)).sort(porTitulo)
+    : null
+
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="max-w-6xl mx-auto flex flex-col gap-6 pb-16">
-        <div>
-          <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mb-2 text-text">
-            Condutas clínicas em fluxograma.
-          </h1>
-          <p className="text-text-dim text-base leading-relaxed max-w-lg">
-            Organizados por área — abra pra consultar durante o atendimento, com opção de tela cheia.
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-6xl mx-auto px-6 sm:px-9 py-10 flex flex-col gap-8">
+        <div className="flex flex-col items-center text-center gap-2">
+          <h1 className="font-display text-[36px] font-bold tracking-[-1.2px] text-text">Fluxogramas</h1>
+          <p className="text-sm text-text-dim max-w-lg">
+            {fluxogramas.length} {fluxogramas.length === 1 ? 'fluxograma' : 'fluxogramas'} divididos por área. Escolha
+            uma área — ou busque pelo nome — para abrir a conduta.
           </p>
         </div>
 
-        <div className="max-w-md">
-          <SearchInput value={busca} onChange={setBusca} placeholder="Buscar fluxograma ou categoria…" />
+        <div className="w-full max-w-md mx-auto">
+          <SearchInput value={busca} onChange={setBusca} placeholder="Buscar fluxograma ou área…" />
         </div>
 
-        {grupos.length === 0 ? (
-          <p className="text-sm text-text-dim">
-            {fluxogramasTodos.length === 0
-              ? 'Nenhum fluxograma cadastrado ainda — quem cadastra é o editor, em Painel → Fluxogramas.'
-              : 'Nada encontrado pra essa busca.'}
+        {resultadoBusca ? (
+          resultadoBusca.length === 0 ? (
+            <p className="text-sm text-text-dim text-center">Nenhum fluxograma encontrado.</p>
+          ) : (
+            <div className="border border-border bg-surface rounded-[var(--radius-panel,18px)] px-6">
+              {resultadoBusca.map((f) => (
+                <LinhaFluxograma key={f.id} f={f} mostrarArea />
+              ))}
+            </div>
+          )
+        ) : areas.length === 0 ? (
+          <p className="text-sm text-text-dim text-center">
+            Nenhum fluxograma cadastrado ainda — quem cadastra é o editor, em Painel → Fluxogramas.
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {grupos.map((grupo) => {
-              const cor = corDaCategoria(grupo.categoria, todasCategorias)
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {areas.map(({ nome, lista }) => {
+              const cor = corDaCategoria(nome, todasCategorias)
               return (
-                <button
-                  key={grupo.categoria}
-                  onClick={() => abrirCategoria(grupo.categoria)}
-                  className="text-left rounded-[var(--radius-card,14px)] border border-border overflow-hidden bg-surface shadow-[var(--shadow-float,0_4px_14px_rgba(17,17,17,.08))] hover:-translate-y-0.5 hover:shadow-[var(--shadow-area,3px_3px_0_var(--color-text))] transition-[transform,box-shadow] duration-150"
+                <Link
+                  key={nome}
+                  to={`/fluxogramas?categoria=${encodeURIComponent(nome)}`}
+                  className="ed-hover-lift border border-border rounded-[var(--radius-panel,18px)] p-5 min-h-[150px] flex flex-col justify-between"
+                  style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${cor} 18%, var(--surface)), var(--surface) 85%)` }}
                 >
-                  <div
-                    className="px-4 py-3 font-display font-semibold text-[15px] tracking-[-.2px] text-white"
-                    style={{ background: cor }}
+                  <span
+                    className="w-11 h-11 rounded-full bg-surface flex items-center justify-center shadow-[var(--shadow-float)]"
+                    style={{ color: cor }}
                   >
-                    {grupo.categoria}
+                    <Workflow className="w-5 h-5" />
+                  </span>
+                  <div>
+                    <p className="font-display text-[19px] font-semibold tracking-[-.5px] text-text leading-tight">{nome}</p>
+                    <p className="text-xs mt-1 font-medium" style={{ color: cor }}>
+                      {lista.length} {lista.length === 1 ? 'fluxograma' : 'fluxogramas'}
+                    </p>
                   </div>
-                  <div className="px-4 py-3 text-sm text-text-dim">
-                    {grupo.itens.length} fluxograma{grupo.itens.length === 1 ? '' : 's'}
-                  </div>
-                </button>
+                </Link>
               )
             })}
           </div>
         )}
       </div>
     </div>
+  )
+}
+
+function ListaDaArea({ nome, lista }: { nome: string; lista: Fluxograma[] }) {
+  const [busca, setBusca] = useState('')
+  const t = busca.trim().toLowerCase()
+  const filtrados = t ? lista.filter((f) => f.titulo.toLowerCase().includes(t)) : lista
+
+  return (
+    <div className="h-full overflow-y-auto">
+      <HeroPagina
+        migalhas={[
+          { label: 'Página inicial', to: '/' },
+          { label: 'Fluxogramas', to: '/fluxogramas' },
+          { label: nome },
+        ]}
+        titulo={nome}
+      >
+        <p className="inline-flex items-center gap-1.5 text-[13px] text-white/90">
+          <Workflow className="w-3.5 h-3.5" />
+          <b>{lista.length}</b> {lista.length === 1 ? 'fluxograma' : 'fluxogramas'}
+        </p>
+      </HeroPagina>
+
+      <div className="px-6 sm:px-9 py-8 flex flex-col gap-4 max-w-5xl">
+        <div className="max-w-md">
+          <SearchInput value={busca} onChange={setBusca} placeholder={`Buscar em ${nome}…`} />
+        </div>
+        {filtrados.length === 0 ? (
+          <p className="text-sm text-text-dim">Nenhum fluxograma encontrado.</p>
+        ) : (
+          <div className="border border-border bg-surface rounded-[var(--radius-panel,18px)] px-6">
+            {filtrados.map((f) => (
+              <LinhaFluxograma key={f.id} f={f} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function LinhaFluxograma({ f, mostrarArea }: { f: Fluxograma; mostrarArea?: boolean }) {
+  return (
+    <Link to={`/fluxogramas/${f.id}`} className="group flex items-center gap-3 py-4 border-b border-border last:border-b-0">
+      <ChevronRight className="w-4 h-4 text-text-dim shrink-0 transition-transform group-hover:translate-x-0.5" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[15px] font-semibold text-text truncate group-hover:text-accent transition-colors">{f.titulo}</p>
+        {(mostrarArea || f.descricao) && (
+          <p className="text-xs text-text-dim truncate mt-0.5">{mostrarArea ? f.categoria : f.descricao}</p>
+        )}
+      </div>
+    </Link>
   )
 }

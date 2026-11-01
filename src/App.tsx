@@ -149,6 +149,7 @@ function App() {
             <Route path="/medicamentos/:id" element={<MedicamentoDetalhe />} />
             <Route path="/materiais" element={<MateriaisPage />} />
             <Route path="/fluxogramas" element={<FluxogramasPage />} />
+            <Route path="/fluxogramas/:id" element={<FluxogramasPage />} />
             <Route path="/painel" element={<AdminLayout />}>
               <Route index element={<Navigate to="areas" replace />} />
               <Route path="areas" element={<AreasPage />} />

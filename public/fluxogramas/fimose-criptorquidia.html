@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fimose e Criptorquidia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout: coluna única de leitura (máx. 760px). Cabeçalho com alternância de modo; abaixo, wizard (Consulta) ou accordion (Mapa Geral). */
+  /* Identidade: Painel Editorial. Tokens claros em :root, escuros redefinidos abaixo. */
+  :root{
+    --paper:#f5f2eb; --surface:#fbfaf7; --surface-2:#f0ede6;
+    --ink:#111111; --muted:#706f69; --line:#d9d6ce; --line-strong:#c8c5bc;
+    --blue:#1857d1; --soft-blue:#e8eefc;
+    --mint:#007f5f; --soft-mint:#def5ee;
+    --orange:#b84a07; --soft-orange:#fcebdc;
+    --red:#b8312b; --soft-red:#fae7e4;
+    --shadow-hard:#111111;
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'DM Sans', system-ui, sans-serif;
+    --radius-card:14px; --radius-control:12px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#131311; --surface:#1b1b18; --surface-2:#242420;
+      --ink:#f2efe8; --muted:#a09c91; --line:#34342f; --line-strong:#4a4a43;
+      --blue:#7aa2ff; --soft-blue:#1c2848;
+      --mint:#35d3a3; --soft-mint:#0f3128;
+      --orange:#ff9355; --soft-orange:#3b2213;
+      --red:#ff8f86; --soft-red:#3e1b1a;
+      --shadow-hard:#000000;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#131311; --surface:#1b1b18; --surface-2:#242420;
+    --ink:#f2efe8; --muted:#a09c91; --line:#34342f; --line-strong:#4a4a43;
+    --blue:#7aa2ff; --soft-blue:#1c2848;
+    --mint:#35d3a3; --soft-mint:#0f3128;
+    --orange:#ff9355; --soft-orange:#3b2213;
+    --red:#ff8f86; --soft-red:#3e1b1a;
+    --shadow-hard:#000000;
+    color-scheme: dark;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:16px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 48px;
+  }
+  .coluna{ max-width:760px; margin-inline:auto; display:flex; flex-direction:column; gap:20px; }
+  button{ font:inherit; color:inherit; }
+  img{ max-width:100%; }
+  :focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+  /* Cabeçalho */
+  .eyebrow{ margin:0 0 6px; font-size:.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--blue); }
+  h1{
+    margin:0; font-family:var(--font-display); font-weight:700;
+    font-size:clamp(1.7rem, 5.4vw, 2.3rem); line-height:1.08; letter-spacing:-1.1px; text-wrap:balance;
+  }
+  .sub{ margin:8px 0 0; color:var(--muted); font-size:.95rem; max-width:60ch; }
+  .barra{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }
+  .modos{
+    display:inline-flex; border:1.5px solid var(--ink); border-radius:var(--radius-control);
+    overflow:hidden; background:var(--surface); box-shadow:3px 3px 0 var(--shadow-hard);
+  }
+  .modos button{
+    border:0; background:transparent; padding:10px 16px; cursor:pointer;
+    font-size:.78rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+  }
+  .modos button + button{ border-left:1.5px solid var(--ink); }
+  .modos button[aria-pressed="true"]{ background:var(--ink); color:var(--paper); }
+  .tema{
+    border:1.5px solid var(--line-strong); background:var(--surface); border-radius:var(--radius-control);
+    padding:9px 14px; cursor:pointer; font-size:.78rem; font-weight:600; color:var(--muted);
+  }
+  .tema:hover{ border-color:var(--ink); color:var(--ink); }
+
+  /* Trilha clicável */
+  .trilha{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0; padding:0; list-style:none; }
+  .trilha[hidden]{ display:none; }
+  .trilha .rotulo{ font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-right:2px; }
+  .trilha button{
+    border:1.5px solid var(--line-strong); background:var(--surface); border-radius:999px;
+    padding:6px 12px; font-size:.82rem; cursor:pointer; text-align:left; max-width:100%;
+  }
+  .trilha button:hover{ border-color:var(--blue); background:var(--soft-blue); }
+  .trilha b{ font-weight:600; color:var(--muted); }
+
+  /* Cartão de pergunta */
+  .painel{
+    background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-card);
+    box-shadow:5px 5px 0 var(--shadow-hard); padding:22px;
+  }
+  .passo{ margin:0 0 6px; font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--blue); }
+  .pergunta{ margin:0; font-family:var(--font-display); font-weight:600; font-size:1.35rem; line-height:1.2; letter-spacing:-.4px; text-wrap:balance; }
+  .pergunta:focus{ outline:none; }
+  .ajuda{ margin:8px 0 0; color:var(--muted); font-size:.92rem; }
+  .opcoes{ display:flex; flex-direction:column; gap:12px; margin-top:18px; }
+  .opcao{
+    display:block; width:100%; text-align:left; cursor:pointer;
+    background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-control);
+    padding:14px 16px; box-shadow:3px 3px 0 var(--shadow-hard);
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .opcao:hover{ background:var(--soft-blue); transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--shadow-hard); }
+  .opcao:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--shadow-hard); }
+  .opcao.perigo{ border-color:var(--red); }
+  .opcao.perigo:hover{ background:var(--soft-red); }
+  .opcao strong{ display:block; font-family:var(--font-display); font-weight:600; font-size:1.02rem; }
+  .opcao span{ display:block; margin-top:2px; color:var(--muted); font-size:.88rem; line-height:1.4; }
+  .acoes{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  .ghost{
+    border:1.5px solid var(--line-strong); background:transparent; border-radius:var(--radius-control);
+    padding:9px 14px; font-size:.82rem; font-weight:600; cursor:pointer; color:var(--muted);
+  }
+  .ghost:hover{ border-color:var(--ink); color:var(--ink); }
+
+  /* Selos e cores de categoria */
+  .selo{
+    display:inline-block; padding:4px 11px; border-radius:999px; font-size:.7rem; font-weight:700;
+    letter-spacing:1px; text-transform:uppercase; border:1.5px solid currentColor;
+  }
+  .selo.mint{ color:var(--mint); background:var(--soft-mint); }
+  .selo.blue{ color:var(--blue); background:var(--soft-blue); }
+  .selo.orange{ color:var(--orange); background:var(--soft-orange); }
+  .selo.red{ color:var(--red); background:var(--soft-red); }
+
+  /* Resultado */
+  .resultado h2{ margin:12px 0 0; font-family:var(--font-display); font-weight:700; font-size:1.7rem; line-height:1.12; letter-spacing:-.7px; text-wrap:balance; }
+  .contexto{ margin:8px 0 0; color:var(--muted); font-size:.92rem; }
+  .selos{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .galeria{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; margin-top:16px; }
+  .foto{ margin:0; border:1.5px solid var(--line-strong); border-radius:var(--radius-control); overflow:hidden; background:var(--surface-2); }
+  .foto img{ display:block; width:100%; height:auto; object-fit:contain; }
+  .foto figcaption{ padding:7px 10px; font-size:.78rem; font-weight:600; border-top:1.5px solid var(--line-strong); }
+  .conduta{ border:1.5px solid var(--line-strong); border-radius:var(--radius-control); padding:12px 14px; background:var(--surface-2); min-width:0; margin-top:14px; }
+  .conduta .k{ margin:0; font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+  .conduta .v{ margin:4px 0 0; font-size:.95rem; line-height:1.45; }
+  .conduta.sim{ border-color:var(--ink); background:var(--surface); }
+  .conduta.alerta{ border-color:var(--red); background:var(--soft-red); }
+  .conduta.alerta .k{ color:var(--red); }
+  .conduta ul{ margin:6px 0 0; padding-left:1.1em; font-size:.92rem; }
+  .conduta li + li{ margin-top:4px; }
+  .conduta ul ul{ margin-top:4px; }
+  .nota{ margin:8px 0 0; color:var(--muted); font-size:.85rem; font-style:italic; }
+  .secao{ margin:20px 0 0; font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--blue); }
+  .tag{ margin-left:8px; font-size:.62rem; letter-spacing:.8px; color:var(--red); }
+
+  /* Mapa Geral */
+  .mapa{ display:flex; flex-direction:column; gap:16px; }
+  .tema-titulo{ margin:8px 0 -4px; font-family:var(--font-display); font-weight:700; font-size:1.3rem; letter-spacing:-.4px; padding-bottom:6px; border-bottom:2px solid var(--ink); }
+  .bloco{ background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-card); overflow:hidden; }
+  .bloco > summary{
+    list-style:none; cursor:pointer; padding:14px 18px; background:var(--surface-2);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    font-family:var(--font-display); font-weight:600; font-size:1.05rem; border-bottom:1.5px solid transparent;
+  }
+  .bloco > summary small{ display:block; font-family:var(--font-body); font-weight:400; font-size:.8rem; color:var(--muted); }
+  .bloco > summary::-webkit-details-marker{ display:none; }
+  .bloco > summary::after{ content:"+"; color:var(--blue); font-size:1.3rem; font-weight:700; }
+  .bloco[open] > summary{ border-bottom-color:var(--ink); }
+  .bloco[open] > summary::after{ content:"\2212"; }
+  .corpo{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:16px; }
+  .doenca{ border:1.5px solid var(--line-strong); border-radius:var(--radius-control); padding:16px; background:var(--surface); }
+  .doenca h3{ margin:10px 0 0; font-family:var(--font-display); font-weight:700; font-size:1.3rem; letter-spacing:-.4px; }
+
+  @media (max-width:560px){ .painel{ padding:18px; } .corpo{ padding:14px; } }
+  @media (prefers-reduced-motion: reduce){ .opcao{ transition:none; } }
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="coluna">
+  <header>
+    <p class="eyebrow">Mapas clínicos</p>
+    <h1>Fimose e criptorquidia</h1>
+    <p class="sub">Urologia pediátrica: conduta guiada em fimose, parafimose e testículo não descido.</p>
+  </header>
+
+  <div class="barra">
+    <div class="modos" role="group" aria-label="Modo de visualização">
+      <button type="button" id="btn-consulta" aria-pressed="true">Modo consulta</button>
+      <button type="button" id="btn-mapa" aria-pressed="false">Mapa geral</button>
+    </div>
+    <button type="button" class="tema" id="btn-tema">Tema escuro</button>
+  </div>
+
+  <section id="vista-consulta" aria-label="Modo consulta">
+    <ol class="trilha" id="trilha" aria-label="Respostas anteriores" hidden></ol>
+    <div id="palco" aria-live="polite" style="margin-top:16px;"></div>
+  </section>
+
+  <section id="vista-mapa" class="mapa" aria-label="Mapa geral" hidden></section>
+</div>
+
+<script>
+const CFG = { resultado: 'Conduta indicada', tratamento: 'Conduta', internacao: 'Atenção' };
+
+const topics = [
+  { id:'fimose', title:'Fimose', accent:'var(--blue)', desc:'Aderência prepucial, fimose patológica e parafimose' },
+  { id:'criptorquidia', title:'Criptorquidia', accent:'var(--orange)', desc:'Testículo não descido — diagnóstico e indicação cirúrgica' }
+];
+
+const trees = {
+  fimose: {
+    start: {
+      q: 'Há parafimose no momento (prepúcio retraído que não retorna, com edema da glande)?',
+      hint: 'Sempre descartar isso primeiro — é uma emergência.',
+      options: [
+        { label: 'Sim', sub: 'anel de constrição atrás da glande, edema progressivo', dx: 'parafimose', perigo: true },
+        { label: 'Não', sub: 'sem retração aguda presa', next: 'idade' }
+      ]
+    },
+    idade: {
+      q: 'Qual a idade da criança?',
+      hint: 'A idade define se a conduta é expectante ou se já se considera intervenção.',
+      options: [
+        { label: '< 3 anos', sub: 'fimose fisiológica é esperada nessa faixa', next: 'complicacoes_menor3' },
+        { label: '≥ 3 anos', sub: 'já se avalia tratamento se persistente', next: 'complicacoes_maior3' }
+      ]
+    },
+    complicacoes_menor3: {
+      q: 'Há alguma dessas complicações: balanopostite grave/recorrente, balonamento com necessidade de compressão manual, ITU de repetição, ou episódio anterior de parafimose?',
+      hint: 'Complicações mudam a conduta mesmo antes dos 3 anos.',
+      options: [
+        { label: 'Não', sub: 'sem complicações associadas', dx: 'expectante' },
+        { label: 'Sim', sub: 'alguma complicação presente', dx: 'indicacao_cirurgica' }
+      ]
+    },
+    complicacoes_maior3: {
+      q: 'Há alguma dessas complicações: balanopostite grave/recorrente, balonamento com necessidade de compressão manual, ITU de repetição, ou episódio anterior de parafimose?',
+      hint: 'Isso define entre terapia tópica e indicação cirúrgica direta.',
+      options: [
+        { label: 'Não', sub: 'sem complicações associadas', next: 'resposta_topica' },
+        { label: 'Sim', sub: 'alguma complicação presente', dx: 'indicacao_cirurgica' }
+      ]
+    },
+    resposta_topica: {
+      q: 'Após aplicar corticoide tópico por 4–8 semanas, houve resolução da fimose?',
+      hint: 'Essa reavaliação define se segue em acompanhamento ou vai para indicação cirúrgica.',
+      options: [
+        { label: 'Ainda não tratou / vai iniciar agora', sub: 'iniciar terapia tópica com corticoide', dx: 'terapia_topica' },
+        { label: 'Sim, resolveu', sub: 'glande exposta sem dificuldade', dx: 'resolvido' },
+        { label: 'Não resolveu após o tempo de tratamento', sub: 'persistente mesmo com corticoide', dx: 'indicacao_cirurgica' }
+      ]
+    }
+  },
+
+  criptorquidia: {
+    start: {
+      q: 'O testículo é palpável ao exame físico bimanual?',
+      hint: 'Diagnóstico é clínico — anamnese + exame físico. Exames complementares não são de rotina. Exame bimanual: uma mão no anel inguinal externo, outra "ordenhando" em direção ao escroto.',
+      options: [
+        { label: 'Sim, é palpável', sub: 'testículo inguinal/ectópico sentido durante a manobra', next: 'idade_palpavel' },
+        { label: 'Não é palpável', sub: 'nem em repouso nem durante a manobra', next: 'idade_naopalpavel' }
+      ]
+    },
+    idade_palpavel: {
+      q: 'Qual a idade da criança (ou tempo desde a identificação, se testículo ascendente)?',
+      hint: 'Define se aguarda a descida espontânea ou já encaminha para cirurgia.',
+      options: [
+        { label: '< 6 meses', sub: 'ainda pode haver descida espontânea', dx: 'aguardar' },
+        { label: '≥ 6 meses', sub: 'encaminhar para orquidopexia', dx: 'testiculo_palpavel' }
+      ]
+    },
+    idade_naopalpavel: {
+      q: 'Qual a idade da criança (ou tempo desde a identificação)?',
+      hint: 'Define se aguarda a descida espontânea ou já investiga cirurgicamente.',
+      options: [
+        { label: '< 6 meses', sub: 'ainda pode haver descida espontânea', dx: 'aguardar' },
+        { label: '≥ 6 meses', sub: 'investigação cirúrgica do testículo não palpável', dx: 'nao_palpavel_conduta' }
+      ]
+    }
+  }
+};
+
+const dxPorTema = {
+  fimose: {
+    parafimose: {
+      title:'Parafimose', subtitle:'Emergência urológica',
+      accent:'var(--red)',
+      banner:'Prepúcio com anel estenótico retraído que não retorna à posição original, ficando preso atrás do sulco balanoprepucial.',
+      fases:[
+        { t:'O que acontece', items:[
+          'O anel de constrição prejudica a drenagem venosa e linfática da glande',
+          'Edema progressivo, que pode culminar em isquemia e necrose se não houver intervenção imediata'
+        ]},
+        { t:'Conduta', items:[
+          'Reconhecimento imediato pelo clínico é essencial',
+          'Evitar manipulação excessiva ou uso de instrumentação por não especialistas',
+          'Consulta precoce ao urologista'
+        ]}
+      ],
+      pills:[{t:'Emergência — encaminhar urgente', c:'red'}]
+    },
+    expectante: {
+      title:'Conduta Expectante', subtitle:'Fimose fisiológica · < 3 anos, sem complicações',
+      accent:'var(--blue)',
+      banner:'~90% dos meninos apresentam resolução espontânea da fimose fisiológica até os 3 anos de idade.',
+      fases:[
+        { t:'O que é a fimose fisiológica', items:[
+          'Aderências naturais entre a face interna do prepúcio e a glande',
+          'Não caracteriza o diagnóstico de fimose propriamente dita',
+          'Tende a se desfazer com o crescimento e as ereções espontâneas'
+        ]},
+        { t:'Orientações de cuidado', items:[
+          'Lavagem peniana regular durante os banhos',
+          'Troca frequente de fraldas',
+          'Evitar retração forçada do prepúcio',
+          'À medida que ocorrer retração espontânea: higiene entre prepúcio e glande, secar, e retornar o prepúcio à posição original'
+        ]},
+        { t:'O que evitar', items:[
+          'Exercícios de retração forçada no recém-nascido e no lactente — podem causar inflamação, sangramento e fibrose local, induzindo fimose patológica'
+        ]}
+      ],
+      pills:[{t:'Conduta expectante', c:'mint'}]
+    },
+    terapia_topica: {
+      title:'Terapia Tópica com Corticoide', subtitle:'Fimose sem complicações, persistente após os 3 anos',
+      accent:'var(--mint)',
+      banner:'Indicada quando não há complicações associadas: episódio anterior de parafimose, balanopostites graves/recorrentes, balonamento com necessidade de compressão manual, ou ITU de repetição.',
+      fases:[
+        { t:'Como aplicar', items:[
+          'Tracionar levemente o prepúcio até o limite, expondo o que conseguir da glande',
+          'Aplicar pequena quantidade do corticoide na região estreita',
+          'Massagear e cobrir novamente a glande com o prepúcio',
+          '2 vezes ao dia, por 4 a 8 semanas',
+          'Associar manobras de retração leve várias vezes ao dia, 5–7 dias após o início do corticoide tópico'
+        ]}
+      ],
+      txNote:'Escolha uma das opções:',
+      tx:[
+        { t:'POSTEC, uso tópico', subs:['1 vez/dia, por 4 semanas'] }
+      ],
+      pills:[{t:'Reavaliar após 4–8 semanas', c:'blue'}]
+    },
+    resolvido: {
+      title:'Resolução com Terapia Tópica', subtitle:'Tratamento concluído',
+      accent:'var(--mint)',
+      banner:'Glande exposta sem dificuldade após o corticoide tópico. Manter orientações de higiene.',
+      fases:[
+        { t:'Orientações de manutenção', items:[
+          'Lavagem peniana regular',
+          'Higiene entre prepúcio e glande após cada retração, seguida de secagem',
+          'Retornar o prepúcio à posição original após a higiene'
+        ]}
+      ],
+      pills:[{t:'Alta com orientações', c:'mint'}]
+    },
+    indicacao_cirurgica: {
+      title:'Indicação de Tratamento Cirúrgico', subtitle:'Postectomia',
+      accent:'var(--orange)',
+      banner:'Indicada quando há complicações associadas, ou fimose persistente após os 4–5 anos, ou sem resposta à terapia tópica.',
+      fases:[
+        { t:'Indicações', items:[
+          'Fimose persistente após os 4–5 anos',
+          'Balanopostites de repetição',
+          'Balonamento prepucial na micção',
+          'Infecções urinárias recorrentes'
+        ]},
+        { t:'Procedimento', items:[
+          'Postectomia: secção do prepúcio para permitir a exteriorização da glande, preservando-o parcialmente para proteção'
+        ]},
+        { t:'Por que não adiar', items:[
+          'Fimose é fator de risco estabelecido para câncer de pênis, por inflamação crônica e exposição a carcinógenos no esmegma'
+        ]}
+      ],
+      pills:[{t:'Encaminhar ao urologista/cirurgião pediátrico', c:'orange'}]
+    }
+  },
+
+  criptorquidia: {
+    aguardar: {
+      title:'Observação — Aguardar', subtitle:'< 6 meses de idade',
+      accent:'var(--blue)',
+      banner:'Nessa faixa etária ainda pode ocorrer descida espontânea do testículo.',
+      fases:[
+        { t:'Conduta', items:[
+          'Acompanhamento clínico periódico',
+          'Reavaliar a posição testicular em consultas de puericultura',
+          'Encaminhar para cirurgia se não houver descida espontânea até os 6 meses'
+        ]}
+      ],
+      pills:[{t:'Observação clínica', c:'mint'}]
+    },
+    testiculo_palpavel: {
+      title:'Testículo Palpável — Orquidopexia', subtitle:'Testículo não descido palpável ao exame',
+      accent:'var(--blue)',
+      banner:'Objetivo do tratamento: posicionar e fixar o testículo viável na posição escrotal normal.',
+      fases:[
+        { t:'Anamnese relevante', items:[
+          'Testículo estava ou não na bolsa escrotal ao nascer',
+          'Cirurgia inguinal prévia (criptorquidia iatrogênica)',
+          'Anormalidades endócrinas durante a gestação',
+          'História familiar de morte neonatal inexplicada, anormalidades genitais, do desenvolvimento puberal ou infertilidade'
+        ]},
+        { t:'Exame físico bimanual', items:[
+          'Uma mão no anel inguinal externo, outra no escroto',
+          'Palpar hemiescroto, canal inguinal e toda a região perineal',
+          'Testículo inguinal/ectópico verdadeiro pode deslizar ou aparecer sob os dedos durante a manobra',
+          'Testículo ectópico baixo ou retrátil pode ser sentido ao ser "ordenhado" para o escroto'
+        ]},
+        { t:'Momento ideal da cirurgia', items:[
+          'Testículo não descido congênito: idealmente antes de 1 ano de idade',
+          'Testículo ascendente: dentro dos primeiros 6 meses após identificação',
+          'Abordagem antes de 1 ano apresenta melhores resultados quanto a complicações'
+        ]},
+        { t:'Técnica', items:[
+          'Orquidopexia: libera o testículo e o cordão espermático das aderências, traz ao escroto e fixa',
+          'Via inguinal (mais indicada, pela persistência do conduto peritônio-vaginal) ou via escrotal'
+        ]},
+        { t:'Complicações pós-operatórias', items:[
+          'Infecção de ferida operatória — mais comum',
+          'Linfedema e congestão vascular do testículo — resolvem espontaneamente no pós-operatório',
+          'Atrofia testicular causada por isquemia'
+        ]}
+      ],
+      pills:[{t:'Encaminhar ao cirurgião pediátrico', c:'orange'},{t:'Orquidopexia antes de 1 ano', c:'blue'}]
+    },
+    nao_palpavel_conduta: {
+      title:'Testículo Não Palpável — Investigação Cirúrgica', subtitle:'Exame sob anestesia confirma ausência de palpação',
+      accent:'var(--orange)',
+      banner:'Exame físico sob anestesia é o primeiro passo. A videolaparoscopia é o método ideal para localizar o testículo.',
+      fases:[
+        { t:'Videolaparoscopia (método ideal)', items:[
+          'Confirma a presença ou ausência de testículo',
+          'Ausência pode ser confirmada por vasos testiculares terminando em fundo cego',
+          'Testículo viável → orquidopexia, em um ou dois tempos cirúrgicos',
+          'Testículo não viável → orquiectomia',
+          'Exames de imagem não são usados para localizar o testículo'
+        ]},
+        { t:'Se a laparoscopia não estiver disponível', items:[
+          'Incisão inguinal estendendo-se para a cavidade abdominal, para excluir a presença de testículo intra-abdominal'
+        ]},
+        { t:'Complicações pós-operatórias', items:[
+          'Infecção de ferida operatória — mais comum',
+          'Linfedema e congestão vascular do testículo — resolvem espontaneamente',
+          'Atrofia testicular causada por isquemia'
+        ]}
+      ],
+      pills:[{t:'Orquidopexia ou orquiectomia conforme achado', c:'orange'}]
+    }
+  }
+};
+
+const mapaPorTema = {
+  fimose: [
+    { title:'Fimose Fisiológica', hint:'< 3 anos, sem complicações — conduta expectante', accent:'var(--blue)', diseases:['expectante'] },
+    { title:'Tratamento Não Cirúrgico', hint:'≥ 3 anos, sem complicações — corticoide tópico', accent:'var(--mint)', diseases:['terapia_topica','resolvido'] },
+    { title:'Indicação Cirúrgica', hint:'complicações, ou persistente após 4–5 anos, ou sem resposta ao corticoide', accent:'var(--orange)', diseases:['indicacao_cirurgica'] },
+    { title:'Emergência', hint:'parafimose — reconhecimento imediato', accent:'var(--red)', diseases:['parafimose'] }
+  ],
+  criptorquidia: [
+    { title:'Observação', hint:'< 6 meses — aguardar possível descida espontânea', accent:'var(--blue)', diseases:['aguardar'] },
+    { title:'Testículo Palpável', hint:'≥ 6 meses — orquidopexia por via inguinal ou escrotal', accent:'var(--blue)', diseases:['testiculo_palpavel'] },
+    { title:'Testículo Não Palpável', hint:'≥ 6 meses — videolaparoscopia (ideal) ou exploração inguinal', accent:'var(--orange)', diseases:['nao_palpavel_conduta'] }
+  ]
+};
+
+/* Adaptador: junta os dois temas num só grafo. A 1ª pergunta escolhe o tema. */
+const tree = {
+  start: {
+    q: 'Sobre qual tema você quer falar?',
+    hint: 'Escolha o assunto da consulta guiada.',
+    options: topics.map(t => ({ label: t.title, sub: t.desc, next: t.id + '.start' }))
+  }
+};
+const diagnoses = {};
+const mapaCategories = [];
+topics.forEach(t => {
+  Object.entries(trees[t.id]).forEach(([id, node]) => {
+    tree[t.id + '.' + id] = {
+      q: node.q, hint: node.hint,
+      options: node.options.map(o => ({
+        label: o.label, sub: o.sub, perigo: o.perigo,
+        next: o.next ? t.id + '.' + o.next : null,
+        dx: o.dx ? t.id + '.' + o.dx : null
+      }))
+    };
+  });
+  Object.entries(dxPorTema[t.id]).forEach(([id, d]) => { diagnoses[t.id + '.' + id] = d; });
+  mapaPorTema[t.id].forEach(c => mapaCategories.push({ ...c, tema: t.title, diseases: c.diseases.map(d => t.id + '.' + d) }));
+});
+
+/* ============================================================
+   Motor comum (mesmo do Profilaxia do Tétano): trilha, perguntas,
+   resultado, mapa geral em accordion, modos e tema.
+   Espera: tree, diagnoses, mapaCategories, CFG.
+   ============================================================ */
+let history = []; // [{nodeId, answerLabel, nextNode, dx}]
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, txt) => {
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined) e.textContent = txt;
+  return e;
+};
+const cor = (accent) => (/--(\w+)/.exec(accent) || [])[1] || 'blue';
+
+function currentNodeId(){ return history.length === 0 ? 'start' : history[history.length - 1].nextNode; }
+
+function renderTrail(){
+  const ol = $('#trilha');
+  ol.replaceChildren();
+  ol.hidden = history.length === 0;
+  if(!history.length) return;
+  ol.append(el('li', 'rotulo', 'Trilha'));
+  history.forEach((h, i) => {
+    const li = el('li');
+    const b = el('button');
+    b.type = 'button';
+    b.title = 'Voltar a esta etapa';
+    b.append(el('b', null, 'Resposta: '), document.createTextNode(h.answerLabel));
+    b.addEventListener('click', () => { history = history.slice(0, i); render(); });
+    li.append(b);
+    ol.append(li);
+  });
+}
+
+function acoes(){
+  const box = el('div', 'acoes');
+  const v = el('button', 'ghost', 'Voltar'); v.type = 'button';
+  v.addEventListener('click', () => { history.pop(); render(); });
+  const r = el('button', 'ghost', 'Recomeçar'); r.type = 'button';
+  r.addEventListener('click', () => { history = []; render(); });
+  box.append(v, r);
+  return box;
+}
+
+function renderPergunta(nodeId){
+  const node = tree[nodeId];
+  const painel = el('div', 'painel');
+  painel.append(el('p', 'passo', 'Pergunta ' + (history.length + 1)));
+  const h = el('h2', 'pergunta', node.q);
+  h.tabIndex = -1; h.id = 'foco';
+  painel.append(h, el('p', 'ajuda', node.hint));
+  const lista = el('div', 'opcoes');
+  node.options.forEach(opt => {
+    const b = el('button', 'opcao' + (opt.perigo ? ' perigo' : ''));
+    b.type = 'button';
+    b.append(el('strong', null, opt.label));
+    if(opt.sub) b.append(el('span', null, opt.sub));
+    b.addEventListener('click', () => {
+      history.push({ nodeId, answerLabel: opt.label, nextNode: opt.next || null, dx: opt.dx || null });
+      render();
+    });
+    lista.append(b);
+  });
+  painel.append(lista);
+  if(history.length) painel.append(acoes());
+  return painel;
+}
+
+function imagens(imgs){
+  if(!imgs || !imgs.length) return null;
+  const g = el('div', 'galeria');
+  imgs.forEach(i => {
+    const f = el('figure', 'foto');
+    const im = el('img'); im.src = i.src; im.alt = i.caption; im.loading = 'lazy';
+    f.append(im, el('figcaption', null, i.caption));
+    g.append(f);
+  });
+  return g;
+}
+
+function lista(itens){
+  const ul = el('ul');
+  itens.forEach(i => {
+    const li = el('li');
+    if(typeof i === 'string'){ li.textContent = i; }
+    else {
+      li.append(document.createTextNode(i.t));
+      const sub = el('ul');
+      i.subs.forEach(s => sub.append(el('li', null, s)));
+      li.append(sub);
+    }
+    ul.append(li);
+  });
+  return ul;
+}
+
+function caixa(rotulo, conteudo, extra){
+  const d = el('div', 'conduta' + (extra ? ' ' + extra : ''));
+  d.append(el('p', 'k', rotulo));
+  if(typeof conteudo === 'string') d.append(el('p', 'v', conteudo)); else d.append(conteudo);
+  return d;
+}
+
+/* Conteúdo clínico da doença/conduta (usado no Consulta e no Mapa geral) */
+function conteudoDoenca(d, alvo){
+  const g = imagens(d.images);
+  if(g) alvo.append(g);
+  if(d.exantemaChar) alvo.append(caixa('Características do exantema', d.exantemaChar));
+  if(d.banner) alvo.append(caixa('Ponto-chave', d.banner));
+  d.fases.forEach(f => alvo.append(caixa(f.t, lista(f.items))));
+  if(d.exames){
+    const c = caixa('Exames', lista(d.exames));
+    c.firstChild.append(el('span', 'tag', 'Obrigatórios'));
+    alvo.append(c);
+  }
+  alvo.append(el('p', 'secao', CFG.tratamento));
+  const selos = el('div', 'selos');
+  d.pills.forEach(p => selos.append(el('span', 'selo ' + p.c, p.t)));
+  alvo.append(selos);
+  if(d.txNote) alvo.append(el('p', 'nota', d.txNote));
+  if(d.tx) alvo.append(caixa('Conduta', lista(d.tx), 'sim'));
+  if(d.internacao) alvo.append(caixa(CFG.internacao, d.internacao, 'alerta'));
+}
+
+function renderDiagnostico(dxId){
+  const d = diagnoses[dxId];
+  const painel = el('div', 'painel resultado');
+  painel.append(el('span', 'selo ' + cor(d.accent), CFG.resultado));
+  const h = el('h2', null, d.title);
+  h.tabIndex = -1; h.id = 'foco';
+  painel.append(h, el('p', 'contexto', d.subtitle));
+  conteudoDoenca(d, painel);
+  painel.append(acoes());
+  return painel;
+}
+
+function render(){
+  renderTrail();
+  const palco = $('#palco');
+  const ultimo = history[history.length - 1];
+  palco.replaceChildren(ultimo && ultimo.dx ? renderDiagnostico(ultimo.dx) : renderPergunta(currentNodeId()));
+  if(history.length){ const f = $('#foco'); if(f) f.focus(); }
+}
+
+/* ---------- Mapa geral: categorias em accordion ---------- */
+function renderMapa(){
+  const mapa = $('#vista-mapa');
+  mapa.replaceChildren();
+  let temaAtual = null;
+  mapaCategories.forEach((cat, i) => {
+    if(cat.tema && cat.tema !== temaAtual){
+      temaAtual = cat.tema;
+      mapa.append(el('h2', 'tema-titulo', cat.tema));
+    }
+    const det = el('details', 'bloco');
+    if(i === 0) det.open = true;
+    const sum = el('summary');
+    const t = el('div'); t.append(document.createTextNode(cat.title), el('small', null, cat.hint));
+    sum.append(t);
+    const corpo = el('div', 'corpo');
+    cat.diseases.forEach(id => {
+      const d = diagnoses[id];
+      const card = el('article', 'doenca');
+      card.append(el('span', 'selo ' + cor(cat.accent), cat.title), el('h3', null, d.title), el('p', 'contexto', d.subtitle));
+      conteudoDoenca(d, card);
+      corpo.append(card);
+    });
+    det.append(sum, corpo);
+    mapa.append(det);
+  });
+}
+
+/* ---------- Modos e tema ---------- */
+function setModo(modo){
+  const consulta = modo === 'consulta';
+  $('#vista-consulta').hidden = !consulta;
+  $('#vista-mapa').hidden = consulta;
+  $('#btn-consulta').setAttribute('aria-pressed', String(consulta));
+  $('#btn-mapa').setAttribute('aria-pressed', String(!consulta));
+  if(!consulta && !$('#vista-mapa').children.length) renderMapa();
+}
+$('#btn-consulta').addEventListener('click', () => setModo('consulta'));
+$('#btn-mapa').addEventListener('click', () => setModo('mapa'));
+
+const raiz = document.documentElement;
+function escuroAgora(){
+  const t = raiz.getAttribute('data-theme');
+  if(t) return t === 'dark';
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function rotuloTema(){ $('#btn-tema').textContent = escuroAgora() ? 'Tema claro' : 'Tema escuro'; }
+$('#btn-tema').addEventListener('click', () => {
+  raiz.setAttribute('data-theme', escuroAgora() ? 'light' : 'dark');
+  rotuloTema();
+});
+if(window.matchMedia){
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(rotuloTema);
+}
+
+rotuloTema();
+render();
+</script>
+<script>(function(){function a(){parent.postMessage({tipo:'prescreve:altura',altura:Math.ceil(document.body.getBoundingClientRect().height)},'*')}window.addEventListener('load',a);new ResizeObserver(a).observe(document.body)})()</script>
+</body>
+</html>
