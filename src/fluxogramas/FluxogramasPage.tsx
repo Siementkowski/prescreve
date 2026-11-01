@@ -68,7 +68,7 @@ export function FluxogramasPage() {
   // então quanto mais área, melhor pra leitura durante o atendimento.
   if (grupoAberto) {
     return (
-      <div className="h-full min-h-0 flex flex-col gap-3 p-4">
+      <div className="h-full min-h-0 overflow-y-auto flex flex-col gap-3 p-4">
         <button
           onClick={voltar}
           className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors shrink-0 w-fit"

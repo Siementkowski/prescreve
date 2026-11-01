@@ -44,7 +44,7 @@ export function CondutasPediatricas() {
   }
 
   return (
-    <div className="h-full min-h-0 p-4 flex flex-col">
+    <div className="h-full min-h-0 overflow-y-auto p-4 flex flex-col">
       <FluxogramaViewer fluxogramas={condutas} />
     </div>
   )

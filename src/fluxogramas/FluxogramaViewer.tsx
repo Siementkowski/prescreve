@@ -13,6 +13,9 @@ export function FluxogramaViewer({ fluxogramas, titulo }: { fluxogramas: Fluxogr
   const [selecionadoId, setSelecionadoId] = useState<number | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [emTelaCheia, setEmTelaCheia] = useState(false)
+  // Altura inicial do iframe, até o fluxograma avisar a real (ver HtmlSandbox): depois disso o
+  // iframe tem a altura do conteúdo e quem rola é a página, não uma caixa interna.
+  const [alturaInicial] = useState(() => Math.max(480, Math.round(window.innerHeight * 0.75)))
 
   const selecionado = fluxogramas.find((f) => f.id === selecionadoId) ?? fluxogramas[0] ?? null
 
@@ -46,7 +49,7 @@ export function FluxogramaViewer({ fluxogramas, titulo }: { fluxogramas: Fluxogr
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center gap-4 shrink-0 flex-wrap">
         {titulo && <h1 className="font-display text-[26px] tracking-[-.8px] text-text">{titulo}</h1>}
         {fluxogramas.length > 1 && (
@@ -87,9 +90,7 @@ export function FluxogramaViewer({ fluxogramas, titulo }: { fluxogramas: Fluxogr
           {selecionado.descricao && <p className="text-sm text-text-dim shrink-0">{selecionado.descricao}</p>}
           <div
             ref={wrapperRef}
-            className={`relative flex-1 min-h-0 rounded-xl border border-border ${
-              emTelaCheia ? 'bg-white p-0' : 'bg-white'
-            }`}
+            className={`relative rounded-xl border border-border bg-white ${emTelaCheia ? 'h-screen overflow-y-auto' : ''}`}
           >
             <button
               type="button"
@@ -99,7 +100,7 @@ export function FluxogramaViewer({ fluxogramas, titulo }: { fluxogramas: Fluxogr
             >
               {emTelaCheia ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
-            <HtmlSandbox key={selecionado.id} html={selecionado.html ?? undefined} url={selecionado.url ?? undefined} className="h-full" />
+            <HtmlSandbox key={selecionado.id} html={selecionado.html ?? undefined} url={selecionado.url ?? undefined} alturaPadrao={alturaInicial} />
           </div>
         </>
       )}

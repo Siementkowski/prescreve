@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 .env
 dev-dist
+
+# Projeto separado (será migrado)
+Whisper/
