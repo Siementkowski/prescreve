@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tontura, Raciocínio Diagnóstico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Estilo: Painel Editorial (mesmo do Gerador de Anamnese). Layout: o do mapa original. */
+  :root{
+    --paper:#f5f2eb; --ink:#111111; --ink2:#3b3a36;
+    --surface:#fbfaf7; --surface-2:#f0ede6; --surface-3:#ebe7de;
+    --line:#d9d6ce; --line-strong:#c8c5bc;
+    --muted:#aaa69c; --muted-2:#8e8a80; --text-secondary:#706f69;
+    --blue:#1857d1; --soft-blue:#e8eefc; --on-blue:#ffffff;
+    --mint:#00b989; --soft-mint:#def5ee; --mint-t:#007f5f;
+    --orange:#ef6b17; --soft-orange:#fcebdc; --orange-t:#b84a07;
+    --red:#e9443d; --soft-red:#fae7e4; --red-t:#b8312b;
+    --warn:var(--red);
+    --shadow-hard:#111111;
+    --radius-card:14px; --radius-control:12px; --radius-input:9px; --radius-pill:999px;
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'DM Sans', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#131311; --ink:#f2efe8; --ink2:#cfcbc0;
+      --surface:#1b1b18; --surface-2:#242420; --surface-3:#2c2c27;
+      --line:#34342f; --line-strong:#4a4a43;
+      --muted:#6f6b62; --muted-2:#8a867c; --text-secondary:#a09c91;
+      --blue:#7aa2ff; --soft-blue:#1c2848; --on-blue:#131311;
+      --mint:#35d3a3; --soft-mint:#0f3128; --mint-t:#35d3a3;
+      --orange:#ff9355; --soft-orange:#3b2213; --orange-t:#ff9355;
+      --red:#ff8f86; --soft-red:#3e1b1a; --red-t:#ff8f86;
+      --shadow-hard:#000000;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#131311; --ink:#f2efe8; --ink2:#cfcbc0;
+    --surface:#1b1b18; --surface-2:#242420; --surface-3:#2c2c27;
+    --line:#34342f; --line-strong:#4a4a43;
+    --muted:#6f6b62; --muted-2:#8a867c; --text-secondary:#a09c91;
+    --blue:#7aa2ff; --soft-blue:#1c2848; --on-blue:#131311;
+    --mint:#35d3a3; --soft-mint:#0f3128; --mint-t:#35d3a3;
+    --orange:#ff9355; --soft-orange:#3b2213; --orange-t:#ff9355;
+    --red:#ff8f86; --soft-red:#3e1b1a; --red-t:#ff8f86;
+    --shadow-hard:#000000;
+    color-scheme: dark;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  ::selection{ background:var(--soft-blue); color:var(--blue); }
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:16px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:48px;
+  }
+  button{ font:inherit; color:inherit; }
+  :focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+  /* Cabeçalho */
+  header{
+    padding:22px max(28px, calc(50% - 450px)) 18px;
+    border-bottom:2px solid var(--ink); background:var(--surface);
+    display:flex; flex-wrap:wrap; gap:12px 20px; align-items:flex-end; justify-content:space-between;
+  }
+  .eyebrow{ margin:0 0 4px; font-size:.66rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--blue); }
+  .h-title-row{ display:flex; align-items:center; gap:.7rem; flex-wrap:wrap; }
+  .h-title{ font-family:var(--font-display); font-weight:700; font-size:1.65rem; line-height:1.1; letter-spacing:-1.1px; }
+  .h-sub{ margin-top:6px; color:var(--text-secondary); font-size:.78rem; font-weight:500; max-width:60ch; }
+  .h-side{ display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+  .tema{
+    font-family:var(--font-body); font-size:.85rem; font-weight:700; letter-spacing:.1px;
+    background:var(--surface); color:var(--text-secondary);
+    border:1.5px solid var(--ink); border-radius:var(--radius-control);
+    padding:9px 14px; cursor:pointer; box-shadow:3px 3px 0 var(--shadow-hard);
+    transition:transform .1s ease, box-shadow .1s ease, background .15s ease;
+  }
+  .tema:hover{ background:var(--soft-blue); transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--shadow-hard); }
+  .tema:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--shadow-hard); }
+
+  .main{ display:block; }
+  .flow{ max-width:932px; margin:0 auto; padding:24px 16px 0; }
+
+  /* Painel de detalhe inline */
+  .inline-detail{
+    display:none; position:relative; overflow:hidden; background:var(--surface);
+    border:1.5px solid var(--ink); border-radius:var(--radius-card);
+    box-shadow:5px 5px 0 var(--shadow-hard); margin:14px 5px 22px 0;
+  }
+  .inline-detail.show{ display:block; animation:detail-in .2s ease; }
+  @keyframes detail-in{ from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
+  .detail-close{
+    position:absolute; top:7px; right:10px; width:26px; height:26px; border-radius:50%;
+    background:var(--surface); border:1.5px solid var(--ink); color:var(--text-secondary);
+    cursor:pointer; font-size:.7rem; display:flex; align-items:center; justify-content:center;
+  }
+  .detail-close:hover{ background:var(--soft-red); color:var(--red-t); }
+
+  /* Tabela de sinais de alarme */
+  .redflag-section{ margin-bottom:2rem; }
+  .redflag-outer{ display:flex; align-items:stretch; gap:.75rem; }
+  .redflag-vertical-label{ flex-shrink:0; width:48px; display:flex; align-items:center; justify-content:center; align-self:stretch; }
+  .redflag-vertical-label span{
+    display:inline-block; transform:rotate(-90deg); white-space:nowrap;
+    font-family:var(--font-display); font-size:1.5rem; letter-spacing:.35em; font-weight:700; color:var(--ink);
+  }
+  .redflag-table-wrap{ flex:1; overflow-x:auto; border:1.5px solid var(--ink); border-radius:var(--radius-card); box-shadow:5px 5px 0 var(--shadow-hard); background:var(--surface); }
+  .redflag-table{ width:100%; border-collapse:collapse; font-size:.88rem; }
+  .redflag-table th{
+    text-align:left; font-size:.72rem; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    color:var(--paper); background:var(--red-t); padding:.65rem .9rem; border-bottom:1.5px solid var(--ink);
+  }
+  .redflag-table td{ padding:.65rem .9rem; border-bottom:1px solid var(--line); line-height:1.4; color:var(--ink2); vertical-align:top; }
+  .redflag-table tr:last-child td{ border-bottom:none; }
+  .redflag-table tr:nth-child(even) td{ background:var(--surface-2); }
+  .redflag-table td:first-child{ font-weight:600; color:var(--ink); }
+
+  /* Lista numerada (HINTS) */
+  .step-list{ list-style:none; display:flex; flex-direction:column; gap:12px; margin:.5rem 0; }
+  .step-list li{
+    display:flex; align-items:flex-start; gap:.85rem; cursor:pointer;
+    background:var(--surface); border:1.5px solid var(--ink); border-radius:var(--radius-control);
+    box-shadow:3px 3px 0 var(--shadow-hard); padding:.85rem 1.1rem;
+    transition:transform .1s ease, box-shadow .1s ease, background .15s ease;
+  }
+  .step-list li:hover{ background:var(--soft-blue); transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--shadow-hard); }
+  .step-list li:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--shadow-hard); }
+  .step-list li.active{ background:var(--blue); }
+  .step-list li.active .sl-title{ color:var(--on-blue); }
+  .step-list li.active .sl-sub{ color:var(--on-blue); opacity:.85; }
+  .step-list li.active .sl-num{ background:var(--on-blue); color:var(--blue); }
+  .sl-num{
+    flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--ink); color:var(--paper);
+    display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:.85rem; font-weight:700;
+  }
+  .sl-title{ font-family:var(--font-display); font-size:1rem; font-weight:600; margin-bottom:.1rem; }
+  .sl-sub{ font-size:.86rem; color:var(--text-secondary); line-height:1.4; font-weight:500; }
+
+  /* Corpo humano */
+  .body-section{ margin-bottom:2rem; }
+  .body-wrap{ display:flex; align-items:center; justify-content:center; gap:2.5rem; flex-wrap:wrap; }
+  .body-svg{ width:240px; height:auto; flex-shrink:0; color:var(--ink); }
+  .hotspot{ fill:var(--warn); fill-opacity:.16; stroke:var(--warn); stroke-width:1.6; cursor:pointer; transition:fill-opacity .18s, stroke-width .18s; }
+  .hotspot:hover{ fill-opacity:.85; stroke-width:2.2; }
+  .body-legend{ display:flex; flex-direction:column; gap:.5rem; }
+  .bl-item{
+    display:flex; align-items:center; gap:.55rem; font-size:.92rem; font-weight:600; cursor:pointer;
+    padding:.4rem .7rem; border-radius:var(--radius-control); border:1.5px solid transparent;
+  }
+  .bl-item:hover{ background:var(--soft-red); border-color:var(--ink); }
+  .bl-dot{ width:10px; height:10px; border-radius:50%; background:var(--red); flex-shrink:0; }
+
+  /* Títulos de passo */
+  .step{ margin-bottom:2.2rem; }
+  .step-head{ display:flex; align-items:center; gap:.75rem; margin-bottom:1rem; flex-wrap:wrap; }
+  .step-badge{
+    font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:4px 11px;
+    border-radius:var(--radius-pill); flex-shrink:0; border:1.5px solid currentColor;
+  }
+  .s2 .step-badge{ color:var(--blue); background:var(--soft-blue); }
+  .s3 .step-badge{ color:var(--orange-t); background:var(--soft-orange); }
+  .s4 .step-badge{ color:var(--mint-t); background:var(--soft-mint); }
+  .step-title{ font-family:var(--font-display); font-size:1.15rem; font-weight:700; letter-spacing:-.3px; }
+  .step-divider{ flex:1; height:1.5px; background:var(--line-strong); min-width:24px; }
+
+  /* Instrução */
+  .question{ background:var(--surface-2); border:1.5px solid var(--line-strong); border-radius:var(--radius-input); padding:.8rem 1.1rem; margin-bottom:.9rem; }
+  .q-label{ font-size:.68rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--blue); margin-bottom:.2rem; }
+  .q-text{ font-size:.92rem; color:var(--ink2); line-height:1.45; font-weight:500; }
+
+  /* Cartões: faixa de rótulo + corpo */
+  .cards{ display:grid; gap:12px; }
+  .g2{ grid-template-columns:1fr 1fr; }
+  .g4{ grid-template-columns:repeat(4,1fr); }
+  .card{
+    cursor:pointer; overflow:hidden; background:var(--surface);
+    border:1.5px solid var(--ink); border-radius:var(--radius-card);
+    transition:transform .12s ease, box-shadow .12s ease, background .15s ease;
+  }
+  .card:hover{ background:var(--soft-blue); box-shadow:4px 4px 0 var(--shadow-hard); transform:translate(-2px,-2px); }
+  .card:active{ transform:translate(1px,1px); box-shadow:1px 1px 0 var(--shadow-hard); }
+  .card-label{
+    font-size:.72rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--ink);
+    padding:9px 14px; margin-bottom:11px; background:var(--surface-2); border-bottom:1.5px solid var(--ink);
+  }
+  .card-title{ font-family:var(--font-display); font-size:1rem; font-weight:700; line-height:1.25; padding:0 14px; margin-bottom:.2rem; }
+  .card-sub{ font-size:.82rem; color:var(--text-secondary); line-height:1.4; font-weight:500; padding:0 14px 14px; }
+  .card.active{ background:var(--blue); box-shadow:4px 4px 0 var(--shadow-hard); transform:translate(-2px,-2px); }
+  .card.active .card-title{ color:var(--on-blue); }
+  .card.active .card-sub{ color:var(--on-blue); opacity:.85; }
+  .card.warn-c{ background:var(--soft-red); }
+  .card.warn-c .card-label{ background:var(--surface); }
+  .card.warn-c .card-title{ color:var(--red-t); }
+  .card.warn-c:hover, .card.warn-c.active{ background:var(--soft-red); }
+  .card.warn-c.active .card-title{ color:var(--red-t); }
+  .card.warn-c.active .card-sub{ color:var(--text-secondary); opacity:1; }
+
+  /* Notas */
+  .note{ border:1.5px solid var(--line-strong); border-left-width:5px; padding:.7rem 1rem; font-size:.88rem; line-height:1.5; margin:.7rem 0; border-radius:var(--radius-control); background:var(--surface); color:var(--ink2); font-weight:500; }
+  .note.warn{ border-color:var(--red); background:var(--soft-red); color:var(--ink); }
+
+  /* Plano cartesiano */
+  .cartesian-wrap{ margin:1rem 0 1.5rem; padding:2.5rem 2.5rem 2rem; position:relative; }
+  .axis-label-top, .axis-label-bottom{ text-align:center; font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink2); padding:.3rem 0; }
+  .axis-label-top{ margin-bottom:.5rem; }
+  .axis-label-bottom{ margin-top:.5rem; }
+  .cartesian-grid{
+    display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:2px;
+    background:var(--ink); border:2px solid var(--ink); border-radius:var(--radius-card); overflow:hidden;
+    box-shadow:5px 5px 0 var(--shadow-hard); position:relative; min-height:400px;
+  }
+  .axis-label-left, .axis-label-right{
+    position:absolute; top:50%; transform:translateY(-50%) rotate(-90deg); white-space:nowrap;
+    font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink2);
+  }
+  .axis-label-left{ left:-2.9rem; }
+  .axis-label-right{ right:-2.6rem; }
+  .quadrant{ background:var(--surface); padding:1rem; display:flex; flex-direction:column; gap:.55rem; overflow-y:auto; }
+  .quad-title{ font-size:.68rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase; margin-bottom:.3rem; padding-bottom:.4rem; border-bottom:1.5px solid var(--line-strong); }
+  .q-node{
+    border-radius:var(--radius-control); border:1.5px solid; padding:.65rem .8rem; cursor:pointer;
+    transition:transform .1s ease, box-shadow .1s ease;
+  }
+  .q-node:hover, .q-node.active{ transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--shadow-hard); }
+  .q-node:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--shadow-hard); }
+  .q-node .qn-title{ font-family:var(--font-display); font-size:.9rem; font-weight:700; line-height:1.25; }
+  .q-node .qn-sub{ font-size:.76rem; color:var(--text-secondary); margin-top:.15rem; line-height:1.3; font-weight:500; }
+  .quad-q1 .quad-title{ color:var(--blue); }     .quad-q1 .q-node{ border-color:var(--blue); background:var(--soft-blue); }
+  .quad-q2 .quad-title{ color:var(--mint-t); }   .quad-q2 .q-node{ border-color:var(--mint); background:var(--soft-mint); }
+  .quad-q3 .quad-title{ color:var(--orange-t); } .quad-q3 .q-node{ border-color:var(--orange); background:var(--soft-orange); }
+  .quad-q4 .quad-title{ color:var(--red-t); }    .quad-q4 .q-node{ border-color:var(--red); background:var(--soft-red); }
+  .center-cross{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:12px; height:12px; background:var(--ink); border:2px solid var(--paper); border-radius:50%; z-index:5; }
+
+  /* Separador */
+  .sep{ font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--blue); text-align:center; margin:1.5rem 0 .9rem; display:flex; align-items:center; gap:.75rem; }
+  .sep::before, .sep::after{ content:''; flex:1; height:1.5px; background:var(--line-strong); }
+
+  /* Conteúdo do painel de detalhe */
+  .dp-tag{
+    display:block; padding:13px 48px 13px 16px; font-size:.72rem; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    color:var(--ink); background:var(--surface-2); border-bottom:1.5px solid var(--ink);
+  }
+  .dp-content{ padding:6px 18px 18px; }
+  .dp-title{ font-family:var(--font-display); font-size:1.4rem; font-weight:700; line-height:1.15; letter-spacing:-.5px; margin:12px 0 .3rem; }
+  .dp-desc{ font-size:.9rem; color:var(--text-secondary); margin-bottom:.4rem; line-height:1.5; font-weight:500; }
+  .dp-section{ position:relative; border:1.5px solid var(--line-strong); border-radius:var(--radius-input); padding:14px 12px 12px; margin-top:18px; }
+  .dp-section-title{
+    position:absolute; top:-9px; left:10px; background:var(--surface); padding:0 6px;
+    font-size:.68rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--blue);
+  }
+  .dp-section ul{ list-style:none; display:flex; flex-direction:column; gap:.3rem; }
+  .dp-section ul li{ font-size:.92rem; line-height:1.45; padding-left:1rem; position:relative; color:var(--ink2); }
+  .dp-section ul li::before{ content:'—'; position:absolute; left:0; color:var(--muted-2); }
+  .dp-note{ border:1.5px solid; border-left-width:5px; padding:.6rem .85rem; font-size:.88rem; line-height:1.5; margin-top:14px; border-radius:var(--radius-control); color:var(--ink); font-weight:500; }
+  .dp-note.warn{ border-color:var(--red); background:var(--soft-red); }
+
+  /* Telas estreitas: mantém a mesma estrutura, empilhando o que for lateral */
+  @media (max-width:700px){
+    .g2, .g4{ grid-template-columns:1fr; }
+    .redflag-vertical-label{ display:none; }
+    .cartesian-wrap{ padding:1.2rem 0; }
+    .cartesian-grid{ grid-template-columns:1fr; min-height:0; }
+    .axis-label-left, .axis-label-right{ display:none; }
+    .body-wrap{ gap:1.2rem; }
+    header{ padding-inline:16px; }
+  }
+  @media (prefers-reduced-motion: reduce){ .card, .step-list li, .q-node, .tema{ transition:none; } .inline-detail.show{ animation:none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <p class="eyebrow">Mapas clínicos</p>
+    <div class="h-title-row">
+      <h1 class="h-title">Tontura</h1>
+    </div>
+    <p class="h-sub">Raciocínio diagnóstico · Departamento de emergência</p>
+  </div>
+  <div class="h-side">
+    <button type="button" class="tema" id="btn-tema">Tema escuro</button>
+  </div>
+</header>
+
+<div class="main">
+<div class="flow">
+
+  <!-- ═══ SINAIS DE ALARME ═══ -->
+  <div class="redflag-section">
+    <div class="sep">Sinais de alarme</div>
+
+    <div class="redflag-outer">
+      <div class="redflag-vertical-label"><span>ANAMNESE</span></div>
+      <div class="redflag-table-wrap">
+        <table class="redflag-table">
+          <tr>
+            <th>Sinal de alarme</th>
+            <th>Por que preocupa</th>
+          </tr>
+          <tr>
+            <td>Início agudo e persistente</td>
+            <td>Síndrome vestibular aguda: neurite ou AVC, é preciso diferenciar</td>
+          </tr>
+          <tr>
+            <td>Diplopia, disartria, disfagia, paresia ou disestesia</td>
+            <td>Sinais focais neurológicos, sugerem causa central</td>
+          </tr>
+          <tr>
+            <td>Perda auditiva unilateral nova</td>
+            <td>Pode indicar AVC de AICA</td>
+          </tr>
+          <tr>
+            <td>Dor torácica, dispneia, febre ou sinais vitais alterados</td>
+            <td>Causa sistêmica: a tontura não é isolada, tratar a causa de base</td>
+          </tr>
+          <tr>
+            <td>Múltiplos fatores de risco para AVC</td>
+            <td>Aumenta a probabilidade de causa central, independente de outros achados</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sep" style="margin-top:1.75rem">Exame físico</div>
+
+  <div class="body-section">
+
+    <div class="body-wrap">
+      <svg class="body-svg" viewBox="0 0 260 440" xmlns="http://www.w3.org/2000/svg">
+        <g fill="none" style="stroke:var(--ink)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <!-- cabeça -->
+          <path d="M130 26
+                   c 14 0 23 11 23 25
+                   c 0 8 -2 15 -6 20
+                   c -4 5 -10 8 -17 8
+                   c -7 0 -13 -3 -17 -8
+                   c -4 -5 -6 -12 -6 -20
+                   c 0 -14 9 -25 23 -25 Z"/>
+          <!-- pescoço -->
+          <path d="M120 79 c 0 8 -1 12 -4 15 M140 79 c 0 8 1 12 4 15"/>
+
+          <!-- ombros e tronco -->
+          <path d="M116 94
+                   c -14 3 -26 8 -33 15
+                   c -5 6 -8 16 -9 27
+                   l -5 55
+                   M144 94
+                   c 14 3 26 8 33 15
+                   c 5 6 8 16 9 27
+                   l 5 55"/>
+          <!-- laterais do tronco até quadril -->
+          <path d="M83 122 c -3 30 -2 60 3 88 c 1 6 2 12 3 18
+                   M177 122 c 3 30 2 60 -3 88 c -1 6 -2 12 -3 18"/>
+          <!-- linha do quadril -->
+          <path d="M89 228 c 14 6 28 8 41 8 c 13 0 27 -2 41 -8"/>
+
+          <!-- braço esquerdo -->
+          <path d="M69 136 l -8 58 c -1 8 -3 16 -6 24 l -6 18"/>
+          <!-- mão esquerda -->
+          <path d="M49 236 c -4 6 -5 12 -3 17 c 2 5 7 8 12 7 c 5 -1 8 -5 8 -11 l 1 -12"/>
+
+          <!-- braço direito -->
+          <path d="M191 136 l 8 58 c 1 8 3 16 6 24 l 6 18"/>
+          <!-- mão direita -->
+          <path d="M211 236 c 4 6 5 12 3 17 c -2 5 -7 8 -12 7 c -5 -1 -8 -5 -8 -11 l -1 -12"/>
+
+          <!-- perna esquerda -->
+          <path d="M99 236 c -3 34 -5 68 -4 96 c 1 20 2 40 1 58"/>
+          <path d="M124 238 c 1 32 1 64 0 92 c -1 21 -2 41 -3 60"/>
+          <!-- pé esquerdo -->
+          <path d="M96 390 c -6 3 -10 6 -10 9 c 0 3 5 5 13 5 l 22 0 c 0 -5 0 -10 0 -14"/>
+
+          <!-- perna direita -->
+          <path d="M161 236 c 3 34 5 68 4 96 c -1 20 -2 40 -1 58"/>
+          <path d="M136 238 c -1 32 -1 64 0 92 c 1 21 2 41 3 60"/>
+          <!-- pé direito -->
+          <path d="M164 390 c 6 3 10 6 10 9 c 0 3 -5 5 -13 5 l -22 0 c 0 -5 0 -10 0 -14"/>
+        </g>
+
+        <!-- Hotspots -->
+        <circle class="hotspot" cx="120" cy="46" r="7" onclick="show('tronco')"/>
+        <circle class="hotspot" cx="140" cy="46" r="7" onclick="show('tronco')"/>
+        <circle class="hotspot" cx="130" cy="66" r="8" onclick="show('tronco')"/>
+
+        <circle class="hotspot" cx="63" cy="186" r="10" onclick="show('deficit')"/>
+        <circle class="hotspot" cx="197" cy="186" r="10" onclick="show('deficit')"/>
+
+        <circle class="hotspot" cx="57" cy="248" r="11" onclick="show('dismetria')"/>
+        <circle class="hotspot" cx="203" cy="248" r="11" onclick="show('dismetria')"/>
+
+        <circle class="hotspot" cx="103" cy="399" r="11" onclick="show('ataxia')"/>
+        <circle class="hotspot" cx="157" cy="399" r="11" onclick="show('ataxia')"/>
+      </svg>
+
+      <div class="body-legend">
+        <div class="bl-item" onclick="show('tronco')"><span class="bl-dot"></span> Olhos e face, Diplopia / Disartria / Disfagia</div>
+        <div class="bl-item" onclick="show('deficit')"><span class="bl-dot"></span> Braços, Déficit motor ou sensitivo</div>
+        <div class="bl-item" onclick="show('dismetria')"><span class="bl-dot"></span> Mãos, Dismetria</div>
+        <div class="bl-item" onclick="show('ataxia')"><span class="bl-dot"></span> Pernas, Ataxia de marcha</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sep" style="margin-top:1.75rem">Classificação das causas</div>
+
+  <div class="step s2">
+    <div class="step-head">
+      <span class="step-badge">Plano Cartesiano</span>
+      <span class="step-title">Combine tempo e gatilho para restringir as causas</span>
+      <div class="step-divider"></div>
+    </div>
+
+    <div class="cartesian-wrap">
+      <div class="axis-label-top">↑ Episódica / Intermitente</div>
+
+      <div class="cartesian-grid">
+        <div class="center-cross"></div>
+
+        <!-- Q1: TOP-LEFT, Não provocada + Episódica -->
+        <div class="quadrant quad-q1">
+          <div class="quad-title">Não Provocada · Episódica</div>
+          <div class="q-node" onclick="show('enxaqueca')">
+            <div class="qn-title">Enxaqueca Vestibular</div>
+            <div class="qn-sub">Cefaleia + fotofobia + fonofobia</div>
+          </div>
+          <div class="q-node" onclick="show('meniere')">
+            <div class="qn-title">Doença de Ménière</div>
+            <div class="qn-sub">Zumbido + hipoacusia + plenitude</div>
+          </div>
+          <div class="q-node" onclick="show('ait')">
+            <div class="qn-title">AIT de circulação posterior</div>
+            <div class="qn-sub">Diplopia, disartria, disfagia associados</div>
+          </div>
+        </div>
+
+        <!-- Q2: TOP-RIGHT, Provocada + Episódica -->
+        <div class="quadrant quad-q2">
+          <div class="quad-title">Provocada · Episódica</div>
+          <div class="q-node" onclick="show('vppb')">
+            <div class="qn-title">VPPB</div>
+            <div class="qn-sub">Nistagmo torcional breve ao Dix-Hallpike</div>
+          </div>
+          <div class="q-node" onclick="show('hipotensao')">
+            <div class="qn-title">Hipotensão Postural</div>
+            <div class="qn-sub">Medir PA deitado e em pé</div>
+          </div>
+        </div>
+
+        <!-- Q3: BOTTOM-LEFT, Não provocada + Aguda/Persistente -->
+        <div class="quadrant quad-q3">
+          <div class="quad-title">Não Provocada · Aguda / Persistente</div>
+          <div class="q-node" onclick="show('neurite')">
+            <div class="qn-title">Neurite Vestibular</div>
+            <div class="qn-sub">Head impulse anormal, nistagmo horizontal</div>
+          </div>
+          <div class="q-node" onclick="show('avc-posterior')">
+            <div class="qn-title">AVC de circulação posterior</div>
+            <div class="qn-sub">Head impulse normal, nistagmo vertical ou torcional</div>
+          </div>
+        </div>
+
+        <!-- Q4: BOTTOM-RIGHT, Provocada + Aguda/Persistente -->
+        <div class="quadrant quad-q4">
+          <div class="quad-title">Provocada · Aguda / Persistente</div>
+          <div class="q-node" onclick="show('medicamentos')">
+            <div class="qn-title">Trauma, medicamentos e tóxicos</div>
+            <div class="qn-sub">Trauma craniano, fármaco novo ou álcool</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="axis-label-left">← Não Provocada</div>
+      <div class="axis-label-right">Provocada →</div>
+      <div class="axis-label-bottom">↓ Aguda / Persistente</div>
+    </div>
+
+    <div class="note warn">
+      Tontura contínua que só piora com o movimento não é provocada: vai para o quadrante inferior esquerdo.
+    </div>
+  </div>
+
+  <!-- ═══ PASSO 1, HINTS ═══ -->
+  <div class="step s4">
+    <div class="step-head">
+      <span class="step-badge">Passo 1</span>
+      <span class="step-title">HINTS, para Síndrome Vestibular Aguda com nistagmo</span>
+      <div class="step-divider"></div>
+    </div>
+
+    <div class="question">
+      <div class="q-label">Quando usar</div>
+      <div class="q-text">Tontura contínua no momento, nistagmo presente e examinador treinado.</div>
+    </div>
+
+    <ol class="step-list">
+      <li onclick="show('head-impulse')">
+        <span class="sl-num">1</span>
+        <div class="sl-body">
+          <div class="sl-title">Head Impulse Test</div>
+          <div class="sl-sub">Normal (sem sacada) = central, sacada corretiva = periférico</div>
+        </div>
+      </li>
+      <li onclick="show('nistagmo-hints')">
+        <span class="sl-num">2</span>
+        <div class="sl-body">
+          <div class="sl-title">Nistagmo</div>
+          <div class="sl-sub">Evocado pelo olhar = central, Lei de Alexander = periférico</div>
+        </div>
+      </li>
+      <li onclick="show('skew')">
+        <span class="sl-num">3</span>
+        <div class="sl-body">
+          <div class="sl-title">Test of Skew</div>
+          <div class="sl-sub">Desalinhamento vertical, sugere central</div>
+        </div>
+      </li>
+      <li onclick="show('hints-plus')">
+        <span class="sl-num">4</span>
+        <div class="sl-body">
+          <div class="sl-title">Teste de Audição (HINTS Plus)</div>
+          <div class="sl-sub">Assimetria nova, detecta AVC de AICA que engana o HINTS padrão</div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="note warn">
+      Qualquer etapa central ou duvidosa: investigar como AVC (RM de crânio).
+    </div>
+  </div>
+
+  <!-- ═══ PASSO 2, STANDING ═══ -->
+  <div class="step s3">
+    <div class="step-head">
+      <span class="step-badge">Passo 2</span>
+      <span class="step-title">Protocolo STANDING, quando a história é vaga</span>
+      <div class="step-divider"></div>
+    </div>
+
+    <div class="question">
+      <div class="q-label">Quando usar</div>
+      <div class="q-text">Quando a história não define tempo e gatilho. Com examinador treinado: sensibilidade 85–96% e especificidade 87–91% para causa central.</div>
+    </div>
+
+    <div class="cards g2">
+      <div class="card" onclick="show('standing-nistagmo')">
+        <div class="card-label">Etapa 1</div>
+        <div class="card-title">Existe nistagmo?</div>
+        <div class="card-sub">Espontâneo ou apenas posicional (ao Dix-Hallpike)</div>
+      </div>
+      <div class="card" onclick="show('standing-caracteristicas')">
+        <div class="card-label">Etapa 2</div>
+        <div class="card-title">Características do nistagmo</div>
+        <div class="card-sub">Muda de direção? Vertical? Torcional? Sugere central</div>
+      </div>
+    </div>
+
+    <div class="cards g2" style="margin-top:0.6rem">
+      <div class="card" onclick="show('standing-headimpulse')">
+        <div class="card-label">Etapa 3</div>
+        <div class="card-title">Head Impulse Test</div>
+        <div class="card-sub">Se nistagmo unidirecional e horizontal</div>
+      </div>
+      <div class="card" onclick="show('standing-marcha')">
+        <div class="card-label">Etapa 4</div>
+        <div class="card-title">Consegue andar ou ficar em pé?</div>
+        <div class="card-sub">Incapacidade sugere fortemente causa central</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ERROS COMUNS ═══ -->
+  <div class="sep">Erros comuns a evitar</div>
+
+  <div class="cards g4">
+    <div class="card warn-c" onclick="show('erro1')">
+      <div class="card-label">Erro 1</div>
+      <div class="card-title">Classificar por qualidade do sintoma</div>
+      <div class="card-sub">"Vertigem" vs "desequilíbrio" não prediz a causa</div>
+    </div>
+    <div class="card warn-c" onclick="show('erro2')">
+      <div class="card-label">Erro 2</div>
+      <div class="card-title">Aplicar HINTS fora de contexto</div>
+      <div class="card-sub">Sem tontura contínua + nistagmo, o resultado não é interpretável</div>
+    </div>
+    <div class="card warn-c" onclick="show('erro3')">
+      <div class="card-label">Erro 3</div>
+      <div class="card-title">Confundir piora com gatilho</div>
+      <div class="card-sub">Leva a diagnosticar VPPB em paciente com AVC</div>
+    </div>
+    <div class="card warn-c" onclick="show('erro4')">
+      <div class="card-label">Erro 4</div>
+      <div class="card-title">Confiar na TC normal</div>
+      <div class="card-sub">TC não exclui AVC de fossa posterior</div>
+    </div>
+  </div>
+
+</div><!-- /flow -->
+</div>
+
+<script>
+const data = {
+  tronco: {
+    tag: 'Exame Físico',
+    title: 'Diplopia, Disartria, Disfagia',
+    desc: 'Sinais de tronco encefálico, buscados na história e no exame.',
+    secs: [
+      { t: 'Como avaliar', items: [
+        'Diplopia: testar os movimentos oculares e ver se persiste com um olho fechado (só binocular é neurológica)',
+        'Disartria e disfonia: ouvir a fala e pedir para repetir frases',
+        'Disfagia: perguntar sobre engasgos e dificuldade para engolir'
+      ]},
+      { t: 'Significado', items: [
+        'Sinais focais de tronco encefálico ou nervos cranianos',
+        'Tontura com qualquer um deles: tratar como causa central até prova em contrário'
+      ]}
+    ]
+  },
+  deficit: {
+    tag: 'Exame Físico',
+    title: 'Déficit Motor ou Sensitivo',
+    desc: 'Paresia ou alteração de sensibilidade em face ou membros.',
+    secs: [
+      { t: 'Como avaliar', items: [
+        'Testar força e sensibilidade tátil e dolorosa, comparando os dois lados',
+        'Perguntar sobre formigamento ou dormência de início recente'
+      ]},
+      { t: 'Significado', items: [
+        'Sinal focal neurológico de início recente',
+        'Aumenta a probabilidade de causa central'
+      ]}
+    ]
+  },
+  dismetria: {
+    tag: 'Exame Físico',
+    title: 'Dismetria',
+    desc: 'Incoordenação de movimentos dos membros, sinal de disfunção cerebelar.',
+    secs: [
+      { t: 'Como avaliar', items: [
+        'Prova índex-nariz',
+        'Prova calcanhar-joelho'
+      ]},
+      { t: 'Significado', items: [
+        'Pode estar presente mesmo sem outros sinais neurológicos',
+        'Sugere AVC cerebelar em paciente com tontura'
+      ]}
+    ]
+  },
+  ataxia: {
+    tag: 'Exame Físico',
+    title: 'Ataxia de Marcha',
+    desc: 'Incapacidade de manter o equilíbrio ao ficar em pé ou caminhar.',
+    secs: [
+      { t: 'Graduação', items: [
+        'Grau 1: desequilíbrio leve, anda com base alargada',
+        'Grau 2: desequilíbrio grave, não consegue andar sem apoio',
+        'Grau 3: cai ao tentar manter a postura ereta'
+      ]},
+      { t: 'Significado', items: [
+        'Graus 2 e 3 sugerem fortemente causa central',
+        'É o principal achado quando não há nistagmo'
+      ]}
+    ],
+  },
+
+  enxaqueca: {
+    tag: 'Q1 · Não Provocada + Episódica',
+    title: 'Enxaqueca Vestibular',
+    desc: 'Causa mais comum de síndrome vestibular episódica espontânea.',
+    secs: [
+      { t: 'Características', items: [
+        'História de enxaqueca, em geral paciente jovem',
+        'Episódios de minutos a horas',
+        'Vertigem ou desequilíbrio'
+      ]},
+      { t: 'Sintomas associados', items: [
+        'Cefaleia, fotofobia e fonofobia'
+      ]}
+    ],
+  },
+  meniere: {
+    tag: 'Q1 · Não Provocada + Episódica',
+    title: 'Doença de Ménière',
+    desc: 'Excesso de endolinfa no labirinto.',
+    secs: [
+      { t: 'Características', items: [
+        'Episódios de 20 minutos a 12 horas',
+        'Vertigem rotatória intensa',
+        'Sem sintomas neurológicos'
+      ]},
+      { t: 'Sintomas auditivos (marca registrada)', items: [
+        'Hipoacusia flutuante',
+        'Zumbido',
+        'Plenitude auricular'
+      ]}
+    ]
+  },
+  ait: {
+    tag: 'Q1 · Não Provocada + Episódica',
+    title: 'AIT de Circulação Posterior',
+    desc: 'Isquemia transitória no território vertebrobasilar.',
+    secs: [
+      { t: 'Características', items: [
+        'Episódios de segundos a minutos',
+        'Vertigem ou desequilíbrio súbito, sem sintomas auditivos',
+        'Diplopia, disartria, disfagia, dismetria ou disestesia durante o episódio'
+      ]},
+      { t: 'Investigação', items: [
+        'Procurar sinais e sintomas de isquemia cerebral',
+        'AngioTC ou AngioRM, não TC simples'
+      ]}
+    ],
+    warn: 'O escore ABCD2 foi desenhado para AIT de circulação anterior e pode subestimar o risco aqui.'
+  },
+  vppb: {
+    tag: 'Q2 · Provocada + Episódica',
+    title: 'VPPB (Vertigem Posicional Paroxística Benigna)',
+    desc: 'Causa mais comum de tontura provocada, especialmente em idosos.',
+    secs: [
+      { t: 'Diagnóstico, Dix-Hallpike', items: [
+        'Rodar a cabeça 45° para o lado testado',
+        'Deitar rapidamente com a cabeça pendente em ~30°',
+        'Nistagmo torcional ou vertical para cima, que dura menos de 1 minuto'
+      ]},
+      { t: 'Tratamento', items: [
+        'Manobra de Epley'
+      ]}
+    ],
+    warn: 'Nistagmo atípico ou que não cessa sugere causa central (VPPC): considerar RM. Tontura contínua que piora no Dix-Hallpike não é VPPB.'
+  },
+  hipotensao: {
+    tag: 'Q2 · Provocada + Episódica',
+    title: 'Hipotensão Postural (Ortostática)',
+    desc: 'Sintomas provocados pela mudança de postura.',
+    secs: [
+      { t: 'Como diagnosticar', items: [
+        'Medir a PA deitado e em pé, com intervalo de cerca de 3 minutos',
+        'Critério: queda ≥ 20 mmHg na sistólica ou ≥ 10 mmHg na diastólica'
+      ]},
+      { t: 'Como diferenciar de VPPB', items: [
+        'VPPB: desencadeada por movimento da cabeça, mesmo deitado',
+        'Hipotensão: ligada à mudança de posição do corpo'
+      ]}
+    ]
+  },
+  neurite: {
+    tag: 'Q3 · Não Provocada + Aguda',
+    title: 'Neurite Vestibular',
+    desc: 'Causa periférica mais comum de síndrome vestibular aguda.',
+    secs: [
+      { t: 'Como diagnosticar', items: [
+        'Head impulse anormal (sacada corretiva)',
+        'Nistagmo unidirecional e horizontal, que obedece a Lei de Alexander',
+        'Sem test of skew e sem sinais neurológicos focais'
+      ]},
+      { t: 'Tratamento', items: [
+        'Corticoide por curto período, com decisão compartilhada, se até 3 dias de sintomas',
+        'Supressores vestibulares só por poucos dias'
+      ]}
+    ]
+  },
+  'avc-posterior': {
+    tag: 'Q3 · Não Provocada + Aguda',
+    title: 'AVC de Circulação Posterior',
+    desc: 'Principal causa central de síndrome vestibular aguda.',
+    secs: [
+      { t: 'Como suspeitar', items: [
+        'HINTS: head impulse normal com nistagmo espontâneo',
+        'Nistagmo evocado pelo olhar, vertical ou torcional',
+        'Test of skew positivo',
+        'Incapacidade de andar ou ficar em pé, dismetria'
+      ]},
+      { t: 'Imagem', items: [
+        'TC sem contraste tem sensibilidade baixa para fossa posterior, serve para descartar hemorragia',
+        'RM com difusão nas primeiras 48 horas tem falso-negativo de cerca de 20%',
+        'RM é confirmatória quando o HINTS é central ou duvidoso'
+      ]}
+    ],
+    warn: 'AVC pequeno de fossa posterior pode ter NIHSS zero e simular neurite. Não confiar em TC ou RM precoce normais para descartar.'
+  },
+  medicamentos: {
+    tag: 'Q4 · Provocada + Aguda',
+    title: 'Trauma, Medicamentos e Tóxicos',
+    desc: 'Tontura contínua com gatilho identificável.',
+    secs: [{ t: 'O que investigar', items: [
+      'Trauma craniano ou cervical recente',
+      'Medicamento novo ou dose ajustada (sedativos, anticonvulsivantes, anti-hipertensivos, ototóxicos)',
+      'Álcool ou outras substâncias'
+    ]}],
+  },
+
+  'head-impulse': {
+    tag: 'HINTS · H',
+    title: 'Head Impulse Test',
+    desc: 'Testa o reflexo vestíbulo-ocular com rotações súbitas da cabeça.',
+    secs: [
+      { t: 'Técnica', items: [
+        'Paciente fixa o olhar no nariz do examinador',
+        'Rotações rápidas da cabeça para cada lado',
+        'Observar se o olhar escapa do alvo e precisa de sacada corretiva'
+      ]},
+      { t: 'Interpretação', items: [
+        'Normal (sem sacada) com nistagmo espontâneo: sugere central',
+        'Anormal (sacada): sugere periférico, exceto AVC de AICA (ver audição)'
+      ]}
+    ],
+    warn: 'Só vale em paciente com tontura contínua e nistagmo espontâneo. Fora desse contexto, um head impulse normal não indica causa central.'
+  },
+  'nistagmo-hints': {
+    tag: 'HINTS · N',
+    title: 'Avaliação do Nistagmo',
+    desc: 'O padrão do nistagmo diferencia central de periférico.',
+    secs: [
+      { t: 'Periférico (Lei de Alexander)', items: [
+        'Unidirecional e horizontal',
+        'Não muda de direção com o olhar',
+        'Mais intenso ao olhar para o lado da fase rápida'
+      ]},
+      { t: 'Central', items: [
+        'Evocado pelo olhar: a fase rápida muda conforme a direção do olhar',
+        'Pode ser vertical ou torcional puro'
+      ]}
+    ]
+  },
+  skew: {
+    tag: 'HINTS · TS',
+    title: 'Test of Skew',
+    desc: 'Desalinhamento vertical dos olhos, indicativo de lesão central.',
+    secs: [
+      { t: 'Técnica', items: [
+        'Cobrir e descobrir os olhos alternadamente',
+        'Observar correção vertical do olho ao descobrir'
+      ]},
+      { t: 'Interpretação', items: [
+        'Presença de correção vertical sugere fortemente causa central'
+      ]}
+    ]
+  },
+  'hints-plus': {
+    tag: 'HINTS Plus',
+    title: 'Teste de Audição com Fricção dos Dedos',
+    desc: 'Complemento ao HINTS para detectar AVC de AICA.',
+    secs: [
+      { t: 'Por que é necessário', items: [
+        'O AVC de artéria cerebelar ântero-inferior (AICA) causa perda auditiva súbita',
+        'Esse AVC pode gerar um HINTS que parece periférico'
+      ]},
+      { t: 'Técnica', items: [
+        'Fricção dos dedos perto de cada orelha e comparação dos lados',
+        'Assimetria nova favorece AVC'
+      ]}
+    ]
+  },
+
+  'standing-nistagmo': {
+    tag: 'STANDING · Etapa 1',
+    title: 'Existe Nistagmo?',
+    desc: 'Primeira bifurcação do protocolo.',
+    secs: [{ t: 'Caminhos', items: [
+      'Nistagmo espontâneo presente: avaliar suas características (etapa 2)',
+      'Sem nistagmo espontâneo: testar nistagmo posicional (Dix-Hallpike)',
+      'Nenhum nistagmo: avaliar a marcha diretamente (etapa 4)'
+    ]}]
+  },
+  'standing-caracteristicas': {
+    tag: 'STANDING · Etapa 2',
+    title: 'Características do Nistagmo',
+    desc: 'Direção e padrão orientam entre central e periférico.',
+    secs: [
+      { t: 'Sugestivo de central', items: [
+        'Muda de direção conforme a posição do olhar',
+        'Vertical',
+        'Torcional puro'
+      ]},
+      { t: 'Sugestivo de periférico', items: [
+        'Unidirecional e horizontal, segue a Lei de Alexander'
+      ]}
+    ]
+  },
+  'standing-headimpulse': {
+    tag: 'STANDING · Etapa 3',
+    title: 'Head Impulse Test',
+    desc: 'Realizado quando o nistagmo é unidirecional e horizontal.',
+    secs: [{ t: 'Interpretação', items: [
+      'Anormal (sacada de correção): sugere neurite vestibular, seguir para a marcha',
+      'Normal (sem sacada): sugere causa central'
+    ]}]
+  },
+  'standing-marcha': {
+    tag: 'STANDING · Etapa 4',
+    title: 'Consegue Andar ou Ficar em Pé?',
+    desc: 'Etapa final: capacidade de marcha e equilíbrio.',
+    secs: [{ t: 'Interpretação', items: [
+      'Consegue andar e ficar em pé: sugere causa periférica',
+      'Não consegue: forte sinal de causa central'
+    ]}],
+  },
+
+  erro1: {
+    tag: 'Erro Comum 1',
+    title: 'Classificar pela Qualidade do Sintoma',
+    desc: 'Basear o diagnóstico em "vertigem" vs "desequilíbrio" vs "cabeça leve".',
+    secs: [{ t: 'Por que é um erro', items: [
+      'Essa classificação não prediz a causa de forma confiável',
+      'Pacientes descrevem de forma variável e misturam categorias',
+      'Leva a não considerar VPPB ou AVC quando a palavra "vertigem" não aparece'
+    ]}],
+  },
+  erro2: {
+    tag: 'Erro Comum 2',
+    title: 'Aplicar HINTS Fora de Contexto',
+    desc: 'Usar HINTS em pacientes sem tontura contínua e nistagmo, ou sem treinamento.',
+    secs: [{ t: 'Consequência', items: [
+      'Gera falsa suspeita de causa central, com RM desnecessária',
+      'Ou falsa segurança, com AVC liberado como periférico'
+    ]}]
+  },
+  erro3: {
+    tag: 'Erro Comum 3',
+    title: 'Confundir Piora com Gatilho',
+    desc: 'Tontura que piora com movimento não é tontura desencadeada pelo movimento.',
+    secs: [{ t: 'Como evitar', items: [
+      'Perguntar sempre: "Você já estava tonto antes de fazer esse movimento?"',
+      'Se já estava tonto, é síndrome vestibular aguda, não VPPB',
+      'Dix-Hallpike que piora uma tontura contínua não confirma VPPB'
+    ]}],
+    warn: 'Paciente com AVC pode ser diagnosticado como VPPB. A tontura contínua prévia é a pista.'
+  },
+  erro4: {
+    tag: 'Erro Comum 4',
+    title: 'Confiar na TC de Crânio Normal',
+    desc: 'TC sem contraste normal não exclui AVC de circulação posterior.',
+    secs: [{ t: 'Por que é um erro', items: [
+      'A sensibilidade da TC para AVC de fossa posterior é baixa',
+      'Paciente é liberado como tontura sem causa e volta com AVC evidente',
+      'A RM nas primeiras 48 horas também pode ser falso-negativa (cerca de 20%)'
+    ]}],
+    warn: 'Se a suspeita clínica de AVC persiste, TC ou RM precoce normais não encerram a investigação.'
+  }
+};
+
+let inlineDetailEl = null;
+
+function getInlineDetail() {
+  if (!inlineDetailEl) {
+    inlineDetailEl = document.createElement('div');
+    inlineDetailEl.className = 'inline-detail';
+    inlineDetailEl.innerHTML = `<button class="detail-close" onclick="closeDetail()">✕</button><div id="dp-body"></div>`;
+  }
+  return inlineDetailEl;
+}
+
+function closeDetail() {
+  if (inlineDetailEl) inlineDetailEl.classList.remove('show');
+}
+
+function nearestGroup(el) {
+  return el.closest('.cards, .cartesian-grid, .body-wrap, .step-list') || el.parentElement;
+}
+
+function show(key) {
+  const d = data[key];
+  if (!d) return;
+  const origem = event.currentTarget;
+
+  document.querySelectorAll('.card, .q-node, .step-list li').forEach(c => c.classList.remove('active'));
+  origem.classList.add('active');
+
+  let html = `
+    <span class="dp-tag">${d.tag}</span>
+    <div class="dp-content">
+    <div class="dp-title">${d.title}</div>
+    ${d.desc ? `<div class="dp-desc">${d.desc}</div>` : ''}
+  `;
+
+  if (d.secs) {
+    d.secs.forEach(s => {
+      html += `<div class="dp-section">
+        <div class="dp-section-title">${s.t}</div>
+        <ul>${s.items.map(i => `<li>${i}</li>`).join('')}</ul>
+      </div>`;
+    });
+  }
+
+    if (d.warn)  html += `<div class="dp-note warn">${d.warn}</div>`;
+
+  html += '</div>';
+
+  const detail = getInlineDetail();
+  const group = nearestGroup(origem);
+  group.parentNode.insertBefore(detail, group.nextSibling);
+  detail.querySelector('#dp-body').innerHTML = html;
+  detail.classList.add('show');
+  detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* Tema claro/escuro */
+const raiz=document.documentElement;
+function escuroAgora(){const t=raiz.getAttribute("data-theme");if(t)return t==="dark";return window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches}
+function rotuloTema(){document.getElementById("btn-tema").textContent=escuroAgora()?"Tema claro":"Tema escuro"}
+document.getElementById("btn-tema").addEventListener("click",()=>{raiz.setAttribute("data-theme",escuroAgora()?"light":"dark");rotuloTema()});
+rotuloTema();
+</script>
+<script>(function(){function a(){parent.postMessage({tipo:'prescreve:altura',altura:Math.ceil(document.body.getBoundingClientRect().height)},'*')}window.addEventListener('load',a);new ResizeObserver(a).observe(document.body)})()</script>
+</body>
+</html>
