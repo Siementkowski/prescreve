@@ -8,6 +8,8 @@ interface AnamneseState {
   setValor: (id: string, v: string) => void
   marcos: Set<string>
   alternarMarco: (chave: string) => void
+  reflexos: Set<string>
+  alternarReflexo: (nome: string) => void
   vacFaltando: Set<string>
   alternarVacina: (nome: string) => void
   exameOff: Set<string>
@@ -31,6 +33,8 @@ export const useAnamneseStore = create<AnamneseState>((set) => ({
   setValor: (id, v) => set((s) => ({ valores: { ...s.valores, [id]: v } })),
   marcos: new Set(),
   alternarMarco: (k) => set((s) => ({ marcos: alternar(s.marcos, k) })),
+  reflexos: new Set(),
+  alternarReflexo: (k) => set((s) => ({ reflexos: alternar(s.reflexos, k) })),
   vacFaltando: new Set(),
   alternarVacina: (k) => set((s) => ({ vacFaltando: alternar(s.vacFaltando, k) })),
   exameOff: new Set(),
@@ -40,5 +44,5 @@ export const useAnamneseStore = create<AnamneseState>((set) => ({
   planoExtra: '',
   setPlanoExtra: (planoExtra) => set({ planoExtra }),
   limpar: () =>
-    set({ valores: {}, marcos: new Set(), vacFaltando: new Set(), exameOff: new Set(), orientOff: new Set(), planoExtra: '' }),
+    set({ valores: {}, marcos: new Set(), reflexos: new Set(), vacFaltando: new Set(), exameOff: new Set(), orientOff: new Set(), planoExtra: '' }),
 }))

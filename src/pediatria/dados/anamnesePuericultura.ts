@@ -24,7 +24,12 @@ export interface Campo {
   /** Até essa idade (em meses) o campo sai no cabeçalho (#), não no S. */
   cabAte?: number
   /** Frase que entra no texto quando o campo está preenchido (check: valor = '1'). */
-  frase: (valor: string) => string
+  frase: (valor: string, sexo?: string) => string
+}
+
+/** Concordância de gênero conforme o sexo escolhido (neutro enquanto não escolhido). */
+export function gen(sexo: string | undefined, masc: string, fem: string, neutro: string) {
+  return sexo === 'masculino' ? masc : sexo === 'feminino' ? fem : neutro
 }
 
 const nr = (v: string) => (v === 'nega' ? 'Nega' : 'Refere')
@@ -44,6 +49,17 @@ export const GRUPOS_ORDEM = [
 
 export const CAMPOS: Campo[] = [
   // ---- Consulta ----
+  {
+    id: 'sexo',
+    grupo: 'Consulta',
+    label: 'Sexo',
+    tipo: 'select',
+    opcoes: [
+      ['masculino', 'Masculino'],
+      ['feminino', 'Feminino'],
+    ],
+    frase: () => '',
+  },
   { id: 'queixa', grupo: 'Consulta', label: 'Queixa principal', tipo: 'text', frase: (v) => `Queixa: ${v}.` },
   {
     id: 'negaQueixas',
@@ -232,7 +248,7 @@ export const CAMPOS: Campo[] = [
       ['sozinho', 'Sozinho(a), cama própria'],
       ['pais', 'Com os pais'],
     ],
-    frase: (v) => (v === 'sozinho' ? 'Dorme sozinho(a) em cama própria.' : 'Dorme com os pais.'),
+    frase: (v, sexo) => (v === 'sozinho' ? `Dorme ${gen(sexo, 'sozinho', 'sozinha', 'sozinho(a)')} em cama própria.` : 'Dorme com os pais.'),
   },
   { id: 'tela', grupo: 'Sono e hábitos', label: 'Tempo de tela', tipo: 'select', opcoes: NEGA_REFERE, min: 6, frase: (v) => (v === 'nega' ? 'Nega exposição a telas.' : 'Refere exposição a telas.') },
   { id: 'creche', grupo: 'Sono e hábitos', label: 'Creche/escola', tipo: 'text', min: 12, frase: (v) => `Creche/escola: ${v}.` },
@@ -251,7 +267,7 @@ export interface ItemExame {
   label: string
   min?: number
   max?: number
-  texto: (meses: number) => string
+  texto: (meses: number, sexo?: string) => string
 }
 
 export const EXAME: ItemExame[] = [
@@ -268,7 +284,7 @@ export const EXAME: ItemExame[] = [
   { id: 'ac', label: 'Cardiovascular', texto: (m) => (m <= 6 ? 'AC: BNT em 2T, RR, sem sopros. Pulsos femorais palpáveis e simétricos.' : 'AC: BNT em 2T, RR, sem sopros.') },
   { id: 'ap', label: 'Respiratório', texto: () => 'AP: MV+ bilateralmente, simétrico, sem RA e/ou esforço.' },
   { id: 'abdome', label: 'Abdome', texto: (m) => (m <= 1 ? 'Abdome globoso, flácido, sem visceromegalias ou herniações. Coto umbilical limpo, sem sinais flogísticos. Ânus pérvio.' : 'Abdome flácido, indolor, sem visceromegalias, RHA presentes.') },
-  { id: 'genital', label: 'Genitália', texto: () => 'Genitália sem alterações (testículos tópicos, em meninos).' },
+  { id: 'genital', label: 'Genitália', texto: (_m, sexo) => (sexo === 'masculino' ? 'Genitália masculina típica, testículos tópicos, sem alterações.' : sexo === 'feminino' ? 'Genitália feminina típica, sem alterações.' : 'Genitália sem alterações (testículos tópicos, em meninos).') },
   { id: 'quadril', label: 'Ortolani e Barlow', max: 4, texto: () => 'Ortolani e Barlow negativos.' },
   { id: 'membros', label: 'Membros e coluna', texto: (m) => `MMSS e MMII simétricos, sem deformidades, mobilidade preservada.${m >= 12 ? ' Marcha sem alterações.' : ''}${m >= 24 ? ' Coluna sem escoliose ou assimetrias.' : ''}` },
   { id: 'neuro', label: 'Neurológico', texto: (m) => (m <= 6 ? 'Tônus e postura adequados para a idade. Reflexos primitivos presentes e simétricos.' : 'Tônus preservado, força grau V, reflexos presentes e simétricos.') },
@@ -280,6 +296,11 @@ export const FONTANELA: [string, string][] = [
   ['deprimida', 'Deprimida'],
   ['fechada', 'Fechada'],
 ]
+
+/** Reflexos primitivos — nas consultas até 1 mês entram no lugar do checklist de marcos. */
+export const REFLEXOS = ['Moro', 'Sucção', 'Busca', 'Preensão palmar', 'Preensão plantar', 'Marcha reflexa']
+export const mostraReflexos = (meses: number) => meses <= 1
+export const ehMarcoReflexo = (x: string) => /^Reflexos primitivos/i.test(x)
 
 export const ORIENTACOES = [
   { id: 'aleitamento', label: 'Aleitamento', texto: 'aleitamento materno' },
@@ -313,6 +334,7 @@ export function proximaFaixa(f: FaixaPuericultura) {
 export interface EstadoAnamnese {
   valores: Record<string, string>
   marcos: Set<string>
+  reflexos: Set<string>
   vacFaltando: Set<string>
   exameOff: Set<string>
   orientOff: Set<string>
@@ -333,7 +355,7 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   // ---- S ----
   const s: string[] = []
   const acompanhante = v('acompanhante')
-  s.push(`Consulta de puericultura (${rotuloIdade(f)})${acompanhante ? `, acompanhado(a) de ${acompanhante}` : ''}.`)
+  s.push(`Consulta de puericultura (${rotuloIdade(f)})${acompanhante ? `, ${gen(v('sexo'), 'acompanhado', 'acompanhada', 'acompanhado(a)')} de ${acompanhante}` : ''}.`)
 
   for (const grupo of GRUPOS_ORDEM) {
     if (grupo === 'Nascimento') continue // vai no cabeçalho
@@ -341,9 +363,9 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
       .map((c) => {
         if (!v(c.id)) return ''
         if (c.id === 'aleitamento' && v(c.id) === 'desmamado') {
-          return `Desmamado${v('desmameIdade') ? ' ao ' + v('desmameIdade') : ''}${v('desmameMotivo') ? ' por ' + v('desmameMotivo') : ''}${v('formulaLeite') ? ', atualmente em uso de ' + v('formulaLeite') : ''}.`
+          return `${gen(v('sexo'), 'Desmamado', 'Desmamada', 'Desmamado(a)')}${v('desmameIdade') ? ' ao ' + v('desmameIdade') : ''}${v('desmameMotivo') ? ' por ' + v('desmameMotivo') : ''}${v('formulaLeite') ? ', atualmente em uso de ' + v('formulaLeite') : ''}.`
         }
-        return c.frase(v(c.id))
+        return c.frase(v(c.id), v('sexo'))
       })
       .filter(Boolean)
     if (grupo === 'Eliminações') {
@@ -360,7 +382,7 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
       const outras = ['colicas', 'desfralde']
         .map((id) => CAMPOS.find((c) => c.id === id)!)
         .filter((c) => visivel(c, m) && v(c.id))
-        .map((c) => c.frase(v(c.id)))
+        .map((c) => c.frase(v(c.id), v('sexo')))
       if (outras.length) linhas.push(outras.join(' '))
       s.push(...linhas)
       continue
@@ -370,7 +392,7 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
     else s.push(`${grupo}: ${frases.join(' ')}`)
   }
 
-  const marcosDaFaixa = f.marcos
+  const marcosDaFaixa = f.marcos.filter((x) => !ehMarcoReflexo(x))
   const marcados = marcosDaFaixa.filter((x) => e.marcos.has(chaveMarco(f.id, x)))
   if (marcosDaFaixa.length > 0 && marcados.length > 0) {
     const faltam = marcosDaFaixa.filter((x) => !e.marcos.has(chaveMarco(f.id, x)))
@@ -379,6 +401,9 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
         ? `DNPM: adquiriu os marcos esperados para a idade (${marcados.join('; ')}).`
         : `DNPM: ${marcados.join('; ')}. Marcos esperados não adquiridos: ${faltam.join('; ')}.`
     )
+  }
+  if (mostraReflexos(m) && e.reflexos.size > 0) {
+    s.push(`DNPM: reflexos primitivos presentes (${REFLEXOS.filter((x) => e.reflexos.has(x)).map((x) => (x === 'Moro' ? x : x.toLowerCase())).join(', ')}).`)
   }
   if (v('dnpmObs')) s.push(`Obs. DNPM: ${v('dnpmObs')}`)
 
@@ -393,7 +418,7 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   if (medidas.length) o.push(`${medidas.join('. ')}.`)
   if (v('fontanela') && m <= 18) o.push(`Fontanela anterior ${v('fontanela')}.`)
   o.push(
-    ...EXAME.filter((x) => visivel(x, m) && !e.exameOff.has(x.id)).map((x) => x.texto(m))
+    ...EXAME.filter((x) => visivel(x, m) && !e.exameOff.has(x.id)).map((x) => x.texto(m, v('sexo')))
   )
   if (v('achados')) o.push(`Outros achados: ${v('achados')}`)
 
@@ -419,40 +444,44 @@ export function montarTexto(f: FaixaPuericultura, nomesVacinasDevidas: string[],
   p.push('Responsável entende, concorda e afirma não haver dúvidas.')
 
   // ---- Cabeçalho ----
-  const linhaCab = (rotulo: string, id: string) => (v(id) ? `# ${rotulo}: ${v(id)}` : `# Nega ${rotulo}`)
-  const cab: string[] = [linhaCab('MUC', 'muc'), linhaCab('comorbidades', 'comorbidades'), linhaCab('alergias', 'alergias')]
+  const cap = (x: string) => (x ? x[0].toUpperCase() + x.slice(1) : x)
   const bl = (x: string) => x || '___'
+  const linhaCab = (rotulo: string, id: string) => (v(id) ? `# ${rotulo}: ${cap(v(id))}` : `# Nega ${rotulo}`)
+  const cab: string[] = [linhaCab('MUC', 'muc'), linhaCab('comorbidades', 'comorbidades'), linhaCab('alergias', 'alergias')]
 
   // Dados do nascimento e aleitamento: só nas consultas de 7 dias a 4 meses
   if (m <= 4) {
     cab.push(`# IG (Capurro): ${v('capurro') ? v('capurro') + ' semanas' : '___'}`)
-    cab.push(`# Peso para a IG: ${bl(v('classPeso'))}`)
+    cab.push(`# PIG/AIG/GIG: ${bl(v('classPeso'))}`)
     cab.push(`# Apgar: ${bl(v('apgar'))}`)
-    cab.push(
-      `# Doenças obstétricas: ${v('doencasGest') === 'refere' ? 'refere ' + (v('doencasGestDet') ? v('doencasGestDet') + ' ' : 'doenças ') + 'durante a gestação' : v('doencasGest') === 'nega' ? 'nega' : '___'}`
-    )
+    const doencas =
+      v('doencasGest') === 'refere'
+        ? `Refere ${v('doencasGestDet') ? v('doencasGestDet') + ' ' : 'doenças '}durante a gestação`
+        : v('doencasGest') === 'nega'
+          ? 'Nega'
+          : '___'
+    cab.push(`# Doenças obstétricas: ${doencas}`)
     if (m <= 1) {
-      cab.push(`# Ao nascimento:
- - Peso: ${bl(v('pesoNasc'))}g
- - Comprimento: ${bl(v('compNasc'))}cm
- - PC: ${bl(v('pcNasc'))}cm`)
+      cab.push(['# Ao nascimento:', ` - Peso: ${bl(v('pesoNasc'))}g`, ` - Comprimento: ${bl(v('compNasc'))}cm`, ` - PC: ${bl(v('pcNasc'))}cm`].join('\n'))
     }
     cab.push(`# Peso de alta: ${bl(v('pesoAlta'))}`)
-    cab.push(`# Triagens neonatais: ${bl(v('triagens'))}${v('triagens') === 'realizadas, com alterações' && v('triagensDet') ? ': ' + v('triagensDet') : ''}`)
+    cab.push(
+      `# Triagens neonatais: ${cap(bl(v('triagens')))}${v('triagens') === 'realizadas, com alterações' && v('triagensDet') ? ': ' + v('triagensDet') : ''}`
+    )
 
     const al = v('aleitamento')
-    let linhaAl = `# Aleitamento materno: ${al || '___'}`
+    let valorAl = al === 'desmamado' ? gen(v('sexo'), 'Desmamado', 'Desmamada', 'Desmamado(a)') : cap(al) || '___'
     if (al === 'desmamado') {
-      if (v('desmameIdade')) linhaAl += ` ao ${v('desmameIdade')}`
-      if (v('desmameMotivo')) linhaAl += ` por ${v('desmameMotivo')}`
-      if (v('formulaLeite')) linhaAl += `, atualmente em uso de ${v('formulaLeite')}`
+      if (v('desmameIdade')) valorAl += ` ao ${v('desmameIdade')}`
+      if (v('desmameMotivo')) valorAl += ` por ${v('desmameMotivo')}`
+      if (v('formulaLeite')) valorAl += `, atualmente em uso de ${v('formulaLeite')}`
     }
-    cab.push(linhaAl)
+    cab.push(`# Aleitamento materno: ${valorAl}`)
   }
 
   // Calendário vacinal (todas as idades): sem marcar nada = em dia
   const faltandoCab = nomesVacinasDevidas.filter((n) => e.vacFaltando.has(n))
-  cab.push(`# Calendário vacinal: ${faltandoCab.length ? 'faltando ' + faltandoCab.join(', ') : 'em dia'}`)
+  cab.push(`# Calendário vacinal: ${faltandoCab.length ? 'Faltando ' + faltandoCab.join(', ') : 'Em dia'}`)
   const cabecalho = cab.join('\n')
 
   return [

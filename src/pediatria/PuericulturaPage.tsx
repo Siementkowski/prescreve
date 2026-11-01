@@ -88,7 +88,7 @@ export function PuericulturaPage() {
 
   return (
     <div className="h-full overflow-y-auto p-6">
-      <div className="max-w-6xl mx-auto flex flex-col gap-4 pb-16">
+      <div className="w-full flex flex-col gap-4 pb-16">
         <button
           onClick={() => setFaixaId(null)}
           className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors w-fit"

@@ -4,7 +4,7 @@ import { CopyButton } from '../consulta/components/CopyButton'
 import { Secao } from '../gestantes/components/Secao'
 import { Campo, ToggleChip, inputCls } from '../gestantes/GuiaConsulta'
 import type { FaixaPuericultura } from './dados/guiaPuericultura'
-import { CAMPOS, EXAME, FONTANELA, GRUPOS_ORDEM, chaveMarco, montarTexto, orientacoesDaFaixa, visivel, type Campo as CampoDef } from './dados/anamnesePuericultura'
+import { CAMPOS, EXAME, FONTANELA, GRUPOS_ORDEM, REFLEXOS, chaveMarco, ehMarcoReflexo, mostraReflexos, montarTexto, orientacoesDaFaixa, visivel, type Campo as CampoDef } from './dados/anamnesePuericultura'
 import { useAnamneseStore } from './anamneseStore'
 import { vacinasDevidas } from './CalendarioPNI'
 
@@ -24,6 +24,7 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
   const s = useAnamneseStore()
   const m = faixa.idadeReferenciaMeses
   const v = (id: string) => s.valores[id] ?? ''
+  const marcosFaixa = faixa.marcos.filter((x) => !ehMarcoReflexo(x))
 
   const devidas = useMemo(() => vacinasDevidas(faixa), [faixa])
   const texto = useMemo(
@@ -31,12 +32,13 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
       montarTexto(faixa, devidas, {
         valores: s.valores,
         marcos: s.marcos,
+        reflexos: s.reflexos,
         vacFaltando: s.vacFaltando,
         exameOff: s.exameOff,
         orientOff: s.orientOff,
         planoExtra: s.planoExtra,
       }),
-    [faixa, devidas, s.valores, s.marcos, s.vacFaltando, s.exameOff, s.orientOff, s.planoExtra]
+    [faixa, devidas, s.valores, s.marcos, s.reflexos, s.vacFaltando, s.exameOff, s.orientOff, s.planoExtra]
   )
 
   const novaConsulta = () => {
@@ -124,14 +126,28 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
             )
           })}
 
-          {faixa.marcos.length > 0 && (
+          {(mostraReflexos(m) || marcosFaixa.length > 0) && (
             <Secao titulo="Desenvolvimento (DNPM)" icone={ListChecks}>
-              <p className="text-xs text-text-dim mb-2">Marque o que a criança já faz. O que ficar sem marcar entra como não adquirido.</p>
-              <div className="flex flex-wrap gap-2">
-                {faixa.marcos.map((x) => (
-                  <ToggleChip key={x} ativo={s.marcos.has(chaveMarco(faixa.id, x))} onClick={() => s.alternarMarco(chaveMarco(faixa.id, x))} label={x} />
-                ))}
-              </div>
+              {mostraReflexos(m) && (
+                <div className="mb-3">
+                  <p className="text-xs text-text-dim mb-2">Reflexos primitivos presentes:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {REFLEXOS.map((x) => (
+                      <ToggleChip key={x} ativo={s.reflexos.has(x)} onClick={() => s.alternarReflexo(x)} label={x} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {marcosFaixa.length > 0 && (
+                <>
+                  <p className="text-xs text-text-dim mb-2">Marque o que a criança já faz. O que ficar sem marcar entra como não adquirido.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {marcosFaixa.map((x) => (
+                      <ToggleChip key={x} ativo={s.marcos.has(chaveMarco(faixa.id, x))} onClick={() => s.alternarMarco(chaveMarco(faixa.id, x))} label={x} />
+                    ))}
+                  </div>
+                </>
+              )}
               <div className="mt-3">
                 <Campo label="Observações (opcional)">
                   <input value={v('dnpmObs')} onChange={(e) => s.setValor('dnpmObs', e.target.value)} className={inputCls + ' w-full'} />
