@@ -675,7 +675,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
                   <span className="text-xs font-bold text-text uppercase tracking-wide">Preview</span>
                   <CopyButton texto={textoFinal} label="Copiar" variant="solid" />
                 </div>
-                <pre className="text-xs text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface rounded-[var(--radius-item,11px)] p-3 shadow-[inset_0_3px_8px_rgba(17,17,17,.22),inset_0_0_0_1px_rgba(17,17,17,.06)] max-h-[calc(100vh-4rem)] overflow-y-auto">
+                <pre className="text-xs text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface rounded-[var(--radius-item,11px)] p-3 shadow-[inset_0_2px_7px_rgba(17,17,17,.12),inset_0_0_0_1px_rgba(17,17,17,.06)] max-h-[calc(100vh-4rem)] overflow-y-auto">
                   {textoFinal}
                 </pre>
               </div>
