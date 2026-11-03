@@ -87,8 +87,8 @@ export function PuericulturaPage() {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="w-[95%] flex flex-col gap-4 pb-16">
+    <div className="h-full overflow-y-auto px-6 sm:px-9 py-8">
+      <div className="flex flex-col gap-6 pb-16">
         <button
           onClick={() => setFaixaId(null)}
           className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors w-fit"
@@ -97,11 +97,11 @@ export function PuericulturaPage() {
           Voltar pras faixas
         </button>
 
-        <div>
-          <h1 className="font-display text-[24px] tracking-[-.5px] text-text">{faixa.titulo}</h1>
+        <div className="flex flex-col items-center text-center">
+          <h1 className="font-display text-[36px] font-bold tracking-[-1.2px] text-text">{faixa.titulo}</h1>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap justify-center gap-1.5">
           {FAIXAS_PUERICULTURA.map((f) => (
             <button
               key={f.id}
@@ -115,13 +115,13 @@ export function PuericulturaPage() {
           ))}
         </div>
 
-        <div className="flex gap-1.5 border-b border-border">
+        <div className="flex justify-center gap-1.5 overflow-x-auto">
           {ABAS_FAIXA.map(({ id, label, icone: Icone }) => (
             <button
               key={id}
               onClick={() => setAba(id)}
-              className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                aba === id ? "border-text text-text" : "border-transparent text-text-dim hover:text-text"
+              className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-[var(--radius-nav,10px)] transition-colors whitespace-nowrap ${
+                aba === id ? "bg-text text-bg" : "text-text hover:bg-surface-3"
               }`}
             >
               <Icone className="w-4 h-4" />
@@ -150,7 +150,7 @@ function ReferenciaFaixa({ faixa, setTelaReferencia }: { faixa: FaixaPuericultur
   const ferro = calcularFerro({ idadeMeses: faixa.idadeReferenciaMeses, prematuroOuBaixoPeso: false, fatorRiscoVitaminaD: false })
   const vitaminaD = calcularVitaminaD({ idadeMeses: faixa.idadeReferenciaMeses, prematuroOuBaixoPeso: false, fatorRiscoVitaminaD: false })
   return (
-    <div className="max-w-3xl flex flex-col gap-4">
+    <div className="max-w-3xl mx-auto w-full flex flex-col gap-6">
         <Bloco titulo="Queixas e intercorrências" icone={MessageCircleQuestion}>
           <ul className="flex flex-col gap-1.5">
             {faixa.queixas.map((q) => (

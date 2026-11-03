@@ -12,20 +12,26 @@ export function Secao({
   titulo,
   icone: Icone,
   tom,
+  acao,
   children,
 }: {
   titulo: string
   icone: ComponentType<{ className?: string }>
   tom?: 'ok' | 'warn' | 'danger'
+  /** Botão/atalho opcional alinhado à direita do título. */
+  acao?: ReactNode
   children: ReactNode
 }) {
   const corIcone = tom === 'danger' ? 'text-danger' : tom === 'ok' ? 'text-ok' : tom === 'warn' ? 'text-warn' : 'text-text-dim'
   return (
     <div className="border border-border rounded-[var(--radius-card,14px)] bg-surface p-4">
-      <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-text mb-3">
-        <Icone className={`w-[18px] h-[18px] ${corIcone}`} />
-        {titulo}
-      </h2>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-text">
+          <Icone className={`w-[18px] h-[18px] ${corIcone}`} />
+          {titulo}
+        </h2>
+        {acao}
+      </div>
       {children}
     </div>
   )

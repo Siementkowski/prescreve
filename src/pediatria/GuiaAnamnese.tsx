@@ -75,22 +75,24 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
   const orientacoes = orientacoesDaFaixa(faixa)
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
-        <button
-          onClick={novaConsulta}
-          className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-3 py-1.5 rounded-[var(--radius-pill,999px)] bg-accent hover:bg-accent/90 text-accent-text transition-colors"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          Nova consulta
-        </button>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-4 items-start lg:-mr-[5.263%]">
-        <div className="w-full lg:flex-1 min-w-0 flex flex-col gap-4">
-          <Secao titulo="Cabeçalho" icone={ClipboardList}>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row gap-6 items-start">
+        <div className="w-full sm:w-[30%] flex flex-col gap-5">
+          <Secao
+            titulo="Cabeçalho"
+            icone={ClipboardList}
+            acao={
+              <button
+                onClick={novaConsulta}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-[var(--radius-input,9px)] bg-accent hover:bg-accent/90 text-accent-text transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Nova consulta
+              </button>
+            }
+          >
             <p className="text-xs text-text-dim mb-3">Deixe em branco para sair como "Nega" no texto.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <Campo label="MUC (medicamentos de uso contínuo)">
                 <input value={v('muc')} onChange={(e) => s.setValor('muc', e.target.value)} className={inputCls + ' w-full'} />
               </Campo>
@@ -229,13 +231,13 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
           </Secao>
         </div>
 
-        <div className="w-full lg:w-[calc(420px+10%)] lg:shrink-0 lg:sticky lg:top-4">
+        <div className="w-full sm:w-[70%] sm:sticky sm:top-4">
           <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-bold text-text-dim uppercase tracking-wide">Preview</span>
+              <span className="text-xs font-bold text-text uppercase tracking-wide">Preview</span>
               <CopyButton texto={texto} label="Copiar" variant="solid" />
             </div>
-            <pre className="text-[11px] text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-[var(--radius-item,11px)] p-3 max-h-[calc(100vh-8rem)] overflow-y-auto">
+            <pre className="text-xs text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface rounded-[var(--radius-item,11px)] p-3 shadow-[inset_0_0_0_1px_rgba(17,17,17,.1)] max-h-[calc(100vh-8rem)] overflow-y-auto">
               {texto}
             </pre>
           </div>
