@@ -670,7 +670,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
             </div>
 
             <div className="w-full sm:w-[70%] sm:sticky sm:top-4">
-              <div className="bg-surface-2 border border-border focus-within:border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5 shadow-[var(--shadow-area)] transition-colors">
+              <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold text-text-dim uppercase tracking-wide">Preview</span>
                   <CopyButton texto={textoFinal} label="Copiar" variant="solid" />
