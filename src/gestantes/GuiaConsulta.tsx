@@ -324,9 +324,9 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
       <div className="flex flex-col gap-6 pb-16">
         {/* ---- calculadora de IG (compacta, canto superior esquerdo) + linha do tempo
             ocupando o resto da largura, lado a lado ---- */}
-        <div className="flex flex-col sm:flex-row gap-6 items-start">
+        <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-stretch">
           <div className="w-full sm:w-[300px] shrink-0 flex flex-col gap-5">
-            <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-4 flex flex-col gap-4">
+            <div className="flex-1 bg-surface border border-border rounded-[var(--radius-card,14px)] p-4 flex flex-col gap-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-text-dim" />
