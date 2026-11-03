@@ -56,21 +56,15 @@ export function MateriaisPage() {
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-6xl mx-auto flex flex-col gap-6 pb-16">
-        <div>
-          <span className="ed-eyebrow">
-            <span className="ed-eyebrow-dot" style={{ background: 'var(--mint)' }} />
-            Conteúdo / Materiais
-          </span>
-          <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-2 text-text">
-            Material de apoio pra passar ao paciente.
-          </h1>
-          <p className="text-text-dim text-base leading-relaxed max-w-lg">
+        <div className="flex flex-col items-center text-center gap-2">
+          <h1 className="font-display text-[36px] font-bold tracking-[-1.2px] text-text">Material de apoio</h1>
+          <p className="text-sm text-text-dim max-w-lg">
             Orientações nutricionais, controle pressórico, controle glicêmico e outros links
             organizados por categoria — abra e imprima na consulta.
           </p>
         </div>
 
-        <div className="max-w-md">
+        <div className="w-full max-w-md mx-auto">
           <SearchInput value={busca} onChange={setBusca} placeholder="Buscar material ou categoria…" />
         </div>
 

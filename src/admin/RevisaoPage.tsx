@@ -88,11 +88,7 @@ export function RevisaoPage() {
     <div className="flex flex-col gap-6 h-full min-h-0 overflow-y-auto pb-8">
       <div className="flex items-end justify-between gap-6 flex-wrap shrink-0">
         <div>
-          <span className="ed-eyebrow">
-            <span className="ed-eyebrow-dot" style={{ background: 'var(--on-soft-orange,#a54e12)' }} />
-            Manutenção / Revisão
-          </span>
-          <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mt-3 mb-1 text-text">
+          <h1 className="font-display text-[34px] leading-[.98] tracking-[-1.5px] mb-1 text-text">
             O que precisa de outro olhar.
           </h1>
           <p className="text-text-dim text-sm">
