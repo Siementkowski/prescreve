@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   FileCheck,
   RotateCcw,
+  CalendarDays,
 } from 'lucide-react'
 import { CopyButton } from '../consulta/components/CopyButton'
 import { useGestantesStore, useIGAtual, dataDeInputISO } from './store'
@@ -17,7 +18,7 @@ import { calcularDPP, dppCorrigidaPorUSG, formatarIG, formatarData, trimestreDaI
 import { PERIODICIDADE_CONSULTAS, examesDaConsulta, CAMPOS_RESULTADO_EXAME } from './dados/preNatal'
 import { vacinasAplicaveis } from './dados/vacinas'
 import { QUEIXAS_ROTINA, TEXTO_SINAIS_ALERTA } from './dados/anamnese'
-import { Secao } from './components/Secao'
+import { Secao, checkboxCls } from './components/Secao'
 import { LinhaDoTempoIG } from './components/LinhaDoTempoIG'
 
 const ROTULO_SOROLOGIA: Record<StatusSorologia, string> = { desconhecido: '?', imune: 'imune', suscetivel: 'suscetível' }
@@ -319,31 +320,31 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="flex flex-col gap-4 pb-16">
-        <div className="flex justify-end">
-          <button
-            onClick={novaConsulta}
-            className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-3 py-1.5 rounded-[var(--radius-pill,999px)] bg-accent hover:bg-accent/90 text-accent-text transition-colors"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Nova consulta
-          </button>
-        </div>
+    <div className="h-full overflow-y-auto px-6 sm:px-9 py-8">
+      <div className="flex flex-col gap-6 pb-16">
         {/* ---- calculadora de IG (compacta, canto superior esquerdo) + linha do tempo
             ocupando o resto da largura, lado a lado ---- */}
-        <div className="flex flex-col sm:flex-row gap-3 items-start">
-          <div className="w-full sm:w-[300px] shrink-0 flex flex-col gap-3">
-            <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-3.5 flex flex-col gap-3">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-accent" />
-                <h2 className="font-display text-[13px] font-semibold">Idade gestacional</h2>
+        <div className="flex flex-col sm:flex-row gap-6 items-start">
+          <div className="w-full sm:w-[300px] shrink-0 flex flex-col gap-5">
+            <div className="bg-surface border border-border rounded-[var(--radius-card,14px)] p-4 flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-text-dim" />
+                  <h2 className="font-display text-sm font-semibold">Idade gestacional</h2>
+                </div>
+                <button
+                  onClick={novaConsulta}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-[var(--radius-input,9px)] bg-text text-bg hover:opacity-90 transition-opacity"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Nova consulta
+                </button>
               </div>
 
               <div className="inline-flex p-[2px] rounded-[var(--radius-pill,999px)] bg-surface-2 border border-border w-fit">
                 <button
                   onClick={() => setMetodo('dum')}
-                  className={`text-[10.5px] font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] transition-colors ${
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] transition-colors ${
                     metodo === 'dum' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
                   }`}
                 >
@@ -351,7 +352,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
                 </button>
                 <button
                   onClick={() => setMetodo('usg')}
-                  className={`text-[10.5px] font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] transition-colors ${
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] transition-colors ${
                     metodo === 'usg' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
                   }`}
                 >
@@ -359,7 +360,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
                 </button>
                 <button
                   onClick={() => setMetodo('previa')}
-                  className={`text-[10.5px] font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] transition-colors ${
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] transition-colors ${
                     metodo === 'previa' ? 'bg-text text-bg' : 'text-text-dim hover:text-text'
                   }`}
                 >
@@ -428,13 +429,22 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
           <LinhaDoTempoIG semanas={ig ? ig.semanas : null} dias={ig?.dias} />
         </div>
 
-        <div className="w-full flex flex-col gap-4">
-        {!ig && <p className="text-sm text-text-dim px-0.5">Calcule a idade gestacional acima pra continuar o guia.</p>}
+        <div className="w-full flex flex-col gap-6">
+        {!ig && (
+          <section className="border border-border bg-surface rounded-[var(--radius-panel,18px)] p-6">
+            <div className="flex flex-col items-center gap-2.5 text-center py-10 px-4">
+              <CalendarDays className="w-5 h-5 text-text-dim" />
+              <p className="text-[15px] font-semibold text-text-dim max-w-sm">
+                Calcule a idade gestacional acima para continuar o guia.
+              </p>
+            </div>
+          </section>
+        )}
 
         {ig && (
           <>
-            <div className="flex flex-col sm:flex-row gap-4 items-start">
-            <div className="w-full sm:w-[30%]">
+            <div className="flex flex-col sm:flex-row gap-6 items-start">
+            <div className="w-full sm:w-[30%] flex flex-col gap-5">
             <Secao titulo="Antecedentes" icone={ClipboardList}>
               <div className="flex flex-col gap-3">
                 <Campo label="DUM (relatada, pro cabeçalho da anamnese)">
@@ -513,7 +523,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
                         type="checkbox"
                         checked={medsSelecionados.has(s.nome)}
                         onChange={() => alternar(medsSelecionados, s.nome, setMedsSelecionados)}
-                        className="mt-0.5 w-4 h-4 accent-[var(--color-accent)] shrink-0"
+                        className={'mt-0.5 ' + checkboxCls}
                       />
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold text-text">{s.textoAnamnese}</span>
@@ -536,7 +546,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
                       type="checkbox"
                       checked={vacinasTomadas.has(nome)}
                       onChange={() => alternar(vacinasTomadas, nome, setVacinasTomadas)}
-                      className="w-4 h-4 accent-[var(--color-accent)]"
+                      className={checkboxCls}
                     />
                     {nome}
                   </label>
@@ -600,7 +610,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
                         type="checkbox"
                         checked={bcfAusente}
                         onChange={(e) => setBcfAusente(e.target.checked)}
-                        className="w-4 h-4 accent-[var(--color-danger)]"
+                        className={checkboxCls}
                       />
                       <span className={bcfAusente ? 'text-danger font-semibold' : ''}>BCF ausente à ausculta</span>
                     </label>
@@ -660,12 +670,12 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
             </div>
 
             <div className="w-full sm:w-[70%] sm:sticky sm:top-4">
-              <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
+              <div className="bg-surface border border-border focus-within:border-text focus-within:shadow-[0_0_0_1px_var(--color-text)] rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5 transition-colors">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-bold text-text-dim uppercase tracking-wide">Preview</span>
-                  <CopyButton texto={textoFinal} label="Copiar" variant="solid" />
+                  <span className="text-xs font-bold text-text-dim uppercase tracking-wide">Preview</span>
+                  <CopyButton texto={textoFinal} label="Copiar" variant="primario" />
                 </div>
-                <pre className="text-[11px] text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-[var(--radius-item,11px)] p-3 max-h-[calc(100vh-4rem)] overflow-y-auto">
+                <pre className="text-xs text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-[var(--radius-item,11px)] p-3 max-h-[calc(100vh-4rem)] overflow-y-auto">
                   {textoFinal}
                 </pre>
               </div>
@@ -680,13 +690,13 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
 }
 
 export const inputCls =
-  'bg-surface-2 border border-border focus:border-text rounded-[var(--radius-input,9px)] px-2.5 py-1.5 text-sm text-text outline-none transition-colors'
+  'bg-surface border border-border focus:border-text rounded-[var(--radius-control,12px)] px-3 py-2 text-sm text-text outline-none transition-colors placeholder:text-text-dim'
 
 function Stat({ label, valor, destaque }: { label: string; valor: string; destaque?: boolean }) {
   return (
     <div className="flex flex-col gap-0.5 min-w-0">
-      <span className="text-[9px] font-semibold text-text-dim uppercase tracking-wide">{label}</span>
-      <span className={`font-display text-[13px] font-semibold tabular-nums truncate ${destaque ? 'text-accent' : ''}`}>{valor}</span>
+      <span className="text-[11px] font-semibold text-text-dim uppercase tracking-wide">{label}</span>
+      <span className={`font-display text-sm font-semibold tabular-nums truncate ${destaque ? 'text-text' : ''}`}>{valor}</span>
     </div>
   )
 }
@@ -694,7 +704,7 @@ function Stat({ label, valor, destaque }: { label: string; valor: string; destaq
 export function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-semibold text-text-dim">{label}</span>
+      <span className="text-xs font-semibold text-text-dim">{label}</span>
       {children}
     </label>
   )
@@ -707,11 +717,11 @@ function CampoComNega({ label, valor, onChange }: { label: string; valor: string
   return (
     <label className="flex flex-col gap-1">
       <span className="flex items-center justify-between gap-2">
-        <span className="text-[10px] font-semibold text-text-dim">{label}</span>
+        <span className="text-xs font-semibold text-text-dim">{label}</span>
         <button
           type="button"
           onClick={() => onChange('')}
-          className={`text-[10px] font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] border transition-colors ${
+          className={`text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-pill,999px)] border transition-colors ${
             negado ? 'bg-text border-text text-bg' : 'bg-surface-2 border-border text-text-dim hover:text-text'
           }`}
         >

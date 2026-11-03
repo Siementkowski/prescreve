@@ -1,5 +1,8 @@
 import type { ComponentType, ReactNode } from 'react'
 
+/** Checkbox padrão do módulo — preenchimento preto (cor do texto) quando marcado, em vez do azul nativo. */
+export const checkboxCls = 'w-4 h-4 accent-text shrink-0 cursor-pointer'
+
 /** Card de seção padrão do módulo Gestantes — ícone + título font-display, mesmo
  *  tratamento em toda a aba (Suplementação/Vacinação/Intercorrências/Guia de Consulta).
  *  Existia redefinido localmente em 3 arquivos diferentes (mais um quarto quase-igual no

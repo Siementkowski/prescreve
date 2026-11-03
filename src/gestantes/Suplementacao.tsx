@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { CheckCircle2, Clock, MinusCircle, Info, ListChecks, Pill } from 'lucide-react'
 import { useIGAtual } from './store'
 import { formatarIG } from './idade'
-import { Secao, Tabela } from './components/Secao'
+import { Secao, Tabela, checkboxCls } from './components/Secao'
 import {
   calcularAcidoFolico,
   calcularFerro,
@@ -56,8 +56,8 @@ export function Suplementacao() {
   ]
 
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="flex flex-col gap-4 pb-16">
+    <div className="h-full overflow-y-auto px-6 sm:px-9 py-8">
+      <div className="flex flex-col gap-6 pb-16">
         <div className="flex items-start gap-2 text-xs text-text-dim bg-surface-2 border border-border rounded-[var(--radius-item,11px)] px-3 py-2.5">
           <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
@@ -78,7 +78,7 @@ export function Suplementacao() {
                       type="checkbox"
                       checked={f.valor}
                       onChange={(e) => f.set(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 accent-[var(--color-accent)] shrink-0"
+                      className={'mt-0.5 ' + checkboxCls}
                     />
                     <span className="min-w-0">
                       <span className="block text-sm font-medium text-text">{f.rotulo}</span>

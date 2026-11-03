@@ -214,7 +214,7 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
           </div>
         </div>
 
-        <div className="flex gap-3.5 text-[11px] text-text-dim whitespace-nowrap">
+        <div className="flex gap-3.5 text-xs text-text-dim whitespace-nowrap">
           <span className="flex items-center gap-1.5">
             <span className="w-[7px] h-[7px] rounded-full bg-text-dim" />
             Período encerrado
@@ -375,7 +375,7 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
               style={{
                 left: pct(w),
                 top: TRACK_Y + 16,
-                fontSize: 11,
+                fontSize: 12,
                 fontVariantNumeric: 'tabular-nums',
                 color: perto ? 'var(--color-text)' : 'var(--color-text-dim)',
                 fontWeight: perto ? 600 : 400,
@@ -400,10 +400,10 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
                 color: atual ? 'var(--color-text)' : 'var(--color-text-dim)',
               }}
             >
-              <div className="uppercase" style={{ fontSize: 10, letterSpacing: '1.2px', fontWeight: atual ? 600 : 400 }}>
+              <div className="uppercase" style={{ fontSize: 11, letterSpacing: '1.2px', fontWeight: atual ? 600 : 400 }}>
                 {t.rotulo}
               </div>
-              <div style={{ fontSize: 10, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>({t.faixa})</div>
+              <div style={{ fontSize: 11, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>({t.faixa})</div>
             </div>
           )
         })}
@@ -415,7 +415,7 @@ export function LinhaDoTempoIG({ semanas, dias = 0 }: { semanas: number | null; 
       {/* ---- marcos sem posição fixa — sob indicação clínica ou "qualquer momento" ---- */}
       {visiveisSemPosicao.length > 0 && (
         <div className="mt-3.5 pt-3.5 border-t border-border">
-          <p className="text-[10px] font-semibold text-text-dim uppercase tracking-wide mb-2">Sem posição fixa na régua</p>
+          <p className="text-[11px] font-semibold text-text-dim uppercase tracking-wide mb-2">Sem posição fixa na régua</p>
           <div className="flex flex-wrap gap-1.5">
             {visiveisSemPosicao.map((m) => {
               const c = CORES_CATEGORIA_MARCO[m.categoria]
@@ -476,7 +476,7 @@ function CardMarco({ marco, ga }: { marco: MarcoIG; ga: number }) {
       <div className="flex items-center justify-between gap-2.5 mb-2">
         <span
           className="flex items-center gap-1.5 uppercase font-semibold"
-          style={{ fontSize: 10, letterSpacing: '1.2px', color: c.cor }}
+          style={{ fontSize: 11, letterSpacing: '1.2px', color: c.cor }}
         >
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: c.cor }} />
           {LABEL_CATEGORIA_MARCO[marco.categoria]}

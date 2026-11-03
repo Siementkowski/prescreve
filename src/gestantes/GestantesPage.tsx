@@ -22,7 +22,13 @@ export function GestantesPage() {
   return (
     <div className="h-full flex flex-col min-h-0">
       <div className="flex flex-col items-center gap-4 px-6 sm:px-9 pt-8 pb-5 shrink-0">
-        <h1 className="font-display text-[36px] font-bold tracking-[-1.2px] text-text">Gestantes</h1>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="font-display text-[36px] font-bold tracking-[-1.2px] text-text">Gestantes</h1>
+          <p className="text-sm text-text-dim max-w-lg">
+            Calcula a idade gestacional e gera o guia de consulta e o prontuário do pré-natal, com suplementos, vacinação e
+            intercorrências comuns.
+          </p>
+        </div>
         <div className="flex items-center gap-1.5 max-w-full overflow-x-auto">
           {ABAS.map(({ id, label, icone: Icone }) => (
             <button

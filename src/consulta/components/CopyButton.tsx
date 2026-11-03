@@ -9,7 +9,7 @@ export function CopyButton({
 }: {
   texto: string
   label?: string
-  variant?: 'ghost' | 'solid'
+  variant?: 'ghost' | 'solid' | 'primario'
   className?: string
 }) {
   const [copiado, setCopiado] = useState(false)
@@ -26,8 +26,13 @@ export function CopyButton({
   }
 
   const base = 'inline-flex items-center gap-1.5 text-xs font-medium rounded-md px-2.5 py-1.5 transition-colors shrink-0'
+  const raio = variant === 'primario' ? 'rounded-[var(--radius-input,9px)] font-semibold' : ''
   const estilos =
-    variant === 'solid'
+    variant === 'primario'
+      ? copiado
+        ? 'bg-ok text-white'
+        : 'bg-text hover:opacity-90 text-bg'
+      : variant === 'solid'
       ? copiado
         ? 'bg-ok text-white'
         : 'bg-accent hover:bg-accent/90 text-accent-text'
@@ -36,7 +41,7 @@ export function CopyButton({
         : 'bg-surface-2 hover:bg-border text-text-dim hover:text-text border border-border'
 
   return (
-    <button type="button" onClick={copiar} disabled={!texto} className={`${base} ${estilos} ${className ?? ''}`}>
+    <button type="button" onClick={copiar} disabled={!texto} className={`${base} ${raio} ${estilos} ${className ?? ''}`}>
       {copiado ? (
         <>
           <Check className="w-3.5 h-3.5" />
