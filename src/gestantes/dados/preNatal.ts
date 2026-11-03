@@ -247,15 +247,15 @@ export interface CampoResultadoExame {
  *  próprio nome do exame como label (ver uso em GuiaConsulta.tsx). */
 export const CAMPOS_RESULTADO_EXAME: Record<string, CampoResultadoExame[]> = {
   Hemograma: [
-    { label: 'Hb (g/dL)', placeholder: 'ex: 12,5' },
-    { label: 'Ht (%)', placeholder: 'ex: 35,9' },
-    { label: 'Leucócitos', placeholder: 'ex: 8.500' },
+    { label: 'Hb (g/dL)', placeholder: 'ex: 12,0' },
+    { label: 'Ht (%)', placeholder: 'ex: 36,0' },
+    { label: 'Leucócitos', placeholder: 'ex: 9.000' },
     { label: 'Plaquetas', placeholder: 'ex: 250.000' },
   ],
   'Tipagem sanguínea + Fator Rh': [{ label: 'Tipo sanguíneo', placeholder: 'ex: A+' }],
   'Coombs indireto': [{ label: 'Coombs indireto', placeholder: 'ex: Negativo' }],
   'Eletroforese de hemoglobina': [{ label: 'Eletroforese de Hb', placeholder: 'ex: AA' }],
-  'Glicemia de jejum': [{ label: 'GJ (mg/dL)', placeholder: 'ex: 92' }],
+  'Glicemia de jejum': [{ label: 'GJ (mg/dL)', placeholder: 'ex: 80' }],
   EAS: [{ label: 'EAS', placeholder: 'ex: Normal' }],
   'Urocultura com TSA (antibiograma)': [{ label: 'Urocultura (TSA)', placeholder: 'ex: Negativa' }],
   'Toxoplasmose IgG/IgM': [

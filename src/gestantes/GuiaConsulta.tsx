@@ -447,7 +447,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
             <div className="w-full sm:w-[30%] flex flex-col gap-5">
             <Secao titulo="Antecedentes" icone={ClipboardList}>
               <div className="flex flex-col gap-3">
-                <Campo label="DUM (relatada, pro cabeçalho da anamnese)">
+                <Campo label="DUM">
                   <input
                     type="date"
                     value={dumAnamnese}
