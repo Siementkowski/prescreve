@@ -30,13 +30,13 @@ export function ConsultaPage() {
 
   return (
     <div className="h-full flex flex-col min-h-0">
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0 flex-wrap">
-        <ModoToggle />
-        <GestanteToggle />
-        <BuscaGlobal />
-      </div>
-
-      <div className="px-4 py-3 shrink-0">
+      <div className="flex flex-col items-center gap-4 px-6 sm:px-9 pt-8 pb-5 shrink-0">
+        <h1 className="font-display text-[36px] font-bold tracking-[-1.2px] text-text">Consulta</h1>
+        <div className="flex items-center gap-3 flex-wrap w-full max-w-4xl">
+          <ModoToggle />
+          <GestanteToggle />
+          <BuscaGlobal />
+        </div>
         <SeletorBreadcrumb />
       </div>
 

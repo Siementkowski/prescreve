@@ -60,7 +60,10 @@ export function SeletorBreadcrumb() {
   }
 
   return (
-    <div className="flex items-center gap-1.5 flex-wrap">
+    <div
+      className="flex items-center justify-center gap-1.5 flex-wrap w-full max-w-4xl rounded-[var(--radius-panel,18px)] border border-border bg-surface px-4 py-3"
+      style={area?.cor ? { borderColor: `${area.cor}55`, backgroundColor: `${area.cor}12` } : undefined}
+    >
       {/* Área */}
       <div className="relative" ref={areaRef}>
         <button

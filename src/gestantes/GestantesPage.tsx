@@ -21,19 +21,22 @@ export function GestantesPage() {
 
   return (
     <div className="h-full flex flex-col min-h-0">
-      <div className="flex items-center gap-1.5 px-4 py-3 border-b border-border shrink-0 overflow-x-auto">
-        {ABAS.map(({ id, label, icone: Icone }) => (
-          <button
-            key={id}
-            onClick={() => setAbaAberta(id)}
-            className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-[var(--radius-nav,10px)] transition-colors whitespace-nowrap ${
-              abaAberta === id ? 'bg-text text-bg' : 'text-text hover:bg-surface-3'
-            }`}
-          >
-            <Icone className="w-4 h-4" />
-            {label}
-          </button>
-        ))}
+      <div className="flex flex-col items-center gap-4 px-6 sm:px-9 pt-8 pb-5 shrink-0">
+        <h1 className="font-display text-[36px] font-bold tracking-[-1.2px] text-text">Gestantes</h1>
+        <div className="flex items-center gap-1.5 max-w-full overflow-x-auto">
+          {ABAS.map(({ id, label, icone: Icone }) => (
+            <button
+              key={id}
+              onClick={() => setAbaAberta(id)}
+              className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-[var(--radius-nav,10px)] transition-colors whitespace-nowrap ${
+                abaAberta === id ? 'bg-text text-bg' : 'text-text hover:bg-surface-3'
+              }`}
+            >
+              <Icone className="w-4 h-4" />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex-1 min-h-0">
