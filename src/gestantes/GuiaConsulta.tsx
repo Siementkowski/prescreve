@@ -334,7 +334,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
                 </div>
                 <button
                   onClick={novaConsulta}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-[var(--radius-input,9px)] bg-text text-bg hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-[var(--radius-input,9px)] bg-accent hover:bg-accent/90 text-accent-text transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   Nova consulta
@@ -673,7 +673,7 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
               <div className="bg-surface border border-border focus-within:border-text focus-within:shadow-[0_0_0_1px_var(--color-text)] rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5 transition-colors">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold text-text-dim uppercase tracking-wide">Preview</span>
-                  <CopyButton texto={textoFinal} label="Copiar" variant="primario" />
+                  <CopyButton texto={textoFinal} label="Copiar" variant="solid" />
                 </div>
                 <pre className="text-xs text-text whitespace-pre-wrap font-sans leading-relaxed bg-surface-2 rounded-[var(--radius-item,11px)] p-3 max-h-[calc(100vh-4rem)] overflow-y-auto">
                   {textoFinal}
