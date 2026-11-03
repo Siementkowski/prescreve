@@ -62,6 +62,7 @@ export function PatologiaDetalhe() {
         ]}
         titulo={patologia.nome}
         subtitulo={patologia.sinonimos ? `Também conhecida como: ${patologia.sinonimos}` : null}
+        cor={area?.cor ?? undefined}
       >
         <ModoSwitch value={modo} onChange={setModo} />
       </HeroPagina>

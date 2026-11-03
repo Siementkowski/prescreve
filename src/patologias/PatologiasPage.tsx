@@ -130,6 +130,7 @@ function ListaDaArea({ area, lista }: { area: Area; lista: Patologia[] }) {
           { label: area.nome },
         ]}
         titulo={area.nome}
+        cor={area.cor ?? COR_PADRAO}
       >
         <p className="inline-flex items-center gap-1.5 text-[13px] text-white/90">
           <IconePorNome nome={area.icone} className="w-3.5 h-3.5" />
