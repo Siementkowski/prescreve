@@ -231,7 +231,7 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
           </Secao>
         </div>
 
-        <div className="w-full sm:w-[55%] sm:sticky sm:top-4">
+        <div className="w-full sm:w-[65%] sm:sticky sm:top-4">
           <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-bold text-text uppercase tracking-wide">Preview</span>
