@@ -77,7 +77,7 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row gap-6 items-start">
-        <div className="w-full sm:w-[30%] flex flex-col gap-5">
+        <div className="w-full sm:w-[40%] flex flex-col gap-5">
           <Secao
             titulo="Cabeçalho"
             icone={ClipboardList}
@@ -231,7 +231,7 @@ export function GuiaAnamnese({ faixa }: { faixa: FaixaPuericultura }) {
           </Secao>
         </div>
 
-        <div className="w-full sm:w-[70%] sm:sticky sm:top-4">
+        <div className="w-full sm:w-[60%] sm:sticky sm:top-4">
           <div className="bg-surface border border-text rounded-[var(--radius-panel,18px)] p-4 flex flex-col gap-2.5">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-bold text-text uppercase tracking-wide">Preview</span>
