@@ -56,47 +56,12 @@ export function PuericulturaPage() {
     )
   }
 
-  const faixa = FAIXAS_PUERICULTURA.find((f) => f.id === faixaId) ?? null
-
-  if (!faixa) {
-    return (
-      <div className="h-full overflow-y-auto p-6">
-        <div className="max-w-5xl mx-auto flex flex-col gap-5 pb-16">
-          <div>
-            <h1 className="font-display text-[22px] font-semibold text-text">Qual consulta você está realizando?</h1>
-            <p className="text-sm text-text-dim mt-1">
-              Cada faixa reúne o que avaliar, orientar e conferir nessa consulta específica.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {FAIXAS_PUERICULTURA.map((f) => (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setFaixaId(f.id)}
-                className="text-left border border-border hover:border-text rounded-[var(--radius-card,14px)] bg-surface p-4 flex flex-col gap-2.5 transition-colors"
-              >
-                <span className="font-display text-[15px] font-semibold text-text leading-snug">{f.titulo}</span>
-                <span className="text-xs text-text-dim leading-snug">{f.resumo}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // Abre direto na anamnese: sem faixa escolhida, assume a primeira (a barra de pílulas troca).
+  const faixa = FAIXAS_PUERICULTURA.find((f) => f.id === faixaId) ?? FAIXAS_PUERICULTURA[0]
 
   return (
     <div className="h-full overflow-y-auto px-6 sm:px-9 py-8">
       <div className="flex flex-col gap-6 pb-16">
-        <button
-          onClick={() => setFaixaId(null)}
-          className="flex items-center gap-1.5 text-sm font-medium text-text-dim hover:text-text transition-colors w-fit"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Voltar pras faixas
-        </button>
-
         <div className="flex flex-col items-center text-center">
           <h1 className="font-display text-[36px] font-bold tracking-[-1.2px] text-text">{faixa.titulo}</h1>
         </div>
