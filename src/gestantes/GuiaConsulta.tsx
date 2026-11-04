@@ -207,18 +207,27 @@ export function GuiaConsulta() {
       )
     }
 
-    const examesComResultado = exames
+    // Uma linha por exame; campos do mesmo exame separados por " | ". Valor numérico
+    // vira "Rótulo valor", valor textual vira "Rótulo: valor". Unidade entre parênteses sai.
+    const linhasExames = exames
       .map((e) => {
-        const valores = camposDoExame(e.nome)
-          .map((campo) => valorResultado(e.nome, campo.label))
-          .filter((v) => v.trim() !== '')
-        return valores.length > 0 ? `${e.nome} (${valores.join(', ')})` : null
+        const partes = camposDoExame(e.nome)
+          .map((campo) => {
+            const v = valorResultado(e.nome, campo.label).trim()
+            if (!v) return null
+            const rotulo = ROTULO_CURTO_EXAME[campo.label] ?? campo.label.replace(/\s*\([^)]*\)\s*$/, '')
+            const sufixo = campo.label === 'Ht (%)' && /^[\d.,]+$/.test(v) ? '%' : ''
+            return /^[\d<>≥≤]/.test(v) ? `${rotulo} ${v}${sufixo}` : `${rotulo}: ${v}`
+          })
+          .filter((t): t is string => t != null)
+        return partes.length > 0 ? partes.join(' | ') : null
       })
       .filter((t): t is string => t != null)
-    const linhaSolicitacao =
-      examesComResultado.length > 0
-        ? `Resultados revisados${dataExames ? ` (${formatarData(dataDeInputISO(dataExames))})` : ''}: ${examesComResultado.join(', ')}.`
-        : 'Aguardo resultados dos exames de rotina do trimestre.'
+    if (linhasExames.length > 0) {
+      linhasObjetivo.push(`EXAMES COMPLEMENTARES${dataExames ? ` (${formatarData(dataDeInputISO(dataExames))})` : ''}`)
+      linhasObjetivo.push(...linhasExames)
+    }
+    const linhaSolicitacao = linhasExames.length > 0 ? '' : 'Aguardo resultados dos exames de rotina do trimestre.'
 
     const linhaVacinasPlano = vacinasFaltando.length > 0 ? `Vacinas pendentes: ${vacinasFaltando.join(', ')}.` : ''
 
@@ -687,6 +696,12 @@ ${itensPlano.map((t, i) => `${i + 1}- ${t}`).join('\n')}`
       </div>
     </div>
   )
+}
+
+/** Rótulos abreviados no texto final (o formulário mantém o nome completo). */
+const ROTULO_CURTO_EXAME: Record<string, string> = {
+  Leucócitos: 'Leuco',
+  'Vitamina D (ng/mL)': 'Vit D',
 }
 
 export const inputCls =
